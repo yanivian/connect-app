@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "508673418266",
+    "project_id": "connect-on-firebase",
+    "storage_bucket": "connect-on-firebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508673418266:android:01ea3ee66e1c042f56dda3",
+        "android_client_info": {
+          "package_name": "com.yanivian.connect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508673418266-4v494mkhph636r57lobg952nnvv35ncs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yanivian.connect",
+            "certificate_hash": "ec48c7347a17fbd5b491296dd40fe887a844d0a7"
+          }
+        },
+        {
+          "client_id": "508673418266-qb6nkf4snr5rjrrgvblevmfo8ph6nb3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA4xAfhAB0z4g4Es9q0na9H40XdiybohM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508673418266-qb6nkf4snr5rjrrgvblevmfo8ph6nb3i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
