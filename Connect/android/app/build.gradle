@@ -93,9 +93,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.connect"
+    namespace "com.yanivian.connect"
     defaultConfig {
-        applicationId "com.connect"
+        applicationId "com.yanivian.connect"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

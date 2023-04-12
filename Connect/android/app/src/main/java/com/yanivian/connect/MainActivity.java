@@ -1,4 +1,4 @@
-package com.connect;
+package com.yanivian.connect;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
