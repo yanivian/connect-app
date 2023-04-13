@@ -1,38 +1,31 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useEffect, useState } from 'react';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import {
+  Pressable,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   useColorScheme,
   View,
 } from 'react-native';
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import type { PropsWithChildren } from 'react';
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): JSX.Element {
+function Section({ children, title }: SectionProps): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View style={styles.sectionContainer}>
+    <View style={[styles.sectionContainer,
+    {
+      backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    }]}>
       <Text
         style={[
           styles.sectionTitle,
@@ -42,76 +35,175 @@ function Section({children, title}: SectionProps): JSX.Element {
         ]}>
         {title}
       </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
+      <View style={styles.sectionContent}>
         {children}
-      </Text>
+      </View>
     </View>
+  );
+}
+
+function Wrap(content: JSX.Element): JSX.Element {
+  const isDarkMode = useColorScheme() === 'dark';
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.dark : Colors.light,
+  };
+  return (
+    <SafeAreaView style={backgroundStyle}>
+      <ScrollView contentInsetAdjustmentBehavior="automatic" style={backgroundStyle}>
+        {content}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
+  const [code, setCode] = useState('');
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+  useEffect(() => auth().onAuthStateChanged(setUser), []);
+
+  async function signInWithPhoneNumber() {
+    const confirmationResult = await auth().signInWithPhoneNumber('+1' + phoneNumber);
+    console.log(confirmationResult);
+    setConfirmationResult(confirmationResult);
+  }
+
+  async function verifyCode() {
+    const userCredential = await confirmationResult?.confirm(code);
+    console.log(userCredential);
+    setUser(userCredential?.user || null);
+  }
+
+  async function signOut() {
+    try {
+      await auth().signOut();
+    } finally {
+      setPhoneNumber('');
+      setConfirmationResult(null);
+      setCode('');
+    }
+  }
+
+  if (!user && !confirmationResult) {
+    return Wrap(
+      <Section title="Auth">
+        <TextInput
+          style={[styles.textInput, {
+            backgroundColor: isDarkMode ? Colors.dark : Colors.light,
+            borderColor: isDarkMode ? Colors.light : Colors.dark,
+            color: isDarkMode ? Colors.white : Colors.black,
+          }]}
+          placeholder="Phone number"
+          placeholderTextColor={isDarkMode ? Colors.light : Colors.dark}
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          onSubmitEditing={e => signInWithPhoneNumber()}
+          inputMode="numeric"
+          textAlign="center" />
+        <Pressable
+          style={[styles.button, {
+            backgroundColor: isDarkMode ? Colors.light : Colors.dark,
+          }]}
+          onPress={signInWithPhoneNumber}>
+          <Text
+            style={[styles.buttonText, {
+              color: isDarkMode ? Colors.black : Colors.white,
+            }]}>
+            Sign in
+          </Text>
+        </Pressable>
+      </Section>
+    )
+  }
+
+  if (!user) {
+    return Wrap(
+      <Section title="Auth">
+        <TextInput
+          style={[styles.textInput, {
+            backgroundColor: isDarkMode ? Colors.dark : Colors.light,
+            borderColor: isDarkMode ? Colors.light : Colors.dark,
+            color: isDarkMode ? Colors.white : Colors.black,
+            letterSpacing: 10,
+          }]}
+          placeholder="000000"
+          value={code}
+          onChangeText={setCode}
+          onSubmitEditing={e => verifyCode()}
+          autoComplete="off"
+          inputMode="numeric"
+          textAlign="center" />
+        <Pressable
+          style={[styles.button, {
+            backgroundColor: isDarkMode ? Colors.light : Colors.dark,
+          }]}
+          onPress={verifyCode}>
+          <Text
+            style={[styles.buttonText, {
+              color: isDarkMode ? Colors.black : Colors.white,
+            }]}>
+            Verify code</Text>
+        </Pressable>
+      </Section>
+    );
+  }
+
+  return Wrap(
+    <Section title="Home">
+      <Text>Welcome {user.isAnonymous ? 'Nameless' : user.phoneNumber}!</Text>
+      <Pressable
+        style={[styles.button, {
+          backgroundColor: isDarkMode ? Colors.light : Colors.dark,
+        }]}
+        onPress={signOut}>
+        <Text
+          style={[styles.buttonText, {
+            color: isDarkMode ? Colors.black : Colors.white,
+          }]}>
+          Sign out</Text>
+      </Pressable>
+    </Section>
   );
 }
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '600',
+    letterSpacing: 1,
+    paddingBottom: 12,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  sectionContent: {
   },
-  highlight: {
-    fontWeight: '700',
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 4,
+    height: 48,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 1,
+    lineHeight: 21,
+  },
+  textInput: {
+    fontSize: 16,
+    letterSpacing: 1,
+    lineHeight: 21,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    height: 48,
+    marginBottom: 12,
   },
 });
 
