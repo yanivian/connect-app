@@ -112,6 +112,8 @@ export function Profile(props: ProfileProps): JSX.Element {
           placeholder="Name"
           placeholderTextColor={props.isDarkMode ? Colors.light : Colors.dark}
           value={name || ''}
+          autoComplete="name"
+          autoCapitalize="words"
           onChangeText={setName}
           inputMode="text"
           textAlign="center" />
@@ -125,6 +127,7 @@ export function Profile(props: ProfileProps): JSX.Element {
           placeholderTextColor={props.isDarkMode ? Colors.light : Colors.dark}
           value={emailAddress || ''}
           onChangeText={setEmailAddress}
+          autoComplete="email"
           inputMode="email"
           textAlign="center" />
         <Pressable

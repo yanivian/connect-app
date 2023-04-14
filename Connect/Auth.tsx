@@ -49,7 +49,8 @@ export default function Auth(props: AuthProps): JSX.Element {
             onChangeText={setPhoneNumber}
             onSubmitEditing={e => signInWithPhoneNumber()}
             inputMode="numeric"
-            textAlign="center" />
+            textAlign="center"
+            autoFocus />
           <Pressable
             style={[styles.button, {
               backgroundColor: props.isDarkMode ? Colors.light : Colors.dark,
@@ -83,7 +84,8 @@ export default function Auth(props: AuthProps): JSX.Element {
           onSubmitEditing={e => verifyCode()}
           autoComplete="off"
           inputMode="numeric"
-          textAlign="center" />
+          textAlign="center"
+          autoFocus />
         <Pressable
           style={[styles.button, {
             backgroundColor: props.isDarkMode ? Colors.light : Colors.dark,
