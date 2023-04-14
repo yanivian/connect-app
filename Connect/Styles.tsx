@@ -31,6 +31,12 @@ const styles = StyleSheet.create({
         lineHeight: 21,
         marginBottom: 12,
     },
+    highlight: {
+        fontWeight: '600',
+    },
+    code: {
+        fontFamily: 'monospaced',
+    },
     textInput: {
         fontSize: 16,
         letterSpacing: 1,

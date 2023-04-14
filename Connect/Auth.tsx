@@ -14,7 +14,7 @@ interface AuthProps {
   setUser: React.Dispatch<React.SetStateAction<FirebaseAuthTypes.User | null>>;
 }
 
-function Auth(props: AuthProps): JSX.Element {
+export default function Auth(props: AuthProps): JSX.Element {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
   const [code, setCode] = useState('');
@@ -99,5 +99,3 @@ function Auth(props: AuthProps): JSX.Element {
     </Page>
   );
 }
-
-export default Auth;

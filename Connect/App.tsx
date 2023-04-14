@@ -1,5 +1,6 @@
 import styles from './Styles';
 import Auth from './Auth';
+import { Profile, ProfileModel } from './Profile';
 import { Page, Section } from './Layout';
 import React, { useEffect, useState } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
@@ -14,6 +15,8 @@ function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [profile, setProfile] = useState<ProfileModel | null>(null);
+
   useEffect(() => auth().onAuthStateChanged(setUser), []);
 
   async function signOut() {
@@ -26,12 +29,18 @@ function App(): JSX.Element {
     )
   }
 
+  if (!profile) {
+    return (
+      <Profile isDarkMode={isDarkMode} user={user} setProfile={setProfile} />
+    )
+  }
+
   return (
     <Page isDarkMode={isDarkMode}>
       <Section title="Home" isDarkMode={isDarkMode}>
         <Text style={[styles.text, {
           color: isDarkMode ? Colors.white : Colors.black,
-        }]}>Welcome {user.uid}</Text>
+        }]}>Welcome {profile.Name || user.uid}</Text>
         <Pressable
           style={[styles.button, {
             backgroundColor: isDarkMode ? Colors.light : Colors.dark,
