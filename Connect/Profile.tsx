@@ -1,5 +1,6 @@
 import styles from './Styles';
 import { Page, Section } from './Layout';
+import { ConsumerApi, ProfileModel } from './ConsumerApi';
 import React, { useState } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import {
@@ -15,35 +16,16 @@ interface ProfileProps {
   setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>;
 }
 
-export interface ProfileModel {
-  UserID: string;
-  PhoneNumber: string;
-  CreatedTimestampMillis: number;
-  Name: string | null;
-  EmailAddress: string | null;
-  LastUpdatedTimestampMillis: number | null;
-}
-
-export function Profile(props: ProfileProps): JSX.Element {
+export default function Profile(props: ProfileProps): JSX.Element {
   const [loading, setLoading] = useState(true);
-  const [errorLoading, setErrorLoading] = useState();
-  const [name, setName] = useState<string>();
-  const [emailAddress, setEmailAddress] = useState<string>();
+  const [errorLoading, setErrorLoading] = useState<string>();
+  const [name, setName] = useState<string | null>(null);
+  const [emailAddress, setEmailAddress] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const [errorCreating, setErrorCreating] = useState();
+  const [errorCreating, setErrorCreating] = useState<string>();
 
-  props.user.getIdToken(true).then((token) => {
-    const url = `https://connect-on-firebase.wm.r.appspot.com/profile/get?id=${encodeURIComponent(props.user.uid)}&token=${encodeURIComponent(token)}`;
-    return fetch(url);
-  }).then(async resp => {
-    if (resp.ok) {
-      return resp.json();
-    } else if (resp.status === 404) {
-      return Promise.resolve(null);
-    } else {
-      return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`));
-    }
-  }).then(props.setProfile)
+  ConsumerApi.get(props.user).getProfile()
+    .then(props.setProfile)
     .catch(setErrorLoading)
     .finally(() => setLoading(false));
 
@@ -136,22 +118,10 @@ export function Profile(props: ProfileProps): JSX.Element {
           }]}
           onPress={async () => {
             setCreating(true);
-            return props.user.getIdToken(true).then((token) => {
-              var url = `https://connect-on-firebase.wm.r.appspot.com/profile/create?id=${encodeURIComponent(props.user.uid)}&token=${encodeURIComponent(token)}&phoneNumber=${encodeURIComponent(props.user.phoneNumber || '')}`;
-              if (name) {
-                url += `&name=${encodeURIComponent(name)}`;
-              }
-              if (emailAddress) {
-                url += `&emailAddress=${encodeURIComponent(emailAddress)}`;
-              }
-              console.log(url);
-              return fetch(url);
-            }).then(async resp => {
-              if (resp.ok) {
-                return resp.json();
-              } else {
-                return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`));
-              }
+            return ConsumerApi.get(props.user).createProfile({
+              phoneNumber: props.user.phoneNumber || '',
+              name: name,
+              emailAddress: emailAddress,
             }).then(props.setProfile)
               .catch(setErrorCreating)
               .finally(() => setCreating(false));

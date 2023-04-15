@@ -1,6 +1,7 @@
 import styles from './Styles';
 import Auth from './Auth';
-import { Profile, ProfileModel } from './Profile';
+import Profile from './Profile';
+import { ProfileModel } from './ConsumerApi';
 import { Page, Section } from './Layout';
 import React, { useEffect, useState } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';

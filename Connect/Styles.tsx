@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     code: {
-        fontFamily: 'monospaced',
+        fontFamily: 'Courier',
     },
     textInput: {
         fontSize: 16,
