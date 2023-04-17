@@ -15,7 +15,7 @@ function App(): JSX.Element {
   useEffect(() => auth().onAuthStateChanged(setUser), []);
 
   async function signOut() {
-    await auth().signOut();
+    return auth().signOut();
   }
 
   if (!user) {
