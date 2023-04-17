@@ -1,13 +1,13 @@
-import styles from './Styles';
-import { Page, Section } from './Layout';
-import React, { useState } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import React, { useState } from 'react';
 import {
   Pressable,
   Text,
   TextInput,
 } from 'react-native';
 import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Page, Section } from './Layout';
+import styles from './Styles';
 
 interface AuthProps {
   isDarkMode: boolean;

@@ -1,17 +1,10 @@
-import styles from './Styles';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import React, { useEffect, useState } from 'react';
+import { useColorScheme } from 'react-native';
 import Auth from './Auth';
+import { ProfileModel } from './ConsumerApi';
 import Home from './Home';
 import Profile from './Profile';
-import { ProfileModel } from './ConsumerApi';
-import { Page, Section } from './Layout';
-import React, { useEffect, useState } from 'react';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import {
-  Pressable,
-  Text,
-  useColorScheme,
-} from 'react-native';
-import { Colors } from "react-native/Libraries/NewAppScreen";
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';

@@ -1,14 +1,14 @@
-import styles from './Styles';
-import { Page, Section } from './Layout';
-import { ConsumerApi, ProfileModel } from './ConsumerApi';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import React, { useState } from 'react';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import {
   Pressable,
   Text,
   TextInput,
 } from 'react-native';
 import { Colors } from "react-native/Libraries/NewAppScreen";
+import { ConsumerApi, ProfileModel } from './ConsumerApi';
+import { Page, Section } from './Layout';
+import styles from './Styles';
 
 interface ProfileProps {
   isDarkMode: boolean;

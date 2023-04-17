@@ -5,8 +5,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import styles from './Styles';
 import { Colors } from "react-native/Libraries/NewAppScreen";
+import styles from './Styles';
 
 import type { PropsWithChildren } from 'react';
 
