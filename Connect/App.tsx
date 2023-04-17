@@ -1,5 +1,6 @@
 import styles from './Styles';
 import Auth from './Auth';
+import Home from './Home';
 import Profile from './Profile';
 import { ProfileModel } from './ConsumerApi';
 import { Page, Section } from './Layout';
@@ -27,34 +28,17 @@ function App(): JSX.Element {
   if (!user) {
     return (
       <Auth isDarkMode={isDarkMode} setUser={setUser} />
-    )
+    );
   }
 
   if (!profile) {
     return (
-      <Profile isDarkMode={isDarkMode} user={user} setProfile={setProfile} />
-    )
+      <Profile isDarkMode={isDarkMode} user={user} setProfile={setProfile} signOut={signOut} />
+    );
   }
 
   return (
-    <Page isDarkMode={isDarkMode}>
-      <Section title="Home" isDarkMode={isDarkMode}>
-        <Text style={[styles.text, {
-          color: isDarkMode ? Colors.white : Colors.black,
-        }]}>Welcome {profile.Name || user.uid}</Text>
-        <Pressable
-          style={[styles.button, {
-            backgroundColor: isDarkMode ? Colors.light : Colors.dark,
-          }]}
-          onPress={signOut}>
-          <Text
-            style={[styles.buttonText, {
-              color: isDarkMode ? Colors.black : Colors.white,
-            }]}>
-            Sign out</Text>
-        </Pressable>
-      </Section>
-    </Page>
+    <Home isDarkMode={isDarkMode} user={user} profile={profile} signOut={signOut} />
   );
 }
 

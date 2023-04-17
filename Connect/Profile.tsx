@@ -14,6 +14,7 @@ interface ProfileProps {
   isDarkMode: boolean;
   user: FirebaseAuthTypes.User;
   setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>;
+  signOut: () => Promise<void>;
 }
 
 export default function Profile(props: ProfileProps): JSX.Element {
