@@ -1,27 +1,30 @@
 
 export interface ProfileModel {
-  UserID: string;
-  PhoneNumber: string;
-  CreatedTimestampMillis: number;
-  Name: string | null;
-  EmailAddress: string | null;
-  LastUpdatedTimestampMillis: number | null;
+  UserID: string,
+  PhoneNumber: string,
+  CreatedTimestampMillis: number,
+  Name: string | null,
+  EmailAddress: string | null,
+  LastUpdatedTimestampMillis: number | null
 }
 
 interface User {
-  uid: string;
-  getIdToken: () => Promise<string>;
+  uid: string,
+  getIdToken: () => Promise<string>
 }
 
 interface AuthRequest {
   id: string,
-  token: string,
+  token: string
 }
 
-interface CreateProfileRequest {
-  phoneNumber: string;
-  name: string | null;
-  emailAddress: string | null;
+interface GetOrCreateProfileRequest {
+  phoneNumber: string
+}
+
+interface UpdateProfileRequest {
+  name: string | null,
+  emailAddress: string | null
 }
 
 export class ConsumerApi {
@@ -39,31 +42,33 @@ export class ConsumerApi {
     this.baseUrl_ = baseUrl;
   }
 
-  async getProfile(): Promise<ProfileModel | null> {
+  async getOrCreateProfile(req: GetOrCreateProfileRequest): Promise<ProfileModel> {
+    console.log('getOrCreateProfile');
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
+        ...req,
       };
-      const url = this.generateUrl_("/profile/get", params);
+      const url = this.generateUrl_("/profile/getorcreate", params);
       return fetch(url, { method: 'POST' });
     }).then(async resp => {
       if (resp.ok) {
         return resp.json();
-      } else if (resp.status === 404) {
-        return Promise.resolve(null);
       } else {
         return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`));
       }
     });
   }
 
-  async createProfile(req: CreateProfileRequest): Promise<ProfileModel> {
+  async updateProfile(req: UpdateProfileRequest): Promise<ProfileModel> {
+    console.log('updateProfile');
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
         ...req,
       };
-      const url = this.generateUrl_("/profile/create", params);
+      const url = this.generateUrl_("/profile/update", params);
+      console.log(url);
       return fetch(url, { method: 'POST' });
     }).then(async resp => {
       if (resp.ok) {

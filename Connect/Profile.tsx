@@ -1,45 +1,39 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import React, { useState } from 'react';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth'
+import React, { useEffect, useState } from 'react'
 import {
   Pressable,
   Text,
   TextInput,
-} from 'react-native';
-import { Colors } from "react-native/Libraries/NewAppScreen";
-import { ConsumerApi, ProfileModel } from './ConsumerApi';
-import { Page, Section } from './Layout';
-import styles from './Styles';
+} from 'react-native'
+import { Colors } from 'react-native/Libraries/NewAppScreen'
+import { ConsumerApi, ProfileModel } from './ConsumerApi'
+import { Page, Section } from './Layout'
+import styles from './Styles'
 
 interface ProfileProps {
-  isDarkMode: boolean;
-  user: FirebaseAuthTypes.User;
-  setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>;
-  signOut: () => Promise<void>;
+  isDarkMode: boolean,
+  user: FirebaseAuthTypes.User,
+  setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>,
+  signOut: () => Promise<void>
 }
 
 export default function Profile(props: ProfileProps): JSX.Element {
-  const [loading, setLoading] = useState(true);
-  const [errorLoading, setErrorLoading] = useState<string>();
-  const [name, setName] = useState<string | null>(null);
-  const [emailAddress, setEmailAddress] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [errorCreating, setErrorCreating] = useState<string>();
+  const [errorLoading, setErrorLoading] = useState<string>()
+  const [name, setName] = useState<string | null>(null)
+  const [emailAddress, setEmailAddress] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [errorCreating, setErrorCreating] = useState<string>()
 
-  ConsumerApi.get(props.user).getProfile()
-    .then(props.setProfile)
-    .catch(setErrorLoading)
-    .finally(() => setLoading(false));
-
-  if (loading) {
-    return (
-      <Page isDarkMode={props.isDarkMode}>
-        <Section title="Profile" isDarkMode={props.isDarkMode}>
-          <Text style={[styles.text, {
-            color: props.isDarkMode ? Colors.white : Colors.black,
-          }]}>Loading...</Text>
-        </Section>
-      </Page>);
-  }
+  useEffect(() => {
+    ConsumerApi.get(props.user).getOrCreateProfile({
+      phoneNumber: props.user.phoneNumber || '',
+    })
+      .then((profile) => {
+        setName(profile?.Name || '')
+        setEmailAddress(profile?.EmailAddress || '')
+      })
+      .catch(setErrorLoading)
+  }, [])
 
   if (errorLoading) {
     return (
@@ -52,18 +46,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
             color: props.isDarkMode ? Colors.white : Colors.black,
           }]}>{errorLoading}</Text>
         </Section>
-      </Page>);
-  }
-
-  if (creating) {
-    return (
-      <Page isDarkMode={props.isDarkMode}>
-        <Section title="Profile" isDarkMode={props.isDarkMode}>
-          <Text style={[styles.text, {
-            color: props.isDarkMode ? Colors.white : Colors.black,
-          }]}>Creating...</Text>
-        </Section>
-      </Page>);
+      </Page>)
   }
 
   if (errorCreating) {
@@ -77,7 +60,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
             color: props.isDarkMode ? Colors.white : Colors.black,
           }]}>{errorCreating}</Text>
         </Section>
-      </Page>);
+      </Page>)
   }
 
   return (
@@ -86,7 +69,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
         <Text style={[styles.text, {
           color: props.isDarkMode ? Colors.white : Colors.black,
         }]}>Can you share a little more about you?</Text>
-        <TextInput
+        <TextInput editable={!creating}
           style={[styles.textInput, {
             backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
             borderColor: props.isDarkMode ? Colors.light : Colors.dark,
@@ -100,7 +83,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
           onChangeText={setName}
           inputMode="text"
           textAlign="center" />
-        <TextInput
+        <TextInput editable={!creating}
           style={[styles.textInput, {
             backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
             borderColor: props.isDarkMode ? Colors.light : Colors.dark,
@@ -113,19 +96,21 @@ export default function Profile(props: ProfileProps): JSX.Element {
           autoComplete="email"
           inputMode="email"
           textAlign="center" />
-        <Pressable
+        <Pressable disabled={creating}
           style={[styles.button, {
             backgroundColor: props.isDarkMode ? Colors.light : Colors.dark,
           }]}
           onPress={async () => {
-            setCreating(true);
-            return ConsumerApi.get(props.user).createProfile({
-              phoneNumber: props.user.phoneNumber || '',
+            setCreating(true)
+            return ConsumerApi.get(props.user).updateProfile({
               name: name,
-              emailAddress: emailAddress,
-            }).then(props.setProfile)
+              emailAddress: emailAddress
+            }).then((p) => {
+              console.log(p)
+              props.setProfile(p)
+            })
               .catch(setErrorCreating)
-              .finally(() => setCreating(false));
+              .finally(() => setCreating(false))
           }}>
           <Text
             style={[styles.buttonText, {
@@ -135,5 +120,5 @@ export default function Profile(props: ProfileProps): JSX.Element {
           </Text>
         </Pressable>
       </Section>
-    </Page>);
+    </Page>)
 }

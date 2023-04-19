@@ -22,7 +22,7 @@ export default function Home(props: HomeProps): JSX.Element {
       <Section title="Home" isDarkMode={props.isDarkMode}>
         <Text style={[styles.text, {
           color: props.isDarkMode ? Colors.white : Colors.black,
-        }]}>Welcome {props.profile.Name || props.user.uid}</Text>
+        }]}>Welcome {props.profile.Name || props.user.phoneNumber}</Text>
         <Pressable
           style={[styles.button, {
             backgroundColor: props.isDarkMode ? Colors.light : Colors.dark,
