@@ -43,14 +43,12 @@ export class ConsumerApi {
   }
 
   async getOrCreateProfile(req: GetOrCreateProfileRequest): Promise<ProfileModel> {
-    console.log('getOrCreateProfile');
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
         ...req,
       };
-      const url = this.generateUrl_("/profile/getorcreate", params);
-      return fetch(url, { method: 'POST' });
+      return this.doPost_('/profile/getorcreate', params);
     }).then(async resp => {
       if (resp.ok) {
         return resp.json();
@@ -61,15 +59,12 @@ export class ConsumerApi {
   }
 
   async updateProfile(req: UpdateProfileRequest): Promise<ProfileModel> {
-    console.log('updateProfile');
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
         ...req,
       };
-      const url = this.generateUrl_("/profile/update", params);
-      console.log(url);
-      return fetch(url, { method: 'POST' });
+      return this.doPost_('/profile/update', params);
     }).then(async resp => {
       if (resp.ok) {
         return resp.json();
@@ -88,8 +83,27 @@ export class ConsumerApi {
     });
   }
 
+  private async doGet_(endpoint: string, params: any): Promise<Response> {
+    const url = this.generateUrl_(endpoint, params);
+    return fetch(url);
+  }
+
+  private async doPost_(endpoint: string, params: any): Promise<Response> {
+    const url = this.generateUrl_(endpoint, {});
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: this.encodeParams_(params),
+    });
+  }
+
   private generateUrl_(endpoint: string, params: any): string {
-    const encodedParams = Object.entries(params).map(([key, value]) => `${key}=${encodeURIComponent('' + value)}`).join("&");
-    return `${this.baseUrl_}${endpoint}?${encodedParams}`;
+    return `${this.baseUrl_}${endpoint}?${this.encodeParams_(params)}`;
+  }
+
+  private encodeParams_(params: any): string {
+    return Object.entries(params).map(([key, value]) => `${key}=${encodeURIComponent('' + value)}`).join("&");
   }
 }

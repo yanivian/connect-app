@@ -42,7 +42,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
           <Text style={[styles.text, {
             color: props.isDarkMode ? Colors.white : Colors.black,
           }]}>Error loading profile.</Text>
-          <Text style={[styles.text, styles.code, {
+          <Text style={[styles.errorText, {
             color: props.isDarkMode ? Colors.white : Colors.black,
           }]}>{errorLoading}</Text>
         </Section>
@@ -56,7 +56,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
           <Text style={[styles.text, {
             color: props.isDarkMode ? Colors.white : Colors.black,
           }]}>Error creating profile.</Text>
-          <Text style={[styles.text, styles.code, {
+          <Text style={[styles.errorText, {
             color: props.isDarkMode ? Colors.white : Colors.black,
           }]}>{errorCreating}</Text>
         </Section>
@@ -105,10 +105,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
             return ConsumerApi.get(props.user).updateProfile({
               name: name,
               emailAddress: emailAddress
-            }).then((p) => {
-              console.log(p)
-              props.setProfile(p)
-            })
+            }).then(props.setProfile)
               .catch(setErrorCreating)
               .finally(() => setCreating(false))
           }}>

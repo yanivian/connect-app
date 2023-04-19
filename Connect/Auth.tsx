@@ -43,7 +43,6 @@ export default function Auth(props: AuthProps): JSX.Element {
     return confirmationResult?.confirm(code).then((userCredential) =>
       userCredential?.user && props.setUser(userCredential.user))
       .catch((err) => {
-        console.log(err);
         const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown';
         switch (errorCode) {
           case 'auth/invalid-verification-code':
