@@ -18,25 +18,54 @@ export default function Auth(props: AuthProps): JSX.Element {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
   const [code, setCode] = useState('');
+  const [error, setError] = useState<string | null>();
 
   async function signInWithPhoneNumber() {
-    if (phoneNumber) {
-      const confirmationResult = await auth().signInWithPhoneNumber('+1' + phoneNumber);
-      setConfirmationResult(confirmationResult);
-    }
+    setError(null);
+    return auth().signInWithPhoneNumber('+1' + phoneNumber, /** forceResend= */ true)
+      .then(setConfirmationResult)
+      .catch((err) => {
+        const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown';
+        switch (errorCode) {
+          case 'auth/invalid-phone-number':
+          case 'auth/missing-phone-number':
+            setError('Please enter a ten-digit phone number.');
+            break;
+          default:
+            setError(`Sorry, something went wrong. (${errorCode})`);
+            break;
+        }
+      });
   }
 
   async function verifyCode() {
-    const userCredential = await confirmationResult?.confirm(code);
-    if (userCredential?.user) {
-      props.setUser(userCredential.user);
-    }
+    setError(null);
+    return confirmationResult?.confirm(code).then((userCredential) =>
+      userCredential?.user && props.setUser(userCredential.user))
+      .catch((err) => {
+        console.log(err);
+        const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown';
+        switch (errorCode) {
+          case 'auth/invalid-verification-code':
+            setCode('');
+            setError('That code was invalid. Please try again.');
+            break;
+          default:
+            setError(`Sorry, something went wrong. (${errorCode})`);
+            break;
+        }
+      });
   }
 
   if (!confirmationResult) {
     return (
       <Page isDarkMode={props.isDarkMode}>
-        <Section title="Auth" isDarkMode={props.isDarkMode}>
+        <Section title="Sign in" isDarkMode={props.isDarkMode}>
+          <Text style={[styles.text, {
+            color: props.isDarkMode ? Colors.white : Colors.black,
+          }]}>
+            We collect your phone number to uniquely identify you.
+          </Text>
           <TextInput
             style={[styles.textInput, {
               backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
@@ -63,6 +92,11 @@ export default function Auth(props: AuthProps): JSX.Element {
               Sign in
             </Text>
           </Pressable>
+          {error && <Text style={[styles.errorText, {
+            color: props.isDarkMode ? Colors.white : Colors.black,
+          }]}>
+            {error}
+          </Text>}
         </Section>
       </Page>
     )
@@ -70,7 +104,12 @@ export default function Auth(props: AuthProps): JSX.Element {
 
   return (
     <Page isDarkMode={props.isDarkMode}>
-      <Section title="Auth" isDarkMode={props.isDarkMode}>
+      <Section title="Sign in" isDarkMode={props.isDarkMode}>
+        <Text style={[styles.text, {
+          color: props.isDarkMode ? Colors.white : Colors.black,
+        }]}>
+          We've sent a verification code to your phone number, and it should arrive momentarily.
+        </Text>
         <TextInput
           style={[styles.textInput, {
             backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
@@ -97,6 +136,11 @@ export default function Auth(props: AuthProps): JSX.Element {
             }]}>
             Verify code</Text>
         </Pressable>
+        {error && <Text style={[styles.errorText, {
+          color: props.isDarkMode ? Colors.white : Colors.black,
+        }]}>
+          {error}
+        </Text>}
       </Section>
     </Page>
   );

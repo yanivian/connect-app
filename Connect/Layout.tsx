@@ -1,9 +1,8 @@
 import React from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   Text,
-  View,
+  View
 } from 'react-native';
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import styles from './Styles';
@@ -24,6 +23,7 @@ export function Section(spec: SectionPropsWithChildren): JSX.Element {
     <View style={[styles.sectionContainer,
     {
       backgroundColor: spec.isDarkMode ? Colors.darker : Colors.lighter,
+      borderColor: spec.isDarkMode ? Colors.light : Colors.dark,
     }]}>
       <Text
         style={[
@@ -46,10 +46,8 @@ export function Page(spec: PagePropsWithChildren): JSX.Element {
     backgroundColor: spec.isDarkMode ? Colors.dark : Colors.light,
   };
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <ScrollView contentInsetAdjustmentBehavior="automatic" style={backgroundStyle}>
-        {spec.children}
-      </ScrollView>
+    <SafeAreaView style={[styles.safeArea, backgroundStyle]}>
+      {spec.children}
     </SafeAreaView>
   );
 }
