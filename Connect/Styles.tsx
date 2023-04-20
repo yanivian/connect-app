@@ -33,6 +33,12 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         lineHeight: 21,
     },
+    anchorText: {
+        fontSize: 16,
+        letterSpacing: 1,
+        lineHeight: 21,
+        textDecorationLine: 'underline',
+    },
     text: {
         fontSize: 16,
         letterSpacing: 1,
@@ -55,11 +61,23 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         height: 48,
     },
-    profileImage: {
+    profileImageContainer: {
         width: 108,
         height: 108,
         marginRight: 12,
         borderRadius: 12,
+        overflow: 'hidden',
+    },
+    profileImage: {
+        width: 108,
+        height: 108,
+        position: 'absolute',
+    },
+    profileImageActionButton: {
+        width: 32,
+        height: 32,
+        marginLeft: 72,
+        marginTop: 4,
     },
 });
 
