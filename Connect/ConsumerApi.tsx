@@ -5,7 +5,15 @@ export interface ProfileModel {
   CreatedTimestampMillis: number,
   Name: string | null,
   EmailAddress: string | null,
+  Image: ImageModel | null,
   LastUpdatedTimestampMillis: number | null
+}
+
+export interface ImageModel {
+  ID: string,
+  UserID: string,
+  CreatedTimestampMillis: number,
+  URL: string,
 }
 
 interface User {

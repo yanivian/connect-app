@@ -4,12 +4,12 @@ const styles = StyleSheet.create({
     safeArea: {
         height: '100%',
         padding: 12,
-        display: 'flex',
+        flexDirection: 'column',
         flex: 1,
     },
     sectionContainer: {
-        paddingVertical: 24,
-        paddingHorizontal: 32,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
         borderRadius: 12,
         borderWidth: 2,
     },
@@ -51,10 +51,15 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         lineHeight: 21,
         paddingVertical: 12,
-        paddingHorizontal: 32,
+        paddingHorizontal: 12,
         borderRadius: 4,
         height: 48,
-        marginBottom: 12,
+    },
+    profileImage: {
+        width: 108,
+        height: 108,
+        marginRight: 12,
+        borderRadius: 12,
     },
 });
 

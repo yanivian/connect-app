@@ -462,6 +462,8 @@ PODS:
     - Firebase/Auth (= 10.7.0)
     - React-Core
     - RNFBApp
+  - RNSVG (13.9.0):
+    - React-Core
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -504,6 +506,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAppCheck (from `../node_modules/@react-native-firebase/app-check`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
+  - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -598,6 +601,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/app-check"
   RNFBAuth:
     :path: "../node_modules/@react-native-firebase/auth"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -653,8 +658,9 @@ SPEC CHECKSUMS:
   RNFBApp: 55dbfc574e5ae414f2984394934f79f87eb4b050
   RNFBAppCheck: 994a84873a0e0324589767f32b3ddc97a3902499
   RNFBAuth: d30acc0f5f169bc28c7fcbf1b45cd061cc647590
+  RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   Yoga: ba09b6b11e6139e3df8229238aa794205ca6a02a
 
 PODFILE CHECKSUM: ece7e74e40aa423b0a9192f37796fe9a62029f08
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1

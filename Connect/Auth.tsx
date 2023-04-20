@@ -70,6 +70,7 @@ export default function Auth(props: AuthProps): JSX.Element {
               backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
               borderColor: props.isDarkMode ? Colors.light : Colors.dark,
               color: props.isDarkMode ? Colors.white : Colors.black,
+              marginBottom: 12,
             }]}
             placeholder="Phone number"
             placeholderTextColor={props.isDarkMode ? Colors.light : Colors.dark}
@@ -115,6 +116,7 @@ export default function Auth(props: AuthProps): JSX.Element {
             borderColor: props.isDarkMode ? Colors.light : Colors.dark,
             color: props.isDarkMode ? Colors.white : Colors.black,
             letterSpacing: 10,
+            marginBottom: 12,
           }]}
           placeholder="000000"
           value={code}
