@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     safeArea: {
         height: '100%',
-        padding: 12,
         flexDirection: 'column',
         flex: 1,
     },
@@ -12,6 +11,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 12,
         borderWidth: 2,
+        margin: 12,
     },
     sectionTitle: {
         fontSize: 24,
