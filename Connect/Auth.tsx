@@ -1,16 +1,10 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import React, { useState } from 'react';
-import {
-  Pressable,
-  Text,
-  TextInput,
-} from 'react-native';
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Button, Text, TextInput } from 'react-native-paper';
 import { Page, Section } from './Layout';
 import styles from './Styles';
 
 interface AuthProps {
-  isDarkMode: boolean;
   setUser: React.Dispatch<React.SetStateAction<FirebaseAuthTypes.User | null>>;
 }
 
@@ -58,43 +52,28 @@ export default function Auth(props: AuthProps): JSX.Element {
 
   if (!confirmationResult) {
     return (
-      <Page isDarkMode={props.isDarkMode}>
-        <Section title="Sign in" isDarkMode={props.isDarkMode}>
-          <Text style={[styles.text, {
-            color: props.isDarkMode ? Colors.white : Colors.black,
-          }]}>
+      <Page>
+        <Section title="Login">
+          <Text style={styles.text} variant="bodyLarge">
             We collect your phone number to uniquely identify you.
           </Text>
           <TextInput
+            autoFocus
             style={[styles.textInput, {
-              backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
-              borderColor: props.isDarkMode ? Colors.light : Colors.dark,
-              color: props.isDarkMode ? Colors.white : Colors.black,
               marginBottom: 12,
             }]}
-            placeholder="Phone number"
-            placeholderTextColor={props.isDarkMode ? Colors.light : Colors.dark}
-            value={phoneNumber || ''}
+            mode="outlined"
+            label="Phone number"
+            left={<TextInput.Affix text="+1" />}
+            value={phoneNumber}
             onChangeText={setPhoneNumber}
             onSubmitEditing={e => signInWithPhoneNumber()}
             inputMode="numeric"
-            textAlign="center"
-            autoFocus />
-          <Pressable
-            style={[styles.button, {
-              backgroundColor: props.isDarkMode ? Colors.light : Colors.dark,
-            }]}
-            onPress={signInWithPhoneNumber}>
-            <Text
-              style={[styles.buttonText, {
-                color: props.isDarkMode ? Colors.black : Colors.white,
-              }]}>
-              Sign in
-            </Text>
-          </Pressable>
-          {error && <Text style={[styles.errorText, {
-            color: props.isDarkMode ? Colors.white : Colors.black,
-          }]}>
+            error={!!error} />
+          <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={signInWithPhoneNumber}>
+            Login
+          </Button>
+          {error && <Text style={styles.errorText} variant="bodyLarge">
             {error}
           </Text>}
         </Section>
@@ -103,43 +82,28 @@ export default function Auth(props: AuthProps): JSX.Element {
   }
 
   return (
-    <Page isDarkMode={props.isDarkMode}>
-      <Section title="Sign in" isDarkMode={props.isDarkMode}>
-        <Text style={[styles.text, {
-          color: props.isDarkMode ? Colors.white : Colors.black,
-        }]}>
+    <Page>
+      <Section title="Login">
+        <Text style={styles.text} variant="bodyLarge">
           We've sent a verification code to your phone number, and it should arrive momentarily.
         </Text>
         <TextInput
+          autoFocus
           style={[styles.textInput, {
-            backgroundColor: props.isDarkMode ? Colors.dark : Colors.light,
-            borderColor: props.isDarkMode ? Colors.light : Colors.dark,
-            color: props.isDarkMode ? Colors.white : Colors.black,
-            letterSpacing: 10,
             marginBottom: 12,
           }]}
-          placeholder="000000"
+          mode="outlined"
+          label="Code"
           value={code}
           onChangeText={setCode}
           onSubmitEditing={e => verifyCode()}
           autoComplete="off"
           inputMode="numeric"
-          textAlign="center"
-          autoFocus />
-        <Pressable
-          style={[styles.button, {
-            backgroundColor: props.isDarkMode ? Colors.light : Colors.dark,
-          }]}
-          onPress={verifyCode}>
-          <Text
-            style={[styles.buttonText, {
-              color: props.isDarkMode ? Colors.black : Colors.white,
-            }]}>
-            Verify code</Text>
-        </Pressable>
-        {error && <Text style={[styles.errorText, {
-          color: props.isDarkMode ? Colors.white : Colors.black,
-        }]}>
+          error={!!error} />
+        <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={verifyCode}>
+          Verify
+        </Button>
+        {error && <Text style={styles.errorText} variant="bodyLarge">
           {error}
         </Text>}
       </Section>

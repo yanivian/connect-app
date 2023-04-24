@@ -1,37 +1,24 @@
 import React from 'react';
 import {
   SafeAreaView,
-  Text,
   View
 } from 'react-native';
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Text } from 'react-native-paper';
 import styles from './Styles';
 
 import type { PropsWithChildren } from 'react';
 
 type SectionPropsWithChildren = PropsWithChildren<{
-  isDarkMode: boolean;
   title: string;
 }>;
 
 type PagePropsWithChildren = PropsWithChildren<{
-  isDarkMode: boolean;
 }>;
 
 export function Section(spec: SectionPropsWithChildren): JSX.Element {
   return (
-    <View style={[styles.sectionContainer,
-    {
-      backgroundColor: spec.isDarkMode ? Colors.darker : Colors.lighter,
-      borderColor: spec.isDarkMode ? Colors.light : Colors.dark,
-    }]}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: spec.isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
+    <View style={styles.sectionContainer}>
+      <Text style={styles.sectionTitle} variant="titleLarge">
         {spec.title}
       </Text>
       <View style={styles.sectionContent}>
@@ -42,11 +29,8 @@ export function Section(spec: SectionPropsWithChildren): JSX.Element {
 }
 
 export function Page(spec: PagePropsWithChildren): JSX.Element {
-  const backgroundStyle = {
-    backgroundColor: spec.isDarkMode ? Colors.dark : Colors.light,
-  };
   return (
-    <SafeAreaView style={[styles.safeArea, backgroundStyle]}>
+    <SafeAreaView style={styles.safeArea}>
       {spec.children}
     </SafeAreaView>
   );
