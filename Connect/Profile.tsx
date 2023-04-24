@@ -2,7 +2,7 @@ import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { Image, View } from 'react-native';
 import * as ImagePicker from 'react-native-image-picker';
-import { Button, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
+import { Button, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
 import { ConsumerApi, ImageModel, ProfileModel } from './ConsumerApi';
 import { Page, Section } from './Layout';
 import styles from './Styles';
@@ -23,6 +23,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
   const [image, setImage] = useState<ImageModel | null>(null)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>()
+  const [imageMenuVisible, setImageMenuVisible] = useState(false)
 
   useEffect(() => {
     ConsumerApi.get(props.user).getOrCreateProfile({
@@ -51,13 +52,41 @@ export default function Profile(props: ProfileProps): JSX.Element {
       </Page>)
   }
 
-  async function uploadImage() {
+  async function uploadFromImageLibrary() {
     const options: ImagePicker.ImageLibraryOptions = {
       selectionLimit: 1,
       mediaType: 'photo',
       includeBase64: false,
     }
     ImagePicker.launchImageLibrary(options).then((response) => {
+      if (!response || response.didCancel || !response.assets || response.assets.length === 0) {
+        return
+      }
+      if (response.errorCode || response.errorMessage) {
+        setError('[' + response.errorCode + '] ' + response.errorMessage)
+        return
+      }
+      const asset = response.assets[0]
+      return ConsumerApi.get(props.user).uploadImage({
+        name: asset.fileName || '',
+        type: asset.type || '',
+        uri: asset.uri || '',
+      })
+    }).then((image) => {
+      if (image) {
+        setImage(image)
+      }
+    }).catch(setError)
+  }
+
+  async function uploadFromCamera() {
+    const options: ImagePicker.CameraOptions = {
+      cameraType: 'back',
+      saveToPhotos: true,
+      mediaType: 'photo',
+      includeBase64: false,
+    }
+    ImagePicker.launchCamera(options).then((response) => {
       if (!response || response.didCancel || !response.assets || response.assets.length === 0) {
         return
       }
@@ -89,19 +118,46 @@ export default function Profile(props: ProfileProps): JSX.Element {
             borderWidth: 1,
             borderColor: theme.colors.onPrimaryContainer,
           }]}>
-            {image?.URL &&
-              <TouchableRipple onPress={uploadImage} onLongPress={() => setImage(null)}>
-                <View>
-                  <Image style={styles.profileImage} source={{ uri: `${image.URL}=s108-c` }} />
-                  <RemoveProfileImage style={styles.profileImageActionButton} />
-                </View>
-              </TouchableRipple>}
-            {!image?.URL &&
-              <TouchableRipple onPress={uploadImage}>
-                <View>
-                  <AddProfileImage style={styles.profileImageActionButton} />
-                </View>
-              </TouchableRipple>}
+            <Menu
+              visible={imageMenuVisible}
+              onDismiss={() => setImageMenuVisible(false)}
+              anchor={
+                <TouchableRipple onPress={() => setImageMenuVisible(true)}>
+                  <View>
+                    {image?.URL &&
+                      <View>
+                        <Image style={styles.profileImage} source={{ uri: `${image.URL}=s118-c` }} />
+                        <RemoveProfileImage style={styles.profileImageActionButton} />
+                      </View>}
+                    {!image?.URL &&
+                      <View>
+                        <AddProfileImage style={styles.profileImageActionButton} />
+                      </View>}
+                  </View>
+                </TouchableRipple>
+              }
+              anchorPosition="bottom">
+              {!image?.URL && <Menu.Item onPress={() => {
+                uploadFromImageLibrary()
+                setImageMenuVisible(false)
+              }} title="Add from Gallery" />}
+              {!image?.URL && <Menu.Item onPress={() => {
+                uploadFromCamera()
+                setImageMenuVisible(false)
+              }} title="Add with Camera" />}
+              {image?.URL && <Menu.Item onPress={() => {
+                uploadFromImageLibrary()
+                setImageMenuVisible(false)
+              }} title="Replace from Gallery" />}
+              {image?.URL && <Menu.Item onPress={() => {
+                uploadFromCamera()
+                setImageMenuVisible(false)
+              }} title="Replace with Camera" />}
+              {image?.URL && <Menu.Item onPress={() => {
+                setImage(null)
+                setImageMenuVisible(false)
+              }} title="Clear" />}
+            </Menu>
           </View>
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <TextInput
@@ -112,9 +168,9 @@ export default function Profile(props: ProfileProps): JSX.Element {
               mode="outlined"
               label="Name"
               value={name || ''}
-              autoComplete="name"
-              autoCapitalize="words"
               onChangeText={setName}
+              autoCapitalize="words"
+              autoComplete="name"
               inputMode="text" />
             <TextInput
               editable={!creating}
@@ -123,6 +179,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
               label="Email address"
               value={emailAddress || ''}
               onChangeText={setEmailAddress}
+              autoCapitalize="none"
               autoComplete="email"
               inputMode="email" />
           </View>
