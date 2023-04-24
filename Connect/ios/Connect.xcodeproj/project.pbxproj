@@ -121,6 +121,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				C5162F0829F74BBA00FBDAD7 /* Fonts */,
 				13B07FAE1A68108700A75B9A /* Connect */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* ConnectTests */,
@@ -151,6 +152,13 @@
 				F03F14800B12A9CACDAB3C0D /* Pods-Connect-ConnectTests.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		C5162F0829F74BBA00FBDAD7 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
