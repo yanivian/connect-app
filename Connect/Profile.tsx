@@ -1,13 +1,12 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import React, { useEffect, useState } from 'react';
-import { Image, View } from 'react-native';
-import * as ImagePicker from 'react-native-image-picker';
-import { Button, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
-import { ConsumerApi, ImageModel, ProfileModel } from './ConsumerApi';
-import { Page, Section } from './Layout';
-import styles from './Styles';
-import AddProfileImage from './images/AddProfileImage.svg';
-import RemoveProfileImage from './images/RemoveProfileImage.svg';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth'
+import React, { useEffect, useState } from 'react'
+import { Image, View } from 'react-native'
+import * as ImagePicker from 'react-native-image-picker'
+import { Button, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
+import { ConsumerApi, ImageModel, ProfileModel } from './ConsumerApi'
+import { Page, Section } from './Layout'
+import styles from './Styles'
+import ProfilePlaceholder from './images/ProfilePlaceholder.svg'
 
 interface ProfileProps {
   user: FirebaseAuthTypes.User,
@@ -81,7 +80,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
 
   async function uploadFromCamera() {
     const options: ImagePicker.CameraOptions = {
-      cameraType: 'back',
+      cameraType: 'front',
       saveToPhotos: true,
       mediaType: 'photo',
       includeBase64: false,
@@ -125,35 +124,32 @@ export default function Profile(props: ProfileProps): JSX.Element {
                 <TouchableRipple onPress={() => setImageMenuVisible(true)}>
                   <View>
                     {image?.URL &&
-                      <View>
-                        <Image style={styles.profileImage} source={{ uri: `${image.URL}=s118-c` }} />
-                        <RemoveProfileImage style={styles.profileImageActionButton} />
-                      </View>}
+                      <Image style={styles.profileImage} source={{ uri: `${image.URL}=s200-c` }} />}
                     {!image?.URL &&
-                      <View>
-                        <AddProfileImage style={styles.profileImageActionButton} />
-                      </View>}
+                      <ProfilePlaceholder style={{
+                        backgroundColor: theme.colors.primary,
+                      }} />}
                   </View>
                 </TouchableRipple>
               }
               anchorPosition="bottom">
-              {!image?.URL && <Menu.Item onPress={() => {
+              {!image?.URL && <Menu.Item leadingIcon="image" onPress={() => {
                 uploadFromImageLibrary()
                 setImageMenuVisible(false)
               }} title="Add from Gallery" />}
-              {!image?.URL && <Menu.Item onPress={() => {
+              {!image?.URL && <Menu.Item leadingIcon="camera" onPress={() => {
                 uploadFromCamera()
                 setImageMenuVisible(false)
               }} title="Add with Camera" />}
-              {image?.URL && <Menu.Item onPress={() => {
+              {image?.URL && <Menu.Item leadingIcon="image" onPress={() => {
                 uploadFromImageLibrary()
                 setImageMenuVisible(false)
               }} title="Replace from Gallery" />}
-              {image?.URL && <Menu.Item onPress={() => {
+              {image?.URL && <Menu.Item leadingIcon="camera" onPress={() => {
                 uploadFromCamera()
                 setImageMenuVisible(false)
               }} title="Replace with Camera" />}
-              {image?.URL && <Menu.Item onPress={() => {
+              {image?.URL && <Menu.Item leadingIcon="delete" onPress={() => {
                 setImage(null)
                 setImageMenuVisible(false)
               }} title="Clear" />}

@@ -49,9 +49,6 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 118,
     height: 118,
-    position: 'absolute',
-  },
-  profileImageActionButton: {
   },
 })
 
