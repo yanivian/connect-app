@@ -1,3 +1,4 @@
+import Lottie from 'lottie-react-native';
 import React from 'react';
 import {
   SafeAreaView,
@@ -33,5 +34,13 @@ export function Page(spec: PagePropsWithChildren): JSX.Element {
     <SafeAreaView style={styles.safeArea}>
       {spec.children}
     </SafeAreaView>
+  );
+}
+
+export function LoadingAnimation() {
+  return (
+    <View style={styles.lottieContainer}>
+      <Lottie speed={.5} style={styles.lottieLoading} source={require('./images/LoadingDots.json')} autoPlay loop />
+    </View>
   );
 }

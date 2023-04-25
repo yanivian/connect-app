@@ -50,6 +50,15 @@ const styles = StyleSheet.create({
     width: 118,
     height: 118,
   },
+  lottieContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+  },
+  lottieLoading: {
+    marginTop: 40,
+    width: 200,
+  },
 })
 
 export default styles
