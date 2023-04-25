@@ -1,7 +1,7 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import React, { useState } from 'react';
 import { Button, Text, TextInput } from 'react-native-paper';
-import { Page, Section } from './Layout';
+import { LoadingAnimation, Page, Section } from './Layout';
 import styles from './Styles';
 
 interface AuthProps {
@@ -10,11 +10,13 @@ interface AuthProps {
 
 export default function Auth(props: AuthProps): JSX.Element {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [confirming, setConfirming] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>();
 
   async function signInWithPhoneNumber() {
+    setConfirming(true);
     setError(null);
     return auth().signInWithPhoneNumber('+1' + phoneNumber, /** forceResend= */ true)
       .then(setConfirmationResult)
@@ -29,7 +31,7 @@ export default function Auth(props: AuthProps): JSX.Element {
             setError(`Sorry, something went wrong. (${errorCode})`);
             break;
         }
-      });
+      }).finally(() => setConfirming(false));
   }
 
   async function verifyCode() {
@@ -69,13 +71,22 @@ export default function Auth(props: AuthProps): JSX.Element {
             onChangeText={setPhoneNumber}
             onSubmitEditing={e => signInWithPhoneNumber()}
             inputMode="numeric"
+            disabled={confirming}
             error={!!error} />
-          <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={signInWithPhoneNumber}>
+          <Button
+            style={styles.button}
+            labelStyle={styles.buttonLabel}
+            mode="contained"
+            onPress={signInWithPhoneNumber}
+            disabled={confirming}>
             Login
           </Button>
-          {error && <Text style={styles.errorText} variant="bodyLarge">
-            {error}
-          </Text>}
+          {confirming && <LoadingAnimation />}
+          {error &&
+            <Text style={styles.errorText} variant="bodyLarge">
+              {error}
+            </Text>
+          }
         </Section>
       </Page>
     )
@@ -99,13 +110,21 @@ export default function Auth(props: AuthProps): JSX.Element {
           onSubmitEditing={e => verifyCode()}
           autoComplete="off"
           inputMode="numeric"
+          disabled={confirming}
           error={!!error} />
-        <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={verifyCode}>
+        <Button
+          style={styles.button}
+          labelStyle={styles.buttonLabel}
+          mode="contained"
+          onPress={verifyCode}
+          disabled={confirming}>
           Verify
         </Button>
-        {error && <Text style={styles.errorText} variant="bodyLarge">
-          {error}
-        </Text>}
+        {error &&
+          <Text style={styles.errorText} variant="bodyLarge">
+            {error}
+          </Text>
+        }
       </Section>
     </Page>
   );
