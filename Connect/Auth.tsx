@@ -35,6 +35,7 @@ export default function Auth(props: AuthProps): JSX.Element {
   }
 
   async function verifyCode() {
+    setConfirming(true);
     setError(null);
     return confirmationResult?.confirm(code).then((userCredential) =>
       userCredential?.user && props.setUser(userCredential.user))
@@ -69,7 +70,7 @@ export default function Auth(props: AuthProps): JSX.Element {
             left={<TextInput.Affix text="+1" />}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
-            onSubmitEditing={e => signInWithPhoneNumber()}
+            onSubmitEditing={async (e) => signInWithPhoneNumber()}
             inputMode="numeric"
             disabled={confirming}
             error={!!error} />
@@ -107,7 +108,7 @@ export default function Auth(props: AuthProps): JSX.Element {
           label="Code"
           value={code}
           onChangeText={setCode}
-          onSubmitEditing={e => verifyCode()}
+          onSubmitEditing={async (e) => verifyCode()}
           autoComplete="off"
           inputMode="numeric"
           disabled={confirming}
@@ -120,6 +121,7 @@ export default function Auth(props: AuthProps): JSX.Element {
           disabled={confirming}>
           Verify
         </Button>
+        {confirming && <LoadingAnimation />}
         {error &&
           <Text style={styles.errorText} variant="bodyLarge">
             {error}
