@@ -21,6 +21,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
   const [emailAddress, setEmailAddress] = useState<string | null>(null)
   const [image, setImage] = useState<ImageModel | null>(null)
   const [creating, setCreating] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>()
   const [imageMenuVisible, setImageMenuVisible] = useState(false)
 
@@ -70,7 +71,12 @@ export default function Profile(props: ProfileProps): JSX.Element {
       type: asset.type || '',
       uri: asset.uri || '',
     }
-    return ConsumerApi.get(props.user).uploadImage(localFile).then(setImage).catch(setError)
+    setUploadingImage(true);
+    return ConsumerApi.get(props.user)
+      .uploadImage(localFile)
+      .then(setImage)
+      .catch(setError)
+      .finally(() => setUploadingImage(false))
   }
 
   if (errorLoading) {
@@ -104,7 +110,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
                 visible={imageMenuVisible}
                 onDismiss={() => setImageMenuVisible(false)}
                 anchor={
-                  <TouchableRipple onPress={() => setImageMenuVisible(true)}>
+                  <TouchableRipple disabled={creating || uploadingImage} onPress={() => setImageMenuVisible(true)}>
                     <View>
                       {image?.URL &&
                         <Image style={styles.profileImage} source={{ uri: `${image.URL}=s200-c` }} />}
@@ -140,7 +146,6 @@ export default function Profile(props: ProfileProps): JSX.Element {
             </View>
             <View style={{ flex: 1, flexDirection: 'column' }}>
               <TextInput
-                editable={!creating}
                 style={[styles.textInput, {
                   marginBottom: 12,
                 }]}
@@ -150,9 +155,9 @@ export default function Profile(props: ProfileProps): JSX.Element {
                 onChangeText={setName}
                 autoCapitalize="words"
                 autoComplete="name"
-                inputMode="text" />
+                inputMode="text"
+                disabled={creating} />
               <TextInput
-                editable={!creating}
                 style={styles.textInput}
                 mode="outlined"
                 label="Email address"
@@ -160,11 +165,11 @@ export default function Profile(props: ProfileProps): JSX.Element {
                 onChangeText={setEmailAddress}
                 autoCapitalize="none"
                 autoComplete="email"
-                inputMode="email" />
+                inputMode="email"
+                disabled={creating} />
             </View>
           </View>
           <Button
-            disabled={creating}
             mode="contained"
             style={[styles.button, {
               marginBottom: 12,
@@ -180,17 +185,19 @@ export default function Profile(props: ProfileProps): JSX.Element {
               }).then(props.setProfile)
                 .catch(setError)
                 .finally(() => setCreating(false))
-            }}>
+            }}
+            disabled={creating || uploadingImage}>
             Finish
           </Button>
           <Button
-            disabled={creating}
             mode="text"
             labelStyle={styles.anchorButtonLabel}
             style={styles.button}
-            onPress={() => props.setProfile(originalProfile)}>
+            onPress={() => props.setProfile(originalProfile)}
+            disabled={creating || uploadingImage}>
             Skip
           </Button>
+          {(creating || uploadingImage) && <LoadingAnimation />}
           {error && <Text style={styles.errorText} variant="bodyLarge">
             {error}
           </Text>}
