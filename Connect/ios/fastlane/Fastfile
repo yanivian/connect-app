@@ -21,7 +21,7 @@ def generate_version()
   build_number = DateTime.now.strftime('%Y%m%d%H%M')
   Hash[
     'app_version' => app_version,
-    'bundle_number' => bundle_number
+    'build_number' => build_number
   ]
 end
 
@@ -37,7 +37,7 @@ platform :ios do
     set_info_plist_value(
       path: "Connect/Info.plist",
       key: 'CFBundleVersion',
-      value: version_info['bundle_number']
+      value: version_info['build_number']
     )
     set_info_plist_value(
       path: "ConnectTests/Info.plist",
@@ -47,7 +47,7 @@ platform :ios do
     set_info_plist_value(
       path: "ConnectTests/Info.plist",
       key: 'CFBundleVersion',
-      value: version_info['bundle_number']
+      value: version_info['build_number']
     )
     get_provisioning_profile  # invokes sigh
     build_app(workspace: "Connect.xcworkspace", scheme: "Connect")
