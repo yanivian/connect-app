@@ -15,24 +15,37 @@
 
 default_platform(:android)
 
+def generate_version()
+  package = load_json(json_path: '../package.json')
+  app_version = package['version']
+  build_number = DateTime.now.strftime('%Y%m%d%H%M')
+  Hash[
+    'code' => app_version.to_f.floor.to_i,
+    'name' => "#{app_version}.#{build_number}"
+  ]
+end
+
 platform :android do
-  desc "Runs all the tests."
+  desc 'Runs all the tests.'
   lane :test do
-    gradle(task: "test")
+    gradle(task: 'test')
   end
 
-  desc "Create a new Beta build."
+  desc 'Create a new Beta build.'
   lane :beta do
-    gradle(task: "clean assembleRelease")
-    # crashlytics
-
-    # sh "your_script.sh"
-    # You can also use other beta testing services here
+    version_info = generate_version()
+    gradle(
+      task: 'clean assembleRelease',
+      properties: {
+        'versionCode': version_info['code'],
+        'versionName': version_info['name']
+      }
+    )
   end
 
-  desc "Deploy a new version to the Google Play."
+  desc 'Deploy a new version to the Google Play.'
   lane :deploy do
-    gradle(task: "clean assembleRelease")
+    gradle(task: 'clean assembleRelease')
     upload_to_play_store
   end
 end

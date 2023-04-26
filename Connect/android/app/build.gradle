@@ -101,8 +101,8 @@ android {
         applicationId "com.yanivian.connect"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode Integer.valueOf(rootProject.ext.get("versionCode")).intValue()
+        versionName rootProject.ext.get("versionName").toString()
     }
 
     splits {
