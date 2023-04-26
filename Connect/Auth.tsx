@@ -1,6 +1,6 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import React, { useState } from 'react';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { Button, HelperText, Text, TextInput } from 'react-native-paper';
 import { LoadingAnimation, Page, Section } from './Layout';
 import styles from './Styles';
 
@@ -37,11 +37,18 @@ export default function Auth(props: AuthProps): JSX.Element {
   async function verifyCode() {
     setConfirming(true);
     setError(null);
-    return confirmationResult?.confirm(code).then((userCredential) =>
+    if (!confirmationResult) {
+      return
+    }
+    return confirmationResult.confirm(code).then((userCredential) =>
       userCredential?.user && props.setUser(userCredential.user))
       .catch((err) => {
         const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown';
         switch (errorCode) {
+          case 'auth/unknown':
+            setCode('');
+            setError('Please enter the verification code.');
+            break;
           case 'auth/invalid-verification-code':
             setCode('');
             setError('That code was invalid. Please try again.');
@@ -50,7 +57,7 @@ export default function Auth(props: AuthProps): JSX.Element {
             setError(`Sorry, something went wrong. (${errorCode})`);
             break;
         }
-      });
+      }).finally(() => setConfirming(false));
   }
 
   if (!confirmationResult) {
@@ -62,9 +69,7 @@ export default function Auth(props: AuthProps): JSX.Element {
           </Text>
           <TextInput
             autoFocus
-            style={[styles.textInput, {
-              marginBottom: 12,
-            }]}
+            style={styles.textInput}
             mode="outlined"
             label="Phone number"
             left={<TextInput.Affix text="+1" />}
@@ -74,6 +79,12 @@ export default function Auth(props: AuthProps): JSX.Element {
             inputMode="numeric"
             disabled={confirming}
             error={!!error} />
+          <HelperText
+            type="error"
+            visible={!!error}
+            style={{ marginBottom: 12 }}>
+            {error}
+          </HelperText>
           <Button
             style={styles.button}
             labelStyle={styles.buttonLabel}
@@ -83,11 +94,6 @@ export default function Auth(props: AuthProps): JSX.Element {
             Login
           </Button>
           {confirming && <LoadingAnimation />}
-          {error &&
-            <Text style={styles.errorText} variant="bodyLarge">
-              {error}
-            </Text>
-          }
         </Section>
       </Page>
     )
@@ -101,9 +107,7 @@ export default function Auth(props: AuthProps): JSX.Element {
         </Text>
         <TextInput
           autoFocus
-          style={[styles.textInput, {
-            marginBottom: 12,
-          }]}
+          style={styles.textInput}
           mode="outlined"
           label="Code"
           value={code}
@@ -113,20 +117,29 @@ export default function Auth(props: AuthProps): JSX.Element {
           inputMode="numeric"
           disabled={confirming}
           error={!!error} />
+        <HelperText
+          type="error"
+          visible={!!error}
+          style={{ marginBottom: 12 }}>
+          {error}
+        </HelperText>
         <Button
-          style={styles.button}
+          style={[styles.button, { marginBottom: 12 }]}
           labelStyle={styles.buttonLabel}
           mode="contained"
           onPress={verifyCode}
           disabled={confirming}>
           Verify
         </Button>
+        <Button
+          mode="text"
+          labelStyle={styles.anchorButtonLabel}
+          style={styles.button}
+          onPress={() => setConfirmationResult(null)}
+          disabled={confirming}>
+          Back
+        </Button>
         {confirming && <LoadingAnimation />}
-        {error &&
-          <Text style={styles.errorText} variant="bodyLarge">
-            {error}
-          </Text>
-        }
       </Section>
     </Page>
   );

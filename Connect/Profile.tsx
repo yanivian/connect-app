@@ -99,7 +99,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
         {!originalProfile && <LoadingAnimation />}
         {originalProfile && <View>
           <Text style={styles.text} variant="bodyLarge">
-            Can you share a little more about you?
+            Can you share a little more about yourself? Only your name and avatar will be visible to others.
           </Text>
           <View style={{ flexDirection: 'row', marginBottom: 12 }}>
             <View style={[styles.profileImageContainer, {

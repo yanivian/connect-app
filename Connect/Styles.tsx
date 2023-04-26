@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flex: 1,
   },
-  sectionContainer: {
+  section: {
     paddingVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 12,
@@ -50,14 +50,10 @@ const styles = StyleSheet.create({
     width: 118,
     height: 118,
   },
-  lottieContainer: {
+  lottieLoading: {
+    height: 150,
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
-  },
-  lottieLoading: {
-    marginTop: 40,
-    width: 200,
   },
 })
 
