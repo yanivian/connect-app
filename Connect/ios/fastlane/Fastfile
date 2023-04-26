@@ -15,10 +15,40 @@
 
 default_platform(:ios)
 
+def generate_version()
+  package = load_json(json_path: '../package.json')
+  app_version = package['version']
+  build_number = DateTime.now.strftime('%Y%m%d%H%M')
+  Hash[
+    'app_version' => app_version,
+    'bundle_number' => bundle_number
+  ]
+end
+
 platform :ios do
   desc "Build a new beta release of the app."
   lane :beta do
-    increment_build_number(xcodeproj: "Connect.xcodeproj")
+    version_info = generate_version()
+    set_info_plist_value(
+      path: "Connect/Info.plist",
+      key: 'CFBundleShortVersionString',
+      value: version_info['app_version']
+    )
+    set_info_plist_value(
+      path: "Connect/Info.plist",
+      key: 'CFBundleVersion',
+      value: version_info['bundle_number']
+    )
+    set_info_plist_value(
+      path: "ConnectTests/Info.plist",
+      key: 'CFBundleShortVersionString',
+      value: version_info['app_version']
+    )
+    set_info_plist_value(
+      path: "ConnectTests/Info.plist",
+      key: 'CFBundleVersion',
+      value: version_info['bundle_number']
+    )
     get_provisioning_profile  # invokes sigh
     build_app(workspace: "Connect.xcworkspace", scheme: "Connect")
   end
