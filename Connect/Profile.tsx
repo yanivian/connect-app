@@ -2,7 +2,7 @@ import { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Image, View } from 'react-native'
 import * as ImagePicker from 'react-native-image-picker'
-import { Button, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
+import { Button, HelperText, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import { ConsumerApi, ImageModel, ProfileModel } from './ConsumerApi'
 import { LoadingAnimation, Page, Section } from './Layout'
 import styles from './Styles'
@@ -86,9 +86,11 @@ export default function Profile(props: ProfileProps): JSX.Element {
           <Text style={styles.text} variant="bodyLarge">
             We're sorry. Something went wrong.
           </Text>
-          {errorLoading && <Text style={styles.errorText} variant="bodyLarge">
+          <HelperText
+            type="error"
+            visible={!!errorLoading}>
             {errorLoading}
-          </Text>}
+          </HelperText>
         </Section>
       </Page>)
   }
@@ -171,9 +173,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
           </View>
           <Button
             mode="contained"
-            style={[styles.button, {
-              marginBottom: 12,
-            }]}
+            style={styles.button}
             labelStyle={styles.buttonLabel}
             onPress={async () => {
               setCreating(true)
@@ -189,18 +189,20 @@ export default function Profile(props: ProfileProps): JSX.Element {
             disabled={creating || uploadingImage}>
             Finish
           </Button>
+          <HelperText
+            type="error"
+            visible={!!error}>
+            {error}
+          </HelperText>
           <Button
             mode="text"
-            labelStyle={styles.anchorButtonLabel}
             style={styles.button}
+            labelStyle={styles.anchorButtonLabel}
             onPress={() => props.setProfile(originalProfile)}
             disabled={creating || uploadingImage}>
             Skip
           </Button>
           {(creating || uploadingImage) && <LoadingAnimation />}
-          {error && <Text style={styles.errorText} variant="bodyLarge">
-            {error}
-          </Text>}
         </View>}
       </Section>
     </Page >)

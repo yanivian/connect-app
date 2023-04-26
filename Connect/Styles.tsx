@@ -29,13 +29,6 @@ const styles = StyleSheet.create({
   text: {
     marginBottom: 12,
   },
-  errorText: {
-    fontFamily: 'Courier',
-    fontSize: 14,
-    letterSpacing: 1,
-    lineHeight: 21,
-    marginTop: 12,
-  },
   textInput: {
   },
   profileImageContainer: {
