@@ -171,9 +171,14 @@ export default function Profile(props: ProfileProps): JSX.Element {
                 disabled={creating} />
             </View>
           </View>
+          <HelperText
+            type="error"
+            visible={!!error}>
+            {error}
+          </HelperText>
           <Button
             mode="contained"
-            style={styles.button}
+            style={[styles.button, { marginBottom: 12 }]}
             labelStyle={styles.buttonLabel}
             onPress={async () => {
               setCreating(true)
@@ -189,11 +194,6 @@ export default function Profile(props: ProfileProps): JSX.Element {
             disabled={creating || uploadingImage}>
             Finish
           </Button>
-          <HelperText
-            type="error"
-            visible={!!error}>
-            {error}
-          </HelperText>
           <Button
             mode="text"
             style={styles.button}
