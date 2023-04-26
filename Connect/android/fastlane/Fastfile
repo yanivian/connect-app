@@ -20,8 +20,8 @@ def generate_version()
   app_version = package['version']
   build_number = DateTime.now.strftime('%Y%m%d%H%M')
   Hash[
-    'code' => app_version.to_f.floor.to_i,
-    'name' => "#{app_version}.#{build_number}"
+    'app_version' => app_version,
+    'build_number' => build_number
   ]
 end
 
@@ -37,8 +37,8 @@ platform :android do
     gradle(
       task: 'clean assembleRelease',
       properties: {
-        'versionCode': version_info['code'],
-        'versionName': version_info['name']
+        'versionCode': version_info['build_number'],
+        'versionName': version_info['app_version']
       }
     )
   end
