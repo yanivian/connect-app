@@ -5,11 +5,11 @@ import { LoadingAnimation, Page, Section } from './Layouts'
 import { UserModel } from './Models'
 import styles from './Styles'
 
-interface AuthProps {
+interface LoginProps {
   setUser: React.Dispatch<React.SetStateAction<UserModel | null>>,
 }
 
-export default function Auth(props: AuthProps): JSX.Element {
+export default function Login(props: LoginProps): JSX.Element {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null)

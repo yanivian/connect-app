@@ -1,7 +1,7 @@
 import auth from '@react-native-firebase/auth'
 import React, { useEffect, useState } from 'react'
-import Auth from './Auth'
 import Home from './Home'
+import Login from './Login'
 import { ProfileModel, UserModel } from './Models'
 import Profile from './Profile'
 
@@ -17,7 +17,7 @@ function App(): JSX.Element {
 
   if (!user) {
     return (
-      <Auth setUser={setUser} />
+      <Login setUser={setUser} />
     )
   }
 
