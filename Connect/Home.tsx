@@ -1,14 +1,13 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import React from 'react';
-import { Button, Text } from 'react-native-paper';
-import { ProfileModel } from './ConsumerApi';
-import { Page, Section } from './Layout';
-import styles from './Styles';
+import React from 'react'
+import { Button, Text } from 'react-native-paper'
+import { Page, Section } from './Layouts'
+import { ProfileModel, UserModel } from './Models'
+import styles from './Styles'
 
 interface HomeProps {
-  user: FirebaseAuthTypes.User;
-  profile: ProfileModel;
-  signOut: () => Promise<void>;
+  user: UserModel,
+  profile: ProfileModel,
+  signOut: () => Promise<void>,
 }
 
 export default function Home(props: HomeProps): JSX.Element {
@@ -23,5 +22,5 @@ export default function Home(props: HomeProps): JSX.Element {
         </Button>
       </Section>
     </Page>
-  );
+  )
 }

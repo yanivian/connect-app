@@ -1,15 +1,15 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Image, View } from 'react-native'
 import * as ImagePicker from 'react-native-image-picker'
 import { Button, HelperText, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
-import { ConsumerApi, ImageModel, ProfileModel } from './ConsumerApi'
-import { LoadingAnimation, Page, Section } from './Layout'
+import FrontendService from './FrontendService'
+import { LoadingAnimation, Page, Section } from './Layouts'
+import { ImageModel, ProfileModel, UserModel } from './Models'
 import styles from './Styles'
 import ProfilePlaceholder from './images/ProfilePlaceholder.svg'
 
 interface ProfileProps {
-  user: FirebaseAuthTypes.User,
+  user: UserModel,
   setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>,
   signOut: () => Promise<void>,
 }
@@ -26,7 +26,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
   const [imageMenuVisible, setImageMenuVisible] = useState(false)
 
   useEffect(() => {
-    ConsumerApi.get(props.user).getOrCreateProfile({
+    FrontendService.get(props.user).getOrCreateProfile({
       phoneNumber: props.user.phoneNumber || '',
     }).then((profile) => {
       setOriginalProfile(profile)
@@ -71,8 +71,8 @@ export default function Profile(props: ProfileProps): JSX.Element {
       type: asset.type || '',
       uri: asset.uri || '',
     }
-    setUploadingImage(true);
-    return ConsumerApi.get(props.user)
+    setUploadingImage(true)
+    return FrontendService.get(props.user)
       .uploadImage(localFile)
       .then(setImage)
       .catch(setError)
@@ -183,7 +183,7 @@ export default function Profile(props: ProfileProps): JSX.Element {
             onPress={async () => {
               setCreating(true)
               setError(null)
-              return ConsumerApi.get(props.user).updateProfile({
+              return FrontendService.get(props.user).updateProfile({
                 name: name,
                 emailAddress: emailAddress,
                 image: image?.ID || null,

@@ -1,63 +1,64 @@
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import React, { useState } from 'react';
-import { Button, HelperText, Text, TextInput } from 'react-native-paper';
-import { LoadingAnimation, Page, Section } from './Layout';
-import styles from './Styles';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
+import React, { useState } from 'react'
+import { Button, HelperText, Text, TextInput } from 'react-native-paper'
+import { LoadingAnimation, Page, Section } from './Layouts'
+import { UserModel } from './Models'
+import styles from './Styles'
 
 interface AuthProps {
-  setUser: React.Dispatch<React.SetStateAction<FirebaseAuthTypes.User | null>>;
+  setUser: React.Dispatch<React.SetStateAction<UserModel | null>>,
 }
 
 export default function Auth(props: AuthProps): JSX.Element {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [confirming, setConfirming] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
-  const [code, setCode] = useState('');
-  const [error, setError] = useState<string | null>();
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [confirming, setConfirming] = useState(false)
+  const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null)
+  const [code, setCode] = useState('')
+  const [error, setError] = useState<string | null>()
 
   async function signInWithPhoneNumber() {
-    setConfirming(true);
-    setError(null);
+    setConfirming(true)
+    setError(null)
     return auth().signInWithPhoneNumber('+1' + phoneNumber, /** forceResend= */ true)
       .then(setConfirmationResult)
       .catch((err) => {
-        const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown';
+        const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown'
         switch (errorCode) {
           case 'auth/invalid-phone-number':
           case 'auth/missing-phone-number':
-            setError('Please enter a ten-digit phone number.');
-            break;
+            setError('Please enter a ten-digit phone number.')
+            break
           default:
-            setError(`Sorry, something went wrong. (${errorCode})`);
-            break;
+            setError(`Sorry, something went wrong. (${errorCode})`)
+            break
         }
-      }).finally(() => setConfirming(false));
+      }).finally(() => setConfirming(false))
   }
 
   async function verifyCode() {
-    setConfirming(true);
-    setError(null);
+    setConfirming(true)
+    setError(null)
     if (!confirmationResult) {
       return
     }
     return confirmationResult.confirm(code).then((userCredential) =>
       userCredential?.user && props.setUser(userCredential.user))
       .catch((err) => {
-        const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown';
+        const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown'
         switch (errorCode) {
           case 'auth/unknown':
-            setCode('');
-            setError('Please enter the verification code.');
-            break;
+            setCode('')
+            setError('Please enter the verification code.')
+            break
           case 'auth/invalid-verification-code':
-            setCode('');
-            setError('That code was invalid. Please try again.');
-            break;
+            setCode('')
+            setError('That code was invalid. Please try again.')
+            break
           default:
-            setError(`Sorry, something went wrong. (${errorCode})`);
-            break;
+            setError(`Sorry, something went wrong. (${errorCode})`)
+            break
         }
-      }).finally(() => setConfirming(false));
+      }).finally(() => setConfirming(false))
   }
 
   if (!confirmationResult) {
@@ -142,5 +143,5 @@ export default function Auth(props: AuthProps): JSX.Element {
         {confirming && <LoadingAnimation />}
       </Section>
     </Page>
-  );
+  )
 }

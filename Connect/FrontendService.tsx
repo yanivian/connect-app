@@ -1,28 +1,6 @@
-/**
- * This file defines the backend API and supporting request/response interfaces.
- */
+/** This file defines a functional interface to the frontend service. */
 
-export interface ProfileModel {
-  UserID: string,
-  PhoneNumber: string,
-  CreatedTimestampMillis: number,
-  Name: string | null,
-  EmailAddress: string | null,
-  Image: ImageModel | null,
-  LastUpdatedTimestampMillis: number | null,
-}
-
-export interface ImageModel {
-  ID: string,
-  UserID: string,
-  CreatedTimestampMillis: number,
-  URL: string,
-}
-
-interface User {
-  uid: string,
-  getIdToken: () => Promise<string>,
-}
+import { ImageModel, ProfileModel, UserModel } from './Models'
 
 interface AuthRequest {
   id: string,
@@ -45,17 +23,17 @@ interface LocalFile {
   uri: string,
 }
 
-export class ConsumerApi {
+export default class FrontendService {
   private static baseUrlProd_ = "https://connect-on-firebase.wm.r.appspot.com"
 
-  public static get(user: User): ConsumerApi {
-    return new ConsumerApi(user, ConsumerApi.baseUrlProd_)
+  public static get(user: UserModel): FrontendService {
+    return new FrontendService(user, FrontendService.baseUrlProd_)
   }
 
-  private user_: User
+  private user_: UserModel
   private baseUrl_: string
 
-  private constructor(user: User, baseUrl: string) {
+  private constructor(user: UserModel, baseUrl: string) {
     this.user_ = user
     this.baseUrl_ = baseUrl
   }
