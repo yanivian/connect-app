@@ -1,35 +1,49 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
 import { SafeAreaView, View } from 'react-native'
-import { Surface, Text } from 'react-native-paper'
+import { IconButton, Surface, Text } from 'react-native-paper'
+import { IconSource } from 'react-native-paper/src/components/Icon'
 import styles from './Styles'
 
 import type { PropsWithChildren } from 'react'
 
-type SectionPropsWithChildren = PropsWithChildren<{
-  title: string,
+type SectionProps = PropsWithChildren<{
+  title: string
+  close?: {
+    icon: IconSource
+    callback: () => void
+  }
 }>
 
-type PagePropsWithChildren = PropsWithChildren<{
-}>
-
-export function Section(spec: SectionPropsWithChildren): JSX.Element {
+export function Section(props: SectionProps): JSX.Element {
   return (
     <Surface style={styles.section} elevation={4}>
-      <Text style={styles.sectionTitle} variant="titleLarge">
-        {spec.title}
-      </Text>
+      <View style={[styles.sectionTitle, { flexDirection: 'row', alignItems: 'center', height: 60 }]}>
+        <Text style={{ flexGrow: 1 }} variant="titleLarge">
+          {props.title}
+        </Text>
+        {props.close &&
+          <IconButton
+            size={20}
+            mode='contained-tonal'
+            icon={props.close.icon}
+            onPress={props.close.callback} />
+        }
+      </View>
       <View style={styles.sectionContent}>
-        {spec.children}
+        {props.children}
       </View>
     </Surface>
   )
 }
 
-export function Page(spec: PagePropsWithChildren): JSX.Element {
+type PageProps = PropsWithChildren<{
+}>
+
+export function Page(props: PageProps): JSX.Element {
   return (
     <SafeAreaView style={styles.safeArea}>
-      {spec.children}
+      {props.children}
     </SafeAreaView>
   )
 }

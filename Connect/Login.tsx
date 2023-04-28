@@ -147,7 +147,7 @@ const Login = (props: LoginProps): JSX.Element => {
   if (!user) {
     return (
       <Page>
-        <Section title="Login">
+        <Section title="Login" close={{ icon: 'restart', callback: () => setConfirmationResult(null) }}>
           <Text style={styles.text} variant="bodyLarge">
             We've sent a verification code to your phone number, and it should arrive momentarily.
           </Text>
@@ -176,14 +176,6 @@ const Login = (props: LoginProps): JSX.Element => {
             onPress={verifyCode}
             disabled={loading}>
             Verify
-          </Button>
-          <Button
-            mode="text"
-            labelStyle={styles.anchorButtonLabel}
-            style={styles.button}
-            onPress={() => setConfirmationResult(null)}
-            disabled={loading}>
-            Back
           </Button>
           {loading && <LoadingAnimation />}
         </Section>

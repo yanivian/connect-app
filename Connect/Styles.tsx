@@ -7,15 +7,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingBottom: 12,
     borderRadius: 12,
     margin: 12,
   },
   sectionTitle: {
+    paddingLeft: 12,
     paddingBottom: 12,
   },
   sectionContent: {
+    paddingHorizontal: 12,
   },
   button: {
   },

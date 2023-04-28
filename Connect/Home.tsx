@@ -66,12 +66,10 @@ const Home = (): JSX.Element => {
               style={{ marginBottom: 12 }}
               actions={[
                 {
-                  icon: 'close',
                   label: 'Close',
                   onPress: () => setShowIncompleteProfileBanner(false),
                 },
                 {
-                  icon: 'wrench',
                   label: 'Fix it',
                   onPress: () => navigateForward(Route.Profile),
                 },

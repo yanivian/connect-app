@@ -43,7 +43,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
   const [emailAddress, setEmailAddress] = useState<string | null>(profile.EmailAddress)
   const [image, setImage] = useState<ImageModel | null>(profile.Image)
 
-  const [creating, setCreating] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>()
   const [imageMenuVisible, setImageMenuVisible] = useState(false)
@@ -73,7 +73,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
   }
 
   return (
-    <Section title="Profile">
+    <Section title="Profile" close={{ icon: 'close', callback: props.close }}>
       <View>
         <Text style={styles.text} variant="bodyLarge">
           Can you share a little more about yourself? Only your name and avatar will be visible to others.
@@ -87,7 +87,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
               visible={imageMenuVisible}
               onDismiss={() => setImageMenuVisible(false)}
               anchor={
-                <TouchableRipple disabled={creating || uploadingImage} onPress={() => setImageMenuVisible(true)}>
+                <TouchableRipple disabled={saving || uploadingImage} onPress={() => setImageMenuVisible(true)}>
                   <View>
                     {image?.URL &&
                       <Image style={styles.profileImage} source={{ uri: `${image.URL}=s200-c` }} />}
@@ -133,7 +133,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
               autoCapitalize="words"
               autoComplete="name"
               inputMode="text"
-              disabled={creating} />
+              disabled={saving} />
             <TextInput
               style={styles.textInput}
               mode="outlined"
@@ -143,7 +143,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
               autoCapitalize="none"
               autoComplete="email"
               inputMode="email"
-              disabled={creating} />
+              disabled={saving} />
           </View>
         </View>
         <HelperText
@@ -156,7 +156,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
           style={[styles.button, { marginBottom: 12 }]}
           labelStyle={styles.buttonLabel}
           onPress={async () => {
-            setCreating(true)
+            setSaving(true)
             setError(null)
             return FrontendService.get(user).updateProfile({
               name: name,
@@ -164,20 +164,12 @@ const Profile = (props: ProfileProps): JSX.Element => {
               image: image?.ID || null,
             }).then(props.setProfile)
               .catch(setError)
-              .finally(() => setCreating(false))
+              .finally(() => setSaving(false))
           }}
-          disabled={creating || uploadingImage}>
-          Finish
+          disabled={saving || uploadingImage}>
+          Save
         </Button>
-        <Button
-          mode="text"
-          style={styles.button}
-          labelStyle={styles.anchorButtonLabel}
-          onPress={props.close}
-          disabled={creating || uploadingImage}>
-          Skip
-        </Button>
-        {(creating || uploadingImage) && <LoadingAnimation />}
+        {(saving || uploadingImage) && <LoadingAnimation />}
       </View>
     </Section>
   )
