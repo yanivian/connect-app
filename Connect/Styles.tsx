@@ -23,10 +23,6 @@ const styles = StyleSheet.create({
   buttonLabel: {
     fontSize: 16,
   },
-  anchorButtonLabel: {
-    fontSize: 16,
-    textDecorationLine: 'underline',
-  },
   text: {
     marginBottom: 12,
   },

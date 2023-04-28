@@ -7,6 +7,17 @@ import styles from './Styles'
 
 import type { PropsWithChildren } from 'react'
 
+type PageProps = PropsWithChildren<{
+}>
+
+export const Page = (props: PageProps) => {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      {props.children}
+    </SafeAreaView>
+  )
+}
+
 type SectionProps = PropsWithChildren<{
   title: string
   close?: {
@@ -15,7 +26,7 @@ type SectionProps = PropsWithChildren<{
   }
 }>
 
-export function Section(props: SectionProps): JSX.Element {
+export const Section = (props: SectionProps) => {
   return (
     <Surface style={styles.section} elevation={4}>
       <View style={[styles.sectionTitle, { flexDirection: 'row', alignItems: 'center', height: 60 }]}>
@@ -37,18 +48,7 @@ export function Section(props: SectionProps): JSX.Element {
   )
 }
 
-type PageProps = PropsWithChildren<{
-}>
-
-export function Page(props: PageProps): JSX.Element {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      {props.children}
-    </SafeAreaView>
-  )
-}
-
-export function LoadingAnimation(): JSX.Element {
+export const LoadingAnimation = () => {
   return (
     <View style={styles.lottieLoading}>
       <View>
