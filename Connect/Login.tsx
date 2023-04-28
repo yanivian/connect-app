@@ -22,7 +22,10 @@ const Login = (props: LoginProps): JSX.Element => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>()
 
-  /** Encapsulates the Firebase User and provides a revised contract. */
+  /**
+   * Encapsulates the Firebase User and provides a revised contract.
+   * Nested within the component because signOut accessed internal state.
+   */
   class FirebaseUserModel implements UserModel {
     private user_!: FirebaseAuthTypes.User
 
