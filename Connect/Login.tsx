@@ -27,10 +27,10 @@ const Login = (props: LoginProps): JSX.Element => {
    * Nested within the component because signOut accessed internal state.
    */
   class FirebaseUserModel implements UserModel {
-    private user_!: FirebaseAuthTypes.User
+    private user_: FirebaseAuthTypes.User
 
-    uid!: string  // Same as Firebase User.
-    phoneNumber!: string  // Firebase User allows null.
+    uid: string  // Same as Firebase User.
+    phoneNumber: string  // Firebase User allows null.
 
     constructor(user: FirebaseAuthTypes.User) {
       this.user_ = user
