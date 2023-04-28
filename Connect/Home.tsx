@@ -7,7 +7,6 @@ import styles from './Styles'
 
 interface HomeProps {
   user: UserModel
-  signOut: () => Promise<void>
 }
 
 export default function Home(props: HomeProps): JSX.Element {
@@ -16,7 +15,7 @@ export default function Home(props: HomeProps): JSX.Element {
 
   useEffect(() => {
     FrontendService.get(props.user).getOrCreateProfile({
-      phoneNumber: props.user.phoneNumber || '',
+      phoneNumber: props.user.phoneNumber,
     }).then(setProfile).catch(setError)
   }, [])
 
@@ -36,7 +35,7 @@ export default function Home(props: HomeProps): JSX.Element {
         <Text style={styles.text} variant="bodyLarge">
           Welcome {profile.Name || profile.PhoneNumber || 'Nameless'}!
         </Text>
-        <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={props.signOut}>
+        <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={props.user.signOut}>
           Sign out
         </Button>
       </Section>

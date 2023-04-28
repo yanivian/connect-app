@@ -6,13 +6,12 @@ import { LoadingAnimation, Page, Section } from './Layouts'
 import { UserModel } from './Models'
 import styles from './Styles'
 
-async function signOut() {
-  return auth().signOut()
-}
-
+/** React component that logs a user in via Firebase phone number auth flow. */
 export default function Login(): JSX.Element {
   const [user, setUser] = useState<UserModel | null>(null)
-  useEffect(() => auth().onAuthStateChanged(setUser), [])
+  useEffect(() => auth().onAuthStateChanged((user) => {
+    setUser(!user ? null : new FirebaseUserModel(user))
+  }), [])
 
   const [phoneNumber, setPhoneNumber] = useState('')
   const [confirming, setConfirming] = useState(false)
@@ -45,8 +44,9 @@ export default function Login(): JSX.Element {
     if (!confirmationResult) {
       return
     }
-    return confirmationResult.confirm(code).then((userCredential) =>
-      userCredential?.user && setUser(userCredential.user))
+    return confirmationResult.confirm(code).then((userCredential) => {
+      userCredential?.user && setUser(new FirebaseUserModel(userCredential.user))
+    })
       .catch((err) => {
         const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown'
         switch (errorCode) {
@@ -152,6 +152,30 @@ export default function Login(): JSX.Element {
   }
 
   return (
-    <Home user={user} signOut={signOut} />
+    <Home user={user} />
   )
+}
+
+class FirebaseUserModel implements UserModel {
+  private user_!: FirebaseAuthTypes.User
+
+  uid!: string
+  phoneNumber!: string
+
+  constructor(user: FirebaseAuthTypes.User) {
+    if (!user.phoneNumber) {
+      throw new Error("Bad auth user payload")
+    }
+    this.user_ = user
+    this.uid = user.uid
+    this.phoneNumber = user.phoneNumber
+  }
+
+  async getIdToken(): Promise<string> {
+    return this.user_.getIdToken(/* forceRefresh= */ true)
+  }
+
+  async signOut() {
+    return auth().signOut()
+  }
 }
