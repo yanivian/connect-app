@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Image, View } from 'react-native'
 import * as ImagePicker from 'react-native-image-picker'
 import { Button, HelperText, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
@@ -10,31 +10,20 @@ import ProfilePlaceholder from './images/ProfilePlaceholder.svg'
 
 interface ProfileProps {
   user: UserModel
+  profile: ProfileModel
   setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>
   signOut: () => Promise<void>
 }
 
 export default function Profile(props: ProfileProps): JSX.Element {
-  const [errorLoading, setErrorLoading] = useState<string>()
-  const [originalProfile, setOriginalProfile] = useState<ProfileModel | null>(null)
-  const [name, setName] = useState<string | null>(null)
-  const [emailAddress, setEmailAddress] = useState<string | null>(null)
-  const [image, setImage] = useState<ImageModel | null>(null)
+  const [name, setName] = useState<string | null>(props.profile.Name)
+  const [emailAddress, setEmailAddress] = useState<string | null>(props.profile.EmailAddress)
+  const [image, setImage] = useState<ImageModel | null>(props.profile.Image)
+
   const [creating, setCreating] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>()
   const [imageMenuVisible, setImageMenuVisible] = useState(false)
-
-  useEffect(() => {
-    FrontendService.get(props.user).getOrCreateProfile({
-      phoneNumber: props.user.phoneNumber || '',
-    }).then((profile) => {
-      setOriginalProfile(profile)
-      setName(profile.Name)
-      setEmailAddress(profile.EmailAddress)
-      setImage(profile.Image)
-    }).catch(setErrorLoading)
-  }, [])
 
   const theme = useTheme()
 
@@ -79,27 +68,10 @@ export default function Profile(props: ProfileProps): JSX.Element {
       .finally(() => setUploadingImage(false))
   }
 
-  if (errorLoading) {
-    return (
-      <Page>
-        <Section title="Profile">
-          <Text style={styles.text} variant="bodyLarge">
-            We're sorry. Something went wrong.
-          </Text>
-          <HelperText
-            type="error"
-            visible={!!errorLoading}>
-            {errorLoading}
-          </HelperText>
-        </Section>
-      </Page>)
-  }
-
   return (
     <Page>
       <Section title="Profile">
-        {!originalProfile && <LoadingAnimation />}
-        {originalProfile && <View>
+        <View>
           <Text style={styles.text} variant="bodyLarge">
             Can you share a little more about yourself? Only your name and avatar will be visible to others.
           </Text>
@@ -198,12 +170,12 @@ export default function Profile(props: ProfileProps): JSX.Element {
             mode="text"
             style={styles.button}
             labelStyle={styles.anchorButtonLabel}
-            onPress={() => props.setProfile(originalProfile)}
+            onPress={() => props.setProfile(props.profile)}
             disabled={creating || uploadingImage}>
             Skip
           </Button>
           {(creating || uploadingImage) && <LoadingAnimation />}
-        </View>}
+        </View>
       </Section>
     </Page >)
 }
