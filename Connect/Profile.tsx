@@ -9,9 +9,9 @@ import styles from './Styles'
 import ProfilePlaceholder from './images/ProfilePlaceholder.svg'
 
 interface ProfileProps {
-  user: UserModel,
-  setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>,
-  signOut: () => Promise<void>,
+  user: UserModel
+  setProfile: React.Dispatch<React.SetStateAction<ProfileModel | null>>
+  signOut: () => Promise<void>
 }
 
 export default function Profile(props: ProfileProps): JSX.Element {

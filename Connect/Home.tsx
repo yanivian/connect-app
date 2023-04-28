@@ -1,21 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Text } from 'react-native-paper'
-import { Page, Section } from './Layouts'
+import FrontendService from './FrontendService'
+import { LoadingAnimation, Page, Section } from './Layouts'
 import { ProfileModel, UserModel } from './Models'
 import styles from './Styles'
 
 interface HomeProps {
-  user: UserModel,
-  profile: ProfileModel,
-  signOut: () => Promise<void>,
+  user: UserModel
+  signOut: () => Promise<void>
 }
 
 export default function Home(props: HomeProps): JSX.Element {
+  const [profile, setProfile] = useState<ProfileModel | null>(null)
+  const [error, setError] = useState<string | null>()
+
+  useEffect(() => {
+    FrontendService.get(props.user).getOrCreateProfile({
+      phoneNumber: props.user.phoneNumber || '',
+    }).then(setProfile).catch(setError)
+  }, [])
+
+  if (!profile) {
+    return (
+      <Page>
+        <Section title="Home">
+          <LoadingAnimation />
+        </Section>
+      </Page>
+    )
+  }
+
   return (
     <Page>
       <Section title="Home">
         <Text style={styles.text} variant="bodyLarge">
-          Welcome {props.profile.Name || props.user.phoneNumber}
+          Welcome {profile.Name || profile.PhoneNumber || 'Nameless'}!
         </Text>
         <Button style={styles.button} labelStyle={styles.buttonLabel} mode="contained" onPress={props.signOut}>
           Sign out

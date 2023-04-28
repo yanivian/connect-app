@@ -1,35 +1,8 @@
-import auth from '@react-native-firebase/auth'
-import React, { useEffect, useState } from 'react'
-import Home from './Home'
+import React from 'react'
 import Login from './Login'
-import { ProfileModel, UserModel } from './Models'
-import Profile from './Profile'
 
-function App(): JSX.Element {
-  const [user, setUser] = useState<UserModel | null>(null)
-  const [profile, setProfile] = useState<ProfileModel | null>(null)
-
-  useEffect(() => auth().onAuthStateChanged(setUser), [])
-
-  async function signOut() {
-    return auth().signOut().then(() => setProfile(null))
-  }
-
-  if (!user) {
-    return (
-      <Login setUser={setUser} />
-    )
-  }
-
-  if (!profile) {
-    return (
-      <Profile user={user} setProfile={setProfile} signOut={signOut} />
-    )
-  }
-
+export default function App(): JSX.Element {
   return (
-    <Home user={user} profile={profile} signOut={signOut} />
+    <Login />
   )
 }
-
-export default App
