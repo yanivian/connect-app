@@ -1,27 +1,64 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
-import React, { useEffect, useState } from 'react'
+import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
-import Home from './Home'
+import { UserModelContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { UserModel } from './Models'
 import styles from './Styles'
 
-/** React component that logs a user in via Firebase phone number auth flow. */
-export default function Login(): JSX.Element {
-  const [user, setUser] = useState<UserModel | null>(null)
-  useEffect(() => auth().onAuthStateChanged((user) => {
-    setUser(!user ? null : new FirebaseUserModel(user))
-  }), [])
+type LoginProps = PropsWithChildren<{}>
 
+/** React component that logs a user in via Firebase's phone number auth flow. */
+const Login = (props: LoginProps): JSX.Element => {
+  // State that this component is responsible for providing to its children.
+  const [user, setUser] = useState<UserModel | null>(null)
+
+  // State that is collected internal to this component towards the auth flow.
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [confirming, setConfirming] = useState(false)
   const [confirmationResult, setConfirmationResult] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null)
   const [code, setCode] = useState('')
+
+  // UI state for when content is loading or when an error occurs.
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>()
 
+  /** Encapsulates the Firebase User and provides a revised contract. */
+  class FirebaseUserModel implements UserModel {
+    private user_!: FirebaseAuthTypes.User
+
+    uid!: string  // Same as Firebase User.
+    phoneNumber!: string  // Firebase User allows null.
+
+    constructor(user: FirebaseAuthTypes.User) {
+      this.user_ = user
+      this.uid = user.uid
+      this.phoneNumber = user.phoneNumber!
+    }
+
+    // Requires encapsulation.
+    async getIdToken(): Promise<string> {
+      return this.user_.getIdToken(/* forceRefresh= */ true)
+    }
+
+    // Not provided by Firebase User.
+    async signOut(): Promise<void> {
+      return auth().signOut().then(() => {
+        // Reset internal state.
+        setConfirmationResult(null)
+        setCode('')
+      })
+    }
+  }
+
+  // Propagate auth state changes to user state.
+  useEffect(() => auth().onAuthStateChanged((user) => {
+    setUser(!user ? null : new FirebaseUserModel(user))
+  }), [] /* Only on first render */)
+
   async function signInWithPhoneNumber() {
-    setConfirming(true)
+    setLoading(true)
     setError(null)
+    // TODO: Validate phone number.
     return auth().signInWithPhoneNumber('+1' + phoneNumber, /** forceResend= */ true)
       .then(setConfirmationResult)
       .catch((err) => {
@@ -35,16 +72,14 @@ export default function Login(): JSX.Element {
             setError(`Sorry, something went wrong. (${errorCode})`)
             break
         }
-      }).finally(() => setConfirming(false))
+      }).finally(() => setLoading(false))
   }
 
   async function verifyCode() {
-    setConfirming(true)
+    setLoading(true)
     setError(null)
-    if (!confirmationResult) {
-      return
-    }
-    return confirmationResult.confirm(code).then((userCredential) => {
+    // TODO: Validate code.
+    return confirmationResult!.confirm(code).then((userCredential) => {
       userCredential?.user && setUser(new FirebaseUserModel(userCredential.user))
     })
       .catch((err) => {
@@ -62,9 +97,10 @@ export default function Login(): JSX.Element {
             setError(`Sorry, something went wrong. (${errorCode})`)
             break
         }
-      }).finally(() => setConfirming(false))
+      }).finally(() => setLoading(false))
   }
 
+  // Step 1: Collect phone number and get ConfirmationResult.
   if (!user && !confirmationResult) {
     return (
       <Page>
@@ -82,7 +118,7 @@ export default function Login(): JSX.Element {
             onChangeText={setPhoneNumber}
             onSubmitEditing={async (e) => signInWithPhoneNumber()}
             inputMode="numeric"
-            disabled={confirming}
+            disabled={loading}
             error={!!error} />
           <HelperText
             type="error"
@@ -95,15 +131,16 @@ export default function Login(): JSX.Element {
             labelStyle={styles.buttonLabel}
             mode="contained"
             onPress={signInWithPhoneNumber}
-            disabled={confirming}>
+            disabled={loading}>
             Login
           </Button>
-          {confirming && <LoadingAnimation />}
+          {loading && <LoadingAnimation />}
         </Section>
       </Page>
     )
   }
 
+  // Step 2: Collect verification code and get Firebase User.
   if (!user) {
     return (
       <Page>
@@ -121,7 +158,7 @@ export default function Login(): JSX.Element {
             onSubmitEditing={async (e) => verifyCode()}
             autoComplete="off"
             inputMode="numeric"
-            disabled={confirming}
+            disabled={loading}
             error={!!error} />
           <HelperText
             type="error"
@@ -134,7 +171,7 @@ export default function Login(): JSX.Element {
             labelStyle={styles.buttonLabel}
             mode="contained"
             onPress={verifyCode}
-            disabled={confirming}>
+            disabled={loading}>
             Verify
           </Button>
           <Button
@@ -142,40 +179,21 @@ export default function Login(): JSX.Element {
             labelStyle={styles.anchorButtonLabel}
             style={styles.button}
             onPress={() => setConfirmationResult(null)}
-            disabled={confirming}>
+            disabled={loading}>
             Back
           </Button>
-          {confirming && <LoadingAnimation />}
+          {loading && <LoadingAnimation />}
         </Section>
       </Page>
     )
   }
 
+  // Step 3: Show children within the context of the logged-in user.
   return (
-    <Home user={user} />
+    <UserModelContext.Provider value={user}>
+      {props.children}
+    </UserModelContext.Provider>
   )
 }
 
-class FirebaseUserModel implements UserModel {
-  private user_!: FirebaseAuthTypes.User
-
-  uid!: string
-  phoneNumber!: string
-
-  constructor(user: FirebaseAuthTypes.User) {
-    if (!user.phoneNumber) {
-      throw new Error("Bad auth user payload")
-    }
-    this.user_ = user
-    this.uid = user.uid
-    this.phoneNumber = user.phoneNumber
-  }
-
-  async getIdToken(): Promise<string> {
-    return this.user_.getIdToken(/* forceRefresh= */ true)
-  }
-
-  async signOut() {
-    return auth().signOut()
-  }
-}
+export default Login
