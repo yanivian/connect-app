@@ -103,7 +103,7 @@ const Home = (): JSX.Element => {
                   {
                     icon: 'run',
                     label: 'Activity',
-                    onPress: () => navigateForward(Route.Profile),
+                    onPress: () => { },
                   },
                 ]}
                 onStateChange={({ open }) => setIsAddButtonPanelOpen(open)} />
