@@ -49,7 +49,7 @@ platform :ios do
       key: 'CFBundleVersion',
       value: version_info['build_number']
     )
-    get_provisioning_profile  # invokes sigh
+    get_provisioning_profile(adhoc: true)  # invokes sigh
     build_app(workspace: "Connect.xcworkspace", scheme: "Connect")
   end
 end
