@@ -14,11 +14,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "508673418266-4v494mkhph636r57lobg952nnvv35ncs.apps.googleusercontent.com",
+          "client_id": "508673418266-991ghhsujbp2h1dgmb321gfsl1vauh73.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.yanivian.connect",
-            "certificate_hash": "ec48c7347a17fbd5b491296dd40fe887a844d0a7"
+            "certificate_hash": "28934d1ae460ea0f18480f5db40e4f7bc7fb6bd8"
+          }
+        },
+        {
+          "client_id": "508673418266-navrkde5f99ojr83oa73e3gocvjuuumv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yanivian.connect",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
@@ -37,6 +45,13 @@
             {
               "client_id": "508673418266-qb6nkf4snr5rjrrgvblevmfo8ph6nb3i.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "508673418266-33aebjpi6bjabbouoj9c1vr4udm9744b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.yanivian.connect"
+              }
             }
           ]
         }
