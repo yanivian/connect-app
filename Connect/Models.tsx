@@ -7,6 +7,12 @@ export interface ImageModel {
   URL: string
 }
 
+export interface LoginContextModel {
+  IsFirstLogin: boolean
+  Profile: ProfileModel
+  Credentials: { GoogleCloudApiKey: string }
+}
+
 export interface ProfileModel {
   UserID: string
   PhoneNumber: string

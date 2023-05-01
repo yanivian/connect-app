@@ -1,14 +1,15 @@
 /** This file defines a functional interface to the frontend service. */
 
-import { ImageModel, ProfileModel, UserModel } from './Models'
+import { ImageModel, LoginContextModel, ProfileModel, UserModel } from './Models'
 
 interface AuthRequest {
   id: string,
   token: string,
 }
 
-interface GetOrCreateProfileRequest {
+interface LoginContextRequest {
   phoneNumber: string,
+  client: string,
 }
 
 interface UpdateProfileRequest {
@@ -38,13 +39,13 @@ export default class FrontendService {
     this.baseUrl_ = baseUrl
   }
 
-  async getOrCreateProfile(req: GetOrCreateProfileRequest): Promise<ProfileModel> {
+  async loginContext(req: LoginContextRequest): Promise<LoginContextModel> {
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
         ...req,
       }
-      return this.doPost_('/profile/getorcreate', params)
+      return this.doPost_('/user/login', params)
     }).then(async resp => {
       if (resp.ok) {
         return resp.json()

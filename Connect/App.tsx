@@ -1,14 +1,14 @@
 import React from 'react'
 import Home from './Home'
 import Login from './Login'
-import ProfileLoader from './ProfileLoader'
+import LoginContextLoader from './LoginContextLoader'
 
 export default function App(): JSX.Element {
   return (
     <Login>
-      <ProfileLoader>
+      <LoginContextLoader>
         <Home />
-      </ProfileLoader>
+      </LoginContextLoader>
     </Login>
   )
 }

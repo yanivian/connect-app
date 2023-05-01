@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Banner, Button, FAB, Portal, Text } from 'react-native-paper'
-import { ProfileModelContext, UserModelContext } from './Contexts'
+import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import Profile from './Profile'
 import styles from './Styles'
@@ -13,10 +13,10 @@ enum Route {
 
 const Home = (): JSX.Element => {
   const user = useContext(UserModelContext)!
-  const initProfile = useContext(ProfileModelContext)!
+  const loginContext = useContext(LoginContext)!
 
   // State with which to override the profile available to its children.
-  const [profile, setProfile] = useState(initProfile)
+  const [profile, setProfile] = useState(loginContext.Profile)
   const isProfileComplete = !!profile.Name && !!profile.Image
 
   // State capturing whether the banner for incomplete profile should be shown.
@@ -25,7 +25,11 @@ const Home = (): JSX.Element => {
   const [isAddButtonPanelOpen, setIsAddButtonPanelOpen] = useState(false)
 
   // State capturing the navigational stack of routes.
-  const [navStack, setNavStack] = useState<Array<Route>>([Route.Home])
+  const initialNavStack = [Route.Home]
+  if (loginContext.IsFirstLogin) {
+    initialNavStack.push(Route.Profile)
+  }
+  const [navStack, setNavStack] = useState<Array<Route>>(initialNavStack)
 
   function isCurrentRoute(route: Route) {
     return navStack[navStack.length - 1] === route

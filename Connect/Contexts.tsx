@@ -1,7 +1,10 @@
 /** This file contains various contexts. */
 
 import { createContext } from 'react';
-import { ProfileModel, UserModel } from './Models';
+import { LoginContextModel, ProfileModel, UserModel } from './Models';
+
+/** React context with a LoginContextModel value type. */
+export const LoginContext = createContext<LoginContextModel | null>(null)
 
 /** React context with a ProfileModel value type. */
 export const ProfileModelContext = createContext<ProfileModel | null>(null)
