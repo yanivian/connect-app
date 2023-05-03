@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Banner, Button, FAB, Portal, Text } from 'react-native-paper'
+import Activity from './Activity'
 import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import Profile from './Profile'
 import styles from './Styles'
 
 enum Route {
+  Activity,
   Home,
   Profile,
 }
@@ -105,7 +107,7 @@ const Home = (): JSX.Element => {
                   {
                     icon: 'run',
                     label: 'Activity',
-                    onPress: () => { },
+                    onPress: () => navigateForward(Route.Activity),
                   },
                 ]}
                 onStateChange={({ open }) => setIsAddButtonPanelOpen(open)} />
@@ -118,6 +120,11 @@ const Home = (): JSX.Element => {
               setProfile(updatedProfile)
               navigateBack()
             }}
+            close={navigateBack} />
+        }
+        {isCurrentRoute(Route.Activity) &&
+          <Activity
+            setActivity={(activity) => console.log('TODO create activity: ' + activity)}
             close={navigateBack} />
         }
       </Page>

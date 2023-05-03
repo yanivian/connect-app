@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   textInput: {
+    fontSize: 16,
   },
   profileImageContainer: {
     width: 118,

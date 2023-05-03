@@ -1,8 +1,13 @@
 /** This file exports the various model interfaces and types pertinent to the app. */
 
+export interface ActivityModel {
+  ID: string
+  CreatedTimestampMillis: number
+  Name: string
+}
+
 export interface ImageModel {
   ID: string
-  UserID: string
   CreatedTimestampMillis: number
   URL: string
 }
