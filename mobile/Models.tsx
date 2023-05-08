@@ -15,7 +15,10 @@ export interface ImageModel {
 export interface LoginContextModel {
   IsFirstLogin: boolean
   Profile: ProfileModel
-  Credentials: { GoogleCloudApiKey: string }
+  Credentials: {
+    GoogleCloudApiKey: string,
+    OpenAIApiKey: string,
+  }
 }
 
 export interface ProfileModel {
