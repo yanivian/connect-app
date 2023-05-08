@@ -37,3 +37,11 @@ export interface UserModel {
   getIdToken: () => Promise<string>
   signOut: () => Promise<void>
 }
+
+export interface FaqModel {
+  Questions: Array<{
+    Topic: string
+    Question: string
+    Answers: Array<string>
+  }>
+}
