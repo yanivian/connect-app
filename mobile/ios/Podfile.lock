@@ -486,6 +486,8 @@ PODS:
     - React-jsi (= 0.71.6)
     - React-logger (= 0.71.6)
     - React-perflogger (= 0.71.6)
+  - RNDateTimePicker (7.0.1):
+    - React-Core
   - RNFBAnalytics (17.4.3):
     - Firebase/Analytics (= 10.7.0)
     - React-Core
@@ -554,6 +556,7 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAppCheck (from `../node_modules/@react-native-firebase/app-check`)"
@@ -660,6 +663,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNDateTimePicker:
+    :path: "../node_modules/@react-native-community/datetimepicker"
   RNFBAnalytics:
     :path: "../node_modules/@react-native-firebase/analytics"
   RNFBApp:
@@ -736,6 +741,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: 73d201599a64ea14b4e0b8f91b64970979fd92e6
   React-runtimeexecutor: 8692ac548bec648fa121980ccb4304afd136d584
   ReactCommon: 0982e4657e0ecdc3a90858fbb529d54cd0be8fb4
+  RNDateTimePicker: e073697ac3e8a378968d68ab0581fef542b8af8a
   RNFBAnalytics: e794cd8afc8d1b8fc450b193f51cdf7a7c26ea90
   RNFBApp: 922564a99c97a8cab366d5a918f9fecff6b563d5
   RNFBAppCheck: 35a9e99630d97413fad534c48fafc3c4e7243aa5

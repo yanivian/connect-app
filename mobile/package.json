@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "^7.0.1",
     "@react-native-firebase/analytics": "^17.4.2",
     "@react-native-firebase/app": "^17.4.2",
     "@react-native-firebase/app-check": "^17.4.2",
