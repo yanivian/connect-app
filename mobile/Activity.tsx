@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
-import { Image, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { DescriptionRow, GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import { Button, HelperText, IconButton, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper'
+import { Button, Divider, HelperText, IconButton, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { LoginContext, UserModelContext } from './Contexts'
 import { LoadingAnimation, Section } from './Layouts'
@@ -26,39 +26,16 @@ interface Place {
 
 type PlaceTypeMap = {
   [placeType: string]: {
-    queryType: string,
-    renderAutocomplete: (row: DescriptionRow) => string
-    renderName: (p: Place) => string
-    renderDescription: (p: Place) => string
-    appIcon: string
-    usePlaceIcon: boolean
+    queryType: string
   }
 }
 
 const placeTypeMap: PlaceTypeMap = {
-  'ESTABLISHMENT': {
+  'PLACE': {
     queryType: 'establishment',
-    renderAutocomplete: (row) => row.description,
-    renderName: (p) => p.data.structured_formatting.main_text,
-    renderDescription: (p) => p.data.structured_formatting.secondary_text,
-    appIcon: 'location-pin',
-    usePlaceIcon: true,
-  },
-  'CITY': {
-    queryType: '(cities)',
-    renderAutocomplete: (row) => row.description,
-    renderName: (p) => `City of ${p.data.structured_formatting.main_text}`,
-    renderDescription: (p) => p.data.structured_formatting.secondary_text,
-    appIcon: 'location-city',
-    usePlaceIcon: false,
   },
   'ADDRESS': {
     queryType: 'address',
-    renderAutocomplete: (row) => row.description,
-    renderName: (p) => p.data.structured_formatting.main_text,
-    renderDescription: (p) => p.data.structured_formatting.secondary_text,
-    appIcon: 'edit-location',
-    usePlaceIcon: false,
   }
 }
 
@@ -67,8 +44,8 @@ const Activity = (props: ActivityProps): JSX.Element => {
   const loginContext = useContext(LoginContext)!
 
   const [name, setName] = useState<string | null>(props.activity?.Name || null)
-  const [placeType, setPlaceType] = useState<string>('ESTABLISHMENT')
-  const [place, setPlace] = useState<Place | null>(null)
+  const [placeType, setPlaceType] = useState<string>('PLACE')
+  const [place, setPlace] = useState<Place | null>()
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>()
@@ -81,7 +58,7 @@ const Activity = (props: ActivityProps): JSX.Element => {
       <View>
         <TextInput
           style={[styles.textInput, {
-            marginBottom: 24,
+            marginBottom: 12,
           }]}
           mode='outlined'
           label='Name'
@@ -91,28 +68,28 @@ const Activity = (props: ActivityProps): JSX.Element => {
           autoComplete='off'
           inputMode='text'
           disabled={saving} />
+        <Divider style={{ marginBottom: 12 }} />
         {place &&
           <View style={{ flexDirection: 'row' }}>
-            <View>
-              {place.detail?.icon && placeTypeMap[placeType]!.usePlaceIcon &&
-                <Image style={{ width: 60, height: 60 }} source={{ uri: place.detail.icon }} />
-              }
-              {(!place.detail?.icon || !placeTypeMap[placeType]!.usePlaceIcon) &&
-                <MaterialIcons name={placeTypeMap[placeType]!.appIcon} size={60} color={theme.colors.primary} />
-              }
+            <View style={{ alignSelf: 'flex-start' }}>
+              <MaterialIcons name={'location-pin'} size={40} color={theme.colors.primary} />
             </View>
-            <View style={{ flexDirection: 'column', flexGrow: 1, paddingHorizontal: 12 }}>
-              <Text style={[styles.text]} variant="bodyLarge">
-                {placeTypeMap[placeType]!.renderName(place)}
+            <View style={{ flexDirection: 'column', flexGrow: 1, marginRight: 90 }}>
+              <Text variant="bodyLarge">
+                {place.data.structured_formatting.main_text}
               </Text>
-              <Text style={[styles.text, {}]} variant="bodySmall">
-                {placeTypeMap[placeType]!.renderDescription(place)}
+              <Text style={styles.text} variant="bodySmall">
+                {place.data.structured_formatting.secondary_text}
               </Text>
             </View>
-            <IconButton
-              disabled={saving}
-              icon='close'
-              onPress={() => setPlace(null)} />
+            <View style={{ alignSelf: 'flex-start', marginLeft: 'auto' }}>
+              <IconButton
+                style={{ margin: 0 }}
+                disabled={saving}
+                size={20}
+                icon='close'
+                onPress={() => setPlace(null)} />
+            </View>
           </View>
         }
         {!place &&
@@ -127,15 +104,14 @@ const Activity = (props: ActivityProps): JSX.Element => {
                 setPlaceType(value)
               }}
               buttons={[
-                { label: 'Establishment', value: 'ESTABLISHMENT', disabled: saving, style: { flex: 2, } },
-                { label: 'City', value: 'CITY', disabled: saving, style: { flex: .5, } },
+                { label: 'Place', value: 'PLACE', disabled: saving, style: { flex: 1, } },
                 { label: 'Address', value: 'ADDRESS', disabled: saving, style: { flex: 1, } },
               ]} />
             <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
               <GooglePlacesAutocomplete
-                renderDescription={placeTypeMap[placeType]!.renderAutocomplete}
+                renderDescription={(row) => row.description}
                 suppressDefaultStyles={true}
-                keepResultsAfterBlur={false}
+                keepResultsAfterBlur={true}
                 debounce={200}
                 placeholder='Add location'
                 query={{
@@ -155,15 +131,16 @@ const Activity = (props: ActivityProps): JSX.Element => {
                   },
                   listView: [styles.text, {
                     paddingHorizontal: 12,
-                    borderRadius: 4,
+                    borderRadius: theme.roundness,
                     borderWidth: 1,
                     borderColor: theme.colors.primary,
                   }],
                   textInputContainer: {
                     paddingHorizontal: 12,
-                    borderRadius: 4,
+                    borderRadius: theme.roundness,
                     borderWidth: 1,
                     borderColor: theme.colors.inverseSurface,
+                    backgroundColor: theme.colors.background,
                   },
                   textInput: [styles.textInput, {
                   }],
