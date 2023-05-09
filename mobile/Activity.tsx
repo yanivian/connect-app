@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Image, View } from 'react-native'
+import { Image, ScrollView, View } from 'react-native'
 import { DescriptionRow, GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { Button, HelperText, IconButton, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -118,7 +118,7 @@ const Activity = (props: ActivityProps): JSX.Element => {
         {!place &&
           <View>
             <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
-              Adding a place will allow help participants to better plan for it.
+              Adding a location will help participants to better plan for it.
             </Text>
             <SegmentedButtons
               style={{ marginBottom: 12 }}
@@ -131,38 +131,48 @@ const Activity = (props: ActivityProps): JSX.Element => {
                 { label: 'City', value: 'CITY', disabled: saving, style: { flex: .5, } },
                 { label: 'Address', value: 'ADDRESS', disabled: saving, style: { flex: 1, } },
               ]} />
-            <GooglePlacesAutocomplete
-              renderDescription={placeTypeMap[placeType]!.renderAutocomplete}
-              suppressDefaultStyles={true}
-              keepResultsAfterBlur={false}
-              minLength={3}
-              debounce={200}
-              placeholder='...'
-              query={{
-                key: loginContext.Credentials.GoogleCloudApiKey,
-                language: 'en',
-                type: placeTypeMap[placeType]!.queryType,
-              }}
-              styles={{
-                row: { paddingVertical: 6, alignContent: 'center', justifyContent: 'center', elevation: 2 },
-                listView: [styles.text, {
-                  paddingHorizontal: 12,
-                  borderRadius: 4,
-                  borderWidth: 1,
-                  borderColor: theme.colors.primary,
-                }],
-                textInputContainer: {
-                  paddingHorizontal: 12,
-                  borderRadius: 4,
-                  borderWidth: 1,
-                  borderColor: theme.colors.inverseSurface,
-                },
-                textInput: styles.textInput,
-              }}
-              enablePoweredByContainer={false}
-              fetchDetails={true}
-              onPress={(data, detail = null) => setPlace({ data, detail })}
-              onFail={setError} />
+            <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
+              <GooglePlacesAutocomplete
+                renderDescription={placeTypeMap[placeType]!.renderAutocomplete}
+                suppressDefaultStyles={true}
+                keepResultsAfterBlur={false}
+                debounce={200}
+                placeholder='Add location'
+                query={{
+                  key: loginContext.Credentials.GoogleCloudApiKey,
+                  language: 'en',
+                  type: placeTypeMap[placeType]!.queryType,
+                }}
+                styles={{
+                  container: {
+                    width: '100%',
+                  },
+                  row: {
+                    paddingVertical: 6,
+                    alignContent: 'center',
+                    justifyContent: 'center',
+                    elevation: 2,
+                  },
+                  listView: [styles.text, {
+                    paddingHorizontal: 12,
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    borderColor: theme.colors.primary,
+                  }],
+                  textInputContainer: {
+                    paddingHorizontal: 12,
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    borderColor: theme.colors.inverseSurface,
+                  },
+                  textInput: [styles.textInput, {
+                  }],
+                }}
+                enablePoweredByContainer={false}
+                fetchDetails={true}
+                onPress={(data, detail = null) => setPlace({ data, detail })}
+                onFail={setError} />
+            </ScrollView>
           </View>
         }
         <HelperText
