@@ -112,105 +112,113 @@ const Activity = (props: ActivityProps): JSX.Element => {
           inputMode='text'
           disabled={saving} />
         <Divider style={{ marginBottom: 12 }} />
-        {place &&
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ alignSelf: 'flex-start' }}>
-              <MaterialIcons name={'location-pin'} size={40} color={theme.colors.primary} />
-            </View>
-            <View style={{ flexDirection: 'column', flexGrow: 1, marginRight: 90 }}>
-              <Text variant="bodyLarge">
-                {place.data.structured_formatting.main_text}
-              </Text>
-              <Text style={styles.text} variant="bodySmall">
-                {place.data.structured_formatting.secondary_text}
-              </Text>
-            </View>
-            <View style={{ alignSelf: 'flex-start', marginLeft: 'auto' }}>
-              <IconButton
-                style={{ margin: 0 }}
-                disabled={saving}
-                size={20}
-                icon='close'
-                onPress={() => setPlace(null)} />
-            </View>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ alignSelf: 'flex-start' }}>
+            <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
           </View>
-        }
-        {!place &&
-          <View>
-            <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
-              Adding a location will help participants to plan better for it.
-            </Text>
-            <SegmentedButtons
-              style={{ marginBottom: 12 }}
-              value={placeType}
-              onValueChange={(value) => {
-                setPlaceType(value)
-              }}
-              buttons={[
-                { label: 'Place', value: 'PLACE', disabled: saving, style: { flex: 1, } },
-                { label: 'Address', value: 'ADDRESS', disabled: saving, style: { flex: 1, } },
-              ]} />
-            <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
-              <GooglePlacesAutocomplete
-                renderDescription={(row) => row.description}
-                suppressDefaultStyles={true}
-                keepResultsAfterBlur={true}
-                debounce={200}
-                placeholder='Add location'
-                query={{
-                  key: loginContext.Credentials.GoogleCloudApiKey,
-                  language: 'en',
-                  type: placeTypeMap[placeType]!.queryType,
+          {place &&
+            <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
+              <View style={{ flexDirection: 'column', flexGrow: 1 }}>
+                <Text variant="bodyLarge">
+                  {place.data.structured_formatting.main_text}
+                </Text>
+                <Text variant="bodySmall">
+                  {place.data.structured_formatting.secondary_text}
+                </Text>
+              </View>
+              <View style={{ alignSelf: 'flex-start', marginLeft: 'auto', marginRight: 0 }}>
+                <IconButton
+                  style={{ margin: 0 }}
+                  disabled={saving}
+                  size={20}
+                  icon='close'
+                  onPress={() => setPlace(null)} />
+              </View>
+            </View>
+          }
+          {!place &&
+            <View style={{ flexDirection: 'column', flexGrow: 1, marginRight: 32 }}>
+              <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
+                Adding a location will help participants to plan better for it.
+              </Text>
+              <SegmentedButtons
+                style={{ marginBottom: 12 }}
+                value={placeType}
+                onValueChange={(value) => {
+                  setPlaceType(value)
                 }}
-                styles={{
-                  container: {
-                    width: '100%',
-                  },
-                  row: {
-                    paddingVertical: 6,
-                    alignContent: 'center',
-                    justifyContent: 'center',
-                    elevation: 2,
-                  },
-                  listView: [styles.text, {
-                    paddingHorizontal: 12,
-                    borderRadius: theme.roundness,
-                    borderWidth: 1,
-                    borderColor: theme.colors.primary,
-                  }],
-                  textInputContainer: {
-                    paddingHorizontal: 12,
-                    borderRadius: theme.roundness,
-                    borderWidth: 1,
-                    borderColor: theme.colors.inverseSurface,
-                    backgroundColor: theme.colors.background,
-                  },
-                  textInput: [styles.textInput, {
-                  }],
-                }}
-                enablePoweredByContainer={false}
-                fetchDetails={true}
-                onPress={(data, detail = null) => setPlace({ data, detail })}
-                onFail={setError} />
-            </ScrollView>
-          </View>
-        }
-        <Divider style={{ marginVertical: 12 }} />
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableRipple onPress={() => showDatePicker('start', 'date')} style={{ padding: 12 }}>
-            <Text variant="bodyLarge">{formatDate(startDate)}</Text>
-          </TouchableRipple>
-          <TouchableRipple onPress={() => showDatePicker('start', 'time')} style={{ padding: 12, marginLeft: 'auto' }}>
-            <Text variant="bodyLarge">{formatTime(startDate)}</Text>
-          </TouchableRipple>
+                buttons={[
+                  { label: 'Place', value: 'PLACE', disabled: saving, style: { flex: 1, } },
+                  { label: 'Address', value: 'ADDRESS', disabled: saving, style: { flex: 1, } },
+                ]} />
+              <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
+                <GooglePlacesAutocomplete
+                  renderDescription={(row) => row.description}
+                  suppressDefaultStyles={true}
+                  keepResultsAfterBlur={true}
+                  debounce={200}
+                  placeholder='Add location'
+                  query={{
+                    key: loginContext.Credentials.GoogleCloudApiKey,
+                    language: 'en',
+                    type: placeTypeMap[placeType]!.queryType,
+                  }}
+                  styles={{
+                    container: {
+                      width: '100%',
+                    },
+                    row: {
+                      paddingVertical: 6,
+                      alignContent: 'center',
+                      justifyContent: 'center',
+                      elevation: 2,
+                    },
+                    listView: [styles.text, {
+                      paddingHorizontal: 12,
+                      borderRadius: theme.roundness,
+                      borderWidth: 1,
+                      borderColor: theme.colors.primary,
+                    }],
+                    textInputContainer: {
+                      paddingHorizontal: 12,
+                      borderRadius: theme.roundness,
+                      borderWidth: 1,
+                      borderColor: theme.colors.inverseSurface,
+                      backgroundColor: theme.colors.background,
+                    },
+                    textInput: styles.textInput,
+                  }}
+                  enablePoweredByContainer={false}
+                  fetchDetails={true}
+                  onPress={(data, detail = null) => setPlace({ data, detail })}
+                  onFail={setError} />
+              </ScrollView>
+            </View>
+          }
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableRipple onPress={() => showDatePicker('end', 'date')} style={{ padding: 12 }}>
-            <Text variant="bodyLarge">{formatDate(endDate)}</Text>
-          </TouchableRipple>
-          <TouchableRipple onPress={() => showDatePicker('end', 'time')} style={{ padding: 12, marginLeft: 'auto' }}>
-            <Text variant="bodyLarge">{formatTime(endDate)}</Text>
-          </TouchableRipple>
+        <Divider style={{ marginVertical: 12 }} />
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ alignSelf: 'flex-start' }}>
+            <MaterialIcons name={'access-time'} size={32} color={theme.colors.primary} />
+          </View>
+          <View style={{ flexDirection: 'column', flexGrow: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableRipple onPress={() => showDatePicker('start', 'date')} style={{ padding: 6 }}>
+                <Text variant="bodyLarge">{formatDate(startDate)}</Text>
+              </TouchableRipple>
+              <TouchableRipple onPress={() => showDatePicker('start', 'time')} style={{ padding: 6, marginLeft: 'auto' }}>
+                <Text variant="bodyLarge">{formatTime(startDate)}</Text>
+              </TouchableRipple>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableRipple onPress={() => showDatePicker('end', 'date')} style={{ padding: 6 }}>
+                <Text variant="bodyLarge">{formatDate(endDate)}</Text>
+              </TouchableRipple>
+              <TouchableRipple onPress={() => showDatePicker('end', 'time')} style={{ padding: 6, marginLeft: 'auto' }}>
+                <Text variant="bodyLarge">{formatTime(endDate)}</Text>
+              </TouchableRipple>
+            </View>
+          </View>
         </View>
         <HelperText
           type="error"

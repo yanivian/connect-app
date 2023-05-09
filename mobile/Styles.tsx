@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     fontSize: 16,
+    height: 48,
   },
   profileImageContainer: {
     width: 118,
