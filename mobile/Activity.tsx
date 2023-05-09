@@ -1,7 +1,8 @@
+import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import React, { useContext, useState } from 'react'
-import { ScrollView, View } from 'react-native'
-import { DescriptionRow, GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import { Button, Divider, HelperText, IconButton, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper'
+import { Platform, ScrollView, View } from 'react-native'
+import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
+import { Button, Divider, HelperText, IconButton, SegmentedButtons, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { LoginContext, UserModelContext } from './Contexts'
 import { LoadingAnimation, Section } from './Layouts'
@@ -53,6 +54,48 @@ const Activity = (props: ActivityProps): JSX.Element => {
   const theme = useTheme()
   const title = !!props.activity ? (props.clone ? 'Clone' : 'Edit') : 'New'
 
+  const initialStartDate = new Date(Date.now() + 1_800_000)
+  initialStartDate.setMinutes(initialStartDate.getMinutes() >= 30 ? 30 : 0)
+  initialStartDate.setSeconds(0)
+  initialStartDate.setMilliseconds(0)
+  const initialEndDate = new Date(initialStartDate.getTime() + 3_600_000)
+
+  const [startDate, setStartDate] = useState(initialStartDate)
+  const [endDate, setEndDate] = useState(initialEndDate)
+
+  function onStartDateChange(unused: DateTimePickerEvent, selectedValue: Date | undefined) {
+    if (!selectedValue) {
+      return
+    }
+    const deltaMillis = selectedValue.getTime() - startDate.getTime()
+    setStartDate(selectedValue)
+    setEndDate(new Date(endDate.getTime() + deltaMillis))
+  }
+
+  function onEndDateChange(unused: DateTimePickerEvent, selectedValue: Date | undefined) {
+    if (!selectedValue) {
+      return
+    }
+    setEndDate(selectedValue)
+  }
+
+  function showDatePicker(which: 'start' | 'end', mode: 'date' | 'time') {
+    DateTimePickerAndroid.open({
+      value: which === 'start' ? startDate : endDate,
+      onChange: which === 'start' ? onStartDateChange : onEndDateChange,
+      mode,
+      is24Hour: false,
+    })
+  }
+
+  function formatDate(date: Date) {
+    return date.toLocaleDateString('en-us', { weekday: "short", year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
+  function formatTime(date: Date) {
+    return date.toLocaleTimeString('en-us', { hour: 'numeric', minute: '2-digit' })
+  }
+
   return (
     <Section title={`${title} activity`} close={{ icon: 'close', callback: props.close }}>
       <View>
@@ -95,7 +138,7 @@ const Activity = (props: ActivityProps): JSX.Element => {
         {!place &&
           <View>
             <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
-              Adding a location will help participants to better plan for it.
+              Adding a location will help participants to plan better for it.
             </Text>
             <SegmentedButtons
               style={{ marginBottom: 12 }}
@@ -152,6 +195,23 @@ const Activity = (props: ActivityProps): JSX.Element => {
             </ScrollView>
           </View>
         }
+        <Divider style={{ marginVertical: 12 }} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableRipple onPress={() => showDatePicker('start', 'date')} style={{ padding: 12 }}>
+            <Text variant="bodyLarge">{formatDate(startDate)}</Text>
+          </TouchableRipple>
+          <TouchableRipple onPress={() => showDatePicker('start', 'time')} style={{ padding: 12, marginLeft: 'auto' }}>
+            <Text variant="bodyLarge">{formatTime(startDate)}</Text>
+          </TouchableRipple>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableRipple onPress={() => showDatePicker('end', 'date')} style={{ padding: 12 }}>
+            <Text variant="bodyLarge">{formatDate(endDate)}</Text>
+          </TouchableRipple>
+          <TouchableRipple onPress={() => showDatePicker('end', 'time')} style={{ padding: 12, marginLeft: 'auto' }}>
+            <Text variant="bodyLarge">{formatTime(endDate)}</Text>
+          </TouchableRipple>
+        </View>
         <HelperText
           type="error"
           visible={!!error}>
