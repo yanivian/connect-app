@@ -1,13 +1,5 @@
 /** This file exports the various model interfaces and types pertinent to the app. */
 
-export interface LocationModel {
-  ID: string
-  Name: string
-  Address: string
-  Latitude: number
-  Longitude: number
-}
-
 export interface ActivityModel {
   ID: string
   CreatedTimestampMillis: number
@@ -17,10 +9,25 @@ export interface ActivityModel {
   EndTimestampMillis: number
 }
 
+export interface FaqModel {
+  Questions: Array<{
+    Topic: string
+    Question: string
+    Answers: Array<string>
+  }>
+}
 export interface ImageModel {
   ID: string
   CreatedTimestampMillis: number
   URL: string
+}
+
+export interface LocationModel {
+  ID: string
+  Name: string
+  Address: string
+  Latitude: number
+  Longitude: number
 }
 
 export interface LoginContextModel {
@@ -47,12 +54,4 @@ export interface UserModel {
   phoneNumber: string
   getIdToken: () => Promise<string>
   signOut: () => Promise<void>
-}
-
-export interface FaqModel {
-  Questions: Array<{
-    Topic: string
-    Question: string
-    Answers: Array<string>
-  }>
 }
