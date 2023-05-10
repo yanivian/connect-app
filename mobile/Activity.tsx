@@ -2,11 +2,11 @@ import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@rea
 import React, { useContext, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
 import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import { Button, Divider, HelperText, IconButton, SegmentedButtons, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
+import { Button, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { LoginContext, UserModelContext } from './Contexts'
 import { LoadingAnimation, Section } from './Layouts'
-import { ActivityModel } from './Models'
+import { ActivityModel, LocationModel } from './Models'
 import styles from './Styles'
 
 interface ActivityProps {
@@ -20,33 +20,12 @@ interface ActivityProps {
   close: () => void
 }
 
-interface Place {
-  data: GooglePlaceData
-  detail: GooglePlaceDetail | null
-}
-
-type PlaceTypeMap = {
-  [placeType: string]: {
-    queryType: string
-  }
-}
-
-const placeTypeMap: PlaceTypeMap = {
-  'PLACE': {
-    queryType: 'establishment',
-  },
-  'ADDRESS': {
-    queryType: 'address',
-  }
-}
-
 const Activity = (props: ActivityProps): JSX.Element => {
   const user = useContext(UserModelContext)!
   const loginContext = useContext(LoginContext)!
 
   const [name, setName] = useState<string | null>(props.activity?.Name || null)
-  const [placeType, setPlaceType] = useState<string>('PLACE')
-  const [place, setPlace] = useState<Place | null>()
+  const [location, setLocation] = useState<LocationModel | null>(props.activity?.Location || null)
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>()
@@ -54,20 +33,13 @@ const Activity = (props: ActivityProps): JSX.Element => {
   const theme = useTheme()
   const title = !!props.activity ? (props.clone ? 'Clone' : 'Edit') : 'New'
 
-  const initialStartDate = new Date(Date.now() + 1_800_000)
-  initialStartDate.setMinutes(initialStartDate.getMinutes() >= 30 ? 30 : 0)
-  initialStartDate.setSeconds(0)
-  initialStartDate.setMilliseconds(0)
-  const initialEndDate = new Date(initialStartDate.getTime() + 3_600_000)
+  const initialStartDateMillis = Math.trunc(Date.now() / 1_800_000) * 1_800_000 + 1_800_000
+  const initialEndDateMillis = initialStartDateMillis + 3_600_000
 
-  const [startDate, setStartDate] = useState(initialStartDate)
-  const [endDate, setEndDate] = useState(initialEndDate)
-  const [startOrEnd, setStartOrEnd] = useState<'start' | 'end' | undefined>()
-  const [dateOrTime, setDateOrTime] = useState<'date' | 'time' | undefined>()
+  const [startDate, setStartDate] = useState(new Date(props.activity?.StartTimestampMillis || initialStartDateMillis))
+  const [endDate, setEndDate] = useState(new Date(props.activity?.EndTimestampMillis || initialEndDateMillis))
 
   function onStartDateChange(unused: DateTimePickerEvent, selectedValue: Date | undefined) {
-    setStartOrEnd(undefined)
-    setDateOrTime(undefined)
     if (selectedValue) {
       const deltaMillis = selectedValue.getTime() - startDate.getTime()
       setStartDate(selectedValue)
@@ -76,8 +48,6 @@ const Activity = (props: ActivityProps): JSX.Element => {
   }
 
   function onEndDateChange(unused: DateTimePickerEvent, selectedValue: Date | undefined) {
-    setStartOrEnd(undefined)
-    setDateOrTime(undefined)
     if (selectedValue) {
       setEndDate(selectedValue)
     }
@@ -120,14 +90,14 @@ const Activity = (props: ActivityProps): JSX.Element => {
           <View style={{ alignSelf: 'flex-start' }}>
             <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
           </View>
-          {place &&
+          {location &&
             <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
               <View style={{ flexDirection: 'column', flexGrow: 1 }}>
                 <Text variant="bodyLarge">
-                  {place.data.structured_formatting.main_text}
+                  {location.Name}
                 </Text>
                 <Text variant="bodySmall">
-                  {place.data.structured_formatting.secondary_text}
+                  {location.Address}
                 </Text>
               </View>
               <View style={{ alignSelf: 'flex-start', marginLeft: 'auto', marginRight: 0 }}>
@@ -136,25 +106,15 @@ const Activity = (props: ActivityProps): JSX.Element => {
                   disabled={saving}
                   size={20}
                   icon='close'
-                  onPress={() => setPlace(null)} />
+                  onPress={() => setLocation(null)} />
               </View>
             </View>
           }
-          {!place &&
+          {!location &&
             <View style={{ flexDirection: 'column', flexGrow: 1, marginRight: 32 }}>
               <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
                 Adding a location will help participants to plan better for it.
               </Text>
-              <SegmentedButtons
-                style={{ marginBottom: 12 }}
-                value={placeType}
-                onValueChange={(value) => {
-                  setPlaceType(value)
-                }}
-                buttons={[
-                  { label: 'Place', value: 'PLACE', disabled: saving, style: { flex: 1, } },
-                  { label: 'Address', value: 'ADDRESS', disabled: saving, style: { flex: 1, } },
-                ]} />
               <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
                 <GooglePlacesAutocomplete
                   renderDescription={(row) => row.description}
@@ -165,7 +125,6 @@ const Activity = (props: ActivityProps): JSX.Element => {
                   query={{
                     key: loginContext.Credentials.GoogleCloudApiKey,
                     language: 'en',
-                    type: placeTypeMap[placeType]!.queryType,
                   }}
                   styles={{
                     container: {
@@ -194,7 +153,15 @@ const Activity = (props: ActivityProps): JSX.Element => {
                   }}
                   enablePoweredByContainer={false}
                   fetchDetails={true}
-                  onPress={(data, detail = null) => setPlace({ data, detail })}
+                  onPress={(data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
+                    setLocation({
+                      ID: data.place_id,
+                      Name: detail!.name,
+                      Address: detail!.formatted_address,
+                      Latitude: detail!.geometry!.location!.lat,
+                      Longitude: detail!.geometry!.location!.lng,
+                    })
+                  }}
                   onFail={setError} />
               </ScrollView>
             </View>

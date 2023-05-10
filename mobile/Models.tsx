@@ -1,9 +1,20 @@
 /** This file exports the various model interfaces and types pertinent to the app. */
 
+export interface LocationModel {
+  ID: string
+  Name: string
+  Address: string
+  Latitude: number
+  Longitude: number
+}
+
 export interface ActivityModel {
   ID: string
   CreatedTimestampMillis: number
   Name: string
+  Location?: LocationModel
+  StartTimestampMillis: number
+  EndTimestampMillis: number
 }
 
 export interface ImageModel {
