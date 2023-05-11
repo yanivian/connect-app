@@ -2,18 +2,53 @@ import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@rea
 import React, { useContext, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
 import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import { Button, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
+import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { LoginContext, UserModelContext } from './Contexts'
 import { LoadingAnimation, Section } from './Layouts'
 import { ActivityModel, LocationModel } from './Models'
 import styles from './Styles'
 
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-us', { weekday: "short", year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+function formatTime(date: Date) {
+  return date.toLocaleTimeString('en-us', { hour: 'numeric', minute: '2-digit' })
+}
+
+// Activity Card
+
+interface ActivityCardProps {
+  activity: ActivityModel
+  editActivity: (activity: ActivityModel) => void
+}
+
+export const ActivityCard = (props: ActivityCardProps): JSX.Element => {
+  const startDate = new Date(props.activity.StartTimestampMillis)
+  return (
+    <Card style={{ marginBottom: 12 }} onPress={() => props.editActivity(props.activity)}>
+      <Card.Title title={props.activity.Name} />
+      <Card.Content>
+        {props.activity.Location &&
+          <View>
+            <Text variant="bodyLarge">{props.activity.Location.Name}</Text>
+            <Text variant="bodyMedium">{props.activity.Location.Address}</Text>
+          </View>
+        }
+        <Text variant="bodyLarge">{`${formatDate(startDate)} at ${formatTime(startDate)}`}</Text>
+      </Card.Content>
+    </Card>
+  )
+}
+
+// Activity (Page)
+
 interface ActivityProps {
   // The activity being edited, if any.
-  activity?: ActivityModel | undefined
+  activity: ActivityModel | null
   // If an activity is provided, indicates whether changes should be saved as a new activity.
-  clone?: boolean | undefined
+  clone?: boolean
   // Callback when saving an activity.
   setActivity: (activity: ActivityModel) => void
   // Callback to close the component.
@@ -62,35 +97,117 @@ const Activity = (props: ActivityProps): JSX.Element => {
     })
   }
 
-  function formatDate(date: Date) {
-    return date.toLocaleDateString('en-us', { weekday: "short", year: 'numeric', month: 'short', day: 'numeric' })
-  }
-
-  function formatTime(date: Date) {
-    return date.toLocaleTimeString('en-us', { hour: 'numeric', minute: '2-digit' })
-  }
-
   return (
     <Section title={`${title} activity`} close={{ icon: 'close', callback: props.close }}>
       <View>
-        <TextInput
-          style={[styles.textInput, {
-            marginBottom: 12,
-          }]}
-          mode='outlined'
-          label='Name'
-          value={name || ''}
-          onChangeText={setName}
-          autoCapitalize='words'
-          autoComplete='off'
-          inputMode='text'
-          disabled={saving} />
-        <Divider style={{ marginBottom: 12 }} />
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ alignSelf: 'flex-start' }}>
-            <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
+        {/* Name of the activity. */}
+        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+          <View style={{ alignSelf: 'center', marginRight: 6 }}>
+            <MaterialIcons name={'event'} size={32} color={theme.colors.primary} />
           </View>
-          {location &&
+          <View style={{ flexGrow: 1 }}>
+            <TextInput
+              style={[styles.textInput, {
+                backgroundColor: theme.colors.backdrop,
+              }]}
+              mode='flat'
+              placeholder='Play Date'
+              value={name || ''}
+              onChangeText={setName}
+              autoCapitalize='words'
+              autoComplete='off'
+              inputMode='text'
+              disabled={saving} />
+          </View>
+        </View>
+
+        <Divider style={{ marginVertical: 12 }} />
+
+        {/* Start and end date and times. */}
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ alignSelf: 'center', marginRight: 6 }}>
+            <MaterialIcons name={'access-time'} size={32} color={theme.colors.primary} />
+          </View>
+          <View style={{ flexDirection: 'column', flexGrow: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ padding: 6 }}>
+                {Platform.OS === 'android' &&
+                  <TouchableRipple
+                    onPress={() => showDatePicker('start', 'date')}
+                    disabled={saving}>
+                    <Text variant="bodyLarge">{formatDate(startDate)}</Text>
+                  </TouchableRipple>
+                }
+                {Platform.OS == 'ios' &&
+                  <DateTimePicker
+                    value={startDate}
+                    onChange={onStartDateChange}
+                    mode={'date'}
+                    disabled={saving} />
+                }
+              </View>
+              <View style={{ padding: 6, marginLeft: 'auto' }}>
+                {Platform.OS === 'android' &&
+                  <TouchableRipple
+                    onPress={() => showDatePicker('start', 'time')}
+                    disabled={saving}>
+                    <Text variant="bodyLarge">{formatTime(startDate)}</Text>
+                  </TouchableRipple>
+                }
+                {Platform.OS == 'ios' &&
+                  <DateTimePicker
+                    value={startDate}
+                    onChange={onStartDateChange}
+                    mode={'time'}
+                    disabled={saving} />
+                }
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ padding: 6 }}>
+                {Platform.OS === 'android' &&
+                  <TouchableRipple
+                    onPress={() => showDatePicker('end', 'date')}
+                    disabled={saving}>
+                    <Text variant="bodyLarge">{formatDate(endDate)}</Text>
+                  </TouchableRipple>
+                }
+                {Platform.OS == 'ios' &&
+                  <DateTimePicker
+                    value={endDate}
+                    onChange={onEndDateChange}
+                    mode={'date'}
+                    disabled={saving} />
+                }
+              </View>
+              <View style={{ padding: 6, marginLeft: 'auto' }}>
+                {Platform.OS === 'android' &&
+                  <TouchableRipple
+                    onPress={() => showDatePicker('end', 'time')}
+                    disabled={saving}>
+                    <Text variant="bodyLarge">{formatTime(endDate)}</Text>
+                  </TouchableRipple>
+                }
+                {Platform.OS == 'ios' &&
+                  <DateTimePicker
+                    value={endDate}
+                    onChange={onEndDateChange}
+                    mode={'time'}
+                    disabled={saving} />
+                }
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <Divider style={{ marginTop: 12, marginBottom: 24 }} />
+
+        {/* Location added. */}
+        {location &&
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ alignSelf: 'center', marginRight: 6 }}>
+              <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
+            </View>
             <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
               <View style={{ flexDirection: 'column', flexGrow: 1 }}>
                 <Text variant="bodyLarge">
@@ -109,12 +226,16 @@ const Activity = (props: ActivityProps): JSX.Element => {
                   onPress={() => setLocation(null)} />
               </View>
             </View>
-          }
-          {!location &&
-            <View style={{ flexDirection: 'column', flexGrow: 1, marginRight: 32 }}>
-              <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
-                Adding a location will help participants to plan better for it.
-              </Text>
+          </View>
+        }
+
+        {/* Location not added. */}
+        {!location &&
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ alignSelf: 'center', marginRight: 6 }}>
+              <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
+            </View>
+            <View style={{ flexGrow: 1 }}>
               <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
                 <GooglePlacesAutocomplete
                   renderDescription={(row) => row.description}
@@ -165,72 +286,9 @@ const Activity = (props: ActivityProps): JSX.Element => {
                   onFail={setError} />
               </ScrollView>
             </View>
-          }
-        </View>
-        <Divider style={{ marginVertical: 12 }} />
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ alignSelf: 'flex-start' }}>
-            <MaterialIcons name={'access-time'} size={32} color={theme.colors.primary} />
           </View>
-          <View style={{ flexDirection: 'column', flexGrow: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ padding: 6 }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple onPress={() => showDatePicker('start', 'date')}>
-                    <Text variant="bodyLarge">{formatDate(startDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={startDate}
-                    onChange={onStartDateChange}
-                    mode={'date'} />
-                }
-              </View>
-              <View style={{ padding: 6, marginLeft: 'auto' }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple onPress={() => showDatePicker('start', 'time')}>
-                    <Text variant="bodyLarge">{formatTime(startDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={startDate}
-                    onChange={onStartDateChange}
-                    mode={'time'} />
-                }
-              </View>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ padding: 6 }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple onPress={() => showDatePicker('end', 'date')}>
-                    <Text variant="bodyLarge">{formatDate(endDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={endDate}
-                    onChange={onEndDateChange}
-                    mode={'date'} />
-                }
-              </View>
-              <View style={{ padding: 6, marginLeft: 'auto' }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple onPress={() => showDatePicker('end', 'time')}>
-                    <Text variant="bodyLarge">{formatTime(endDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={endDate}
-                    onChange={onEndDateChange}
-                    mode={'time'} />
-                }
-              </View>
-            </View>
-          </View>
-        </View>
+        }
+
         <HelperText
           type="error"
           visible={!!error}>
@@ -240,7 +298,20 @@ const Activity = (props: ActivityProps): JSX.Element => {
           mode="contained"
           style={[styles.button, { marginBottom: 12 }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => setSaving(true)}
+          onPress={() => {
+            // TODO: Persist activity.
+            const nowMillis = Date.now()
+            props.setActivity({
+              ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
+              CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
+              Name: name || 'Play Date',
+              Location: location || undefined,
+              StartTimestampMillis: startDate.getTime(),
+              EndTimestampMillis: endDate.getTime(),
+              LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
+            })
+            props.close()
+          }}
           disabled={saving}>
           Save
         </Button>

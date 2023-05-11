@@ -7,6 +7,7 @@ export interface ActivityModel {
   Location?: LocationModel
   StartTimestampMillis: number
   EndTimestampMillis: number
+  LastUpdatedTimestampMillis: number | null
 }
 
 export interface FaqModel {

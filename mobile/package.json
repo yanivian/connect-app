@@ -20,7 +20,6 @@
     "openai": "^3.2.1",
     "react": "18.2.0",
     "react-native": "0.71.6",
-    "react-native-calendars": "^1.1295.0",
     "react-native-clean-project": "^4.0.1",
     "react-native-google-places-autocomplete": "^2.5.1",
     "react-native-paper": "^5.7.0",

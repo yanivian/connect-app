@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { Dimensions, View } from 'react-native'
 import { Banner, Button, FAB, Portal, Text } from 'react-native-paper'
-import Activity from './Activity'
+import Activity, { ActivityCard } from './Activity'
 import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
+import { ActivityModel } from './Models'
 import Profile from './Profile'
 import styles from './Styles'
 
@@ -16,10 +17,14 @@ enum Route {
 const Home = (): JSX.Element => {
   const user = useContext(UserModelContext)!
   const loginContext = useContext(LoginContext)!
+  const { width } = Dimensions.get('window')
 
   // State with which to override the profile available to its children.
   const [profile, setProfile] = useState(loginContext.Profile)
   const isProfileComplete = !!profile.Name && !!profile.Image
+
+  // Update visibility state of the banner when profile completion state changes.
+  useEffect(() => setShowIncompleteProfileBanner(!isProfileComplete), [isProfileComplete])
 
   // State capturing whether the banner for incomplete profile should be shown.
   const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
@@ -55,8 +60,26 @@ const Home = (): JSX.Element => {
     setNavStack(nextNavStack)
   }
 
-  // Update visibility state of the banner when profile completion state changes.
-  useEffect(() => setShowIncompleteProfileBanner(!isProfileComplete), [isProfileComplete])
+  // State capturing my activities.
+  const [myActivities, setMyActivities] = useState<Array<ActivityModel>>([])
+  const [selectedActivity, setSelectedActivity] = useState<ActivityModel | null>(null)
+
+  function mergeActivity(myNewActivity: ActivityModel) {
+    const activities: Array<ActivityModel> = []
+    let found = false
+    for (const activity of myActivities) {
+      if (activity.ID === myNewActivity.ID) {
+        activities.push(myNewActivity)
+        found = true
+      } else {
+        activities.push(activity)
+      }
+    }
+    if (!found) {
+      activities.push(myNewActivity)
+    }
+    setMyActivities(activities)
+  }
 
   return (
     <ProfileModelContext.Provider value={profile}>
@@ -83,9 +106,23 @@ const Home = (): JSX.Element => {
               icon="alert-circle-outline">
               Your profile is incomplete. Please pick a name and avatar.
             </Banner>
-            <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
-              This is where you will see your activities, once you create them.
-            </Text>
+            {myActivities.length === 0 &&
+              <Text style={styles.text} variant="bodyLarge">
+                This is where you will see your activities, once you create them.
+              </Text>
+            }
+            {myActivities.map((thisActivity) => {
+              return (
+                <ActivityCard
+                  key={thisActivity.ID}
+                  activity={thisActivity}
+                  editActivity={(activity) => {
+                    setSelectedActivity(activity)
+                    navigateForward(Route.Activity)
+                  }} />
+
+              )
+            })}
             <View style={{ flexDirection: 'row' }}>
               <View style={{ flex: 1, marginEnd: 12 }}>
                 <Button style={styles.button} labelStyle={[styles.buttonLabel]} mode="contained-tonal" onPress={() => navigateForward(Route.Profile)}>
@@ -124,8 +161,12 @@ const Home = (): JSX.Element => {
         }
         {isCurrentRoute(Route.Activity) &&
           <Activity
-            setActivity={(activity) => console.log('TODO create activity: ' + activity)}
-            close={navigateBack} />
+            activity={selectedActivity}
+            setActivity={mergeActivity}
+            close={() => {
+              setSelectedActivity(null)
+              navigateBack()
+            }} />
         }
       </Page>
     </ProfileModelContext.Provider>

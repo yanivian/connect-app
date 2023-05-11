@@ -31,7 +31,7 @@ type SectionProps = PropsWithChildren<{
 export const Section = (props: SectionProps) => {
   return (
     <Surface style={styles.section} elevation={4}>
-      <View style={[styles.sectionTitle, { flexDirection: 'row', alignItems: 'center', height: 60 }]}>
+      <View style={styles.sectionTitle}>
         <Text style={{ flexGrow: 1 }} variant="titleLarge">
           {props.title}
         </Text>
