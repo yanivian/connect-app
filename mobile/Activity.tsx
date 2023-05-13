@@ -1,5 +1,5 @@
 import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker'
-import React, { useContext, useState } from 'react'
+import React, { memo, useContext, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
 import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
@@ -21,43 +21,76 @@ function formatTime(date: Date) {
 
 interface ActivityCardProps {
   activity: ActivityModel
-  editActivity: (activity: ActivityModel) => void
+  cloneActivity?: (activity: ActivityModel) => void
+  deleteActivity?: (activity: ActivityModel) => void
+  editActivity?: (activity: ActivityModel) => void
 }
 
 export const ActivityCard = (props: ActivityCardProps): JSX.Element => {
+  const theme = useTheme()
   const startDate = new Date(props.activity.StartTimestampMillis)
   return (
-    <Card style={{ marginBottom: 12 }} onPress={() => props.editActivity(props.activity)}>
-      <Card.Title title={props.activity.Name} />
+    <Card style={{ marginBottom: 12 }}>
+      <Card.Title title={`${formatDate(startDate)} at ${formatTime(startDate)}`} />
       <Card.Content>
+        <Text variant="titleMedium">{props.activity.Name}</Text>
         {props.activity.Location &&
-          <View>
-            <Text variant="bodyLarge">{props.activity.Location.Name}</Text>
-            <Text variant="bodyMedium">{props.activity.Location.Address}</Text>
-          </View>
+          <Text variant="bodySmall">{props.activity.Location.Name}</Text>
         }
-        <Text variant="bodyLarge">{`${formatDate(startDate)} at ${formatTime(startDate)}`}</Text>
       </Card.Content>
+      <Card.Actions>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {props.activity.Location &&
+            <IconButton
+              icon="directions"
+              mode="contained"
+              onPress={() => console.log("TODO directions")}
+              style={{
+                backgroundColor: theme.colors.primaryContainer,
+              }} />
+          }
+          {props.editActivity &&
+            <IconButton
+              icon="pencil"
+              mode="contained"
+              onPress={() => props.editActivity && props.editActivity(props.activity)} />
+          }
+          {props.cloneActivity &&
+            <IconButton
+              icon="content-copy"
+              mode="contained"
+              onPress={() => props.cloneActivity && props.cloneActivity(props.activity)} />
+          }
+          {props.deleteActivity &&
+            <IconButton
+              icon="delete"
+              mode="contained"
+              onPress={() => props.deleteActivity && props.deleteActivity(props.activity)} />
+          }
+        </ScrollView>
+      </Card.Actions>
     </Card>
   )
 }
 
-// Activity (Page)
+// Activity (Component)
 
-interface ActivityProps {
+export interface ActivityProps {
   // The activity being edited, if any.
-  activity: ActivityModel | null
-  // If an activity is provided, indicates whether changes should be saved as a new activity.
+  activity?: ActivityModel
+  // If an activity is provided, indicates whether saving should clone the activity or overwrite/edit it.
   clone?: boolean
-  // Callback when saving an activity.
-  setActivity: (activity: ActivityModel) => void
-  // Callback to close the component.
-  close: () => void
 }
 
-const Activity = (props: ActivityProps): JSX.Element => {
+const Activity = (props: ActivityProps & {
+  // Callback to save an activity.
+  save: (activity: ActivityModel) => void
+  // Callback to close this activity component if it is the current route.
+  close: () => void
+}): JSX.Element => {
   const user = useContext(UserModelContext)!
   const loginContext = useContext(LoginContext)!
+  const theme = useTheme()
 
   const [name, setName] = useState<string | null>(props.activity?.Name || null)
   const [location, setLocation] = useState<LocationModel | null>(props.activity?.Location || null)
@@ -65,7 +98,6 @@ const Activity = (props: ActivityProps): JSX.Element => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>()
 
-  const theme = useTheme()
   const title = !!props.activity ? (props.clone ? 'Clone' : 'Edit') : 'New'
 
   const initialStartDateMillis = Math.trunc(Date.now() / 1_800_000) * 1_800_000 + 1_800_000
@@ -301,7 +333,7 @@ const Activity = (props: ActivityProps): JSX.Element => {
           onPress={() => {
             // TODO: Persist activity.
             const nowMillis = Date.now()
-            props.setActivity({
+            props.save({
               ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
               CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
               Name: name || 'Play Date',

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Dimensions, View } from 'react-native'
+import { View } from 'react-native'
 import { Banner, Button, FAB, Portal, Text } from 'react-native-paper'
-import Activity, { ActivityCard } from './Activity'
+import Activity, { ActivityCard, ActivityProps } from './Activity'
 import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import { ActivityModel } from './Models'
@@ -17,7 +17,6 @@ enum Route {
 const Home = (): JSX.Element => {
   const user = useContext(UserModelContext)!
   const loginContext = useContext(LoginContext)!
-  const { width } = Dimensions.get('window')
 
   // State with which to override the profile available to its children.
   const [profile, setProfile] = useState(loginContext.Profile)
@@ -62,28 +61,46 @@ const Home = (): JSX.Element => {
 
   // State capturing my activities.
   const [myActivities, setMyActivities] = useState<Array<ActivityModel>>([])
-  const [selectedActivity, setSelectedActivity] = useState<ActivityModel | null>(null)
 
-  function mergeActivity(myNewActivity: ActivityModel) {
+  function mergeMyActivity(myActivity: ActivityModel) {
     const activities: Array<ActivityModel> = []
     let found = false
     for (const activity of myActivities) {
-      if (activity.ID === myNewActivity.ID) {
-        activities.push(myNewActivity)
+      if (activity.ID === myActivity.ID) {
+        activities.push(myActivity)
         found = true
       } else {
         activities.push(activity)
       }
     }
     if (!found) {
-      activities.push(myNewActivity)
+      activities.push(myActivity)
     }
     setMyActivities(activities)
+  }
+
+  function deleteActivity(activityID: string) {
+    const activities: Array<ActivityModel> = []
+    for (const activity of myActivities) {
+      if (activity.ID !== activityID) {
+        activities.push(activity)
+      }
+    }
+    setMyActivities(activities)
+  }
+
+  // State capturing a selected activity.
+  const [selectedActivity, setSelectedActivity] = useState<ActivityProps>()
+
+  function closeActivity() {
+    setSelectedActivity(undefined)
+    navigateBack()
   }
 
   return (
     <ProfileModelContext.Provider value={profile}>
       <Page>
+        {/* Home route */}
         {isCurrentRoute(Route.Home) &&
           <Section title="Home">
             <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
@@ -116,8 +133,19 @@ const Home = (): JSX.Element => {
                 <ActivityCard
                   key={thisActivity.ID}
                   activity={thisActivity}
+                  cloneActivity={(activity) => {
+                    setSelectedActivity({
+                      activity,
+                      clone: true,
+                    })
+                    navigateForward(Route.Activity)
+                  }}
+                  deleteActivity={(activity) => deleteActivity(activity.ID)}
                   editActivity={(activity) => {
-                    setSelectedActivity(activity)
+                    setSelectedActivity({
+                      activity,
+                      clone: false,
+                    })
                     navigateForward(Route.Activity)
                   }} />
 
@@ -144,13 +172,18 @@ const Home = (): JSX.Element => {
                   {
                     icon: 'run',
                     label: 'Activity',
-                    onPress: () => navigateForward(Route.Activity),
+                    onPress: () => {
+                      setSelectedActivity({})
+                      navigateForward(Route.Activity)
+                    },
                   },
                 ]}
                 onStateChange={({ open }) => setIsAddButtonPanelOpen(open)} />
             </Portal>
           </Section>
         }
+
+        {/* Profile route */}
         {isCurrentRoute(Route.Profile) &&
           <Profile
             setProfile={(updatedProfile) => {
@@ -159,14 +192,10 @@ const Home = (): JSX.Element => {
             }}
             close={navigateBack} />
         }
+
+        {/* Activity route */}
         {isCurrentRoute(Route.Activity) &&
-          <Activity
-            activity={selectedActivity}
-            setActivity={mergeActivity}
-            close={() => {
-              setSelectedActivity(null)
-              navigateBack()
-            }} />
+          <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
         }
       </Page>
     </ProfileModelContext.Provider>
