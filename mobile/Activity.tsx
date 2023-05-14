@@ -1,6 +1,6 @@
 import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker'
-import React, { memo, useContext, useState } from 'react'
-import { Platform, ScrollView, View } from 'react-native'
+import React, { useContext, useState } from 'react'
+import { Linking, Platform, ScrollView, View } from 'react-native'
 import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -15,6 +15,11 @@ function formatDate(date: Date) {
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString('en-us', { hour: 'numeric', minute: '2-digit' })
+}
+
+async function openGoogleMaps(location: LocationModel) {
+  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.Name)}&query_place_id=${location.ID}`
+  Linking.openURL(url)
 }
 
 // Activity Card
@@ -44,7 +49,7 @@ export const ActivityCard = (props: ActivityCardProps): JSX.Element => {
             <IconButton
               icon="directions"
               mode="contained"
-              onPress={() => console.log("TODO directions")}
+              onPress={async () => props.activity.Location && openGoogleMaps(props.activity.Location)}
               style={{
                 backgroundColor: theme.colors.primaryContainer,
               }} />
