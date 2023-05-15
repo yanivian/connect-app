@@ -17,6 +17,7 @@ export interface FaqModel {
     Answers: Array<string>
   }>
 }
+
 export interface ImageModel {
   ID: string
   CreatedTimestampMillis: number
@@ -33,6 +34,7 @@ export interface LocationModel {
 
 export interface LoginContextModel {
   IsFirstLogin: boolean
+  // Profile at the time of login. Use ProfileModelContext for more current profile.
   Profile: ProfileModel
   Credentials: {
     GoogleCloudApiKey: string,

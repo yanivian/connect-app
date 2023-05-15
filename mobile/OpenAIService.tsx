@@ -2,8 +2,9 @@
 import { Configuration, OpenAIApi } from 'openai'
 import { FaqModel } from './Models'
 
-interface FaqCompletionRequest {
-  activityDescription: string
+interface ActivityFaqCompletionRequest {
+  // Name of the activity, or proxy such as a placeholder.
+  name: string
 }
 
 export default class OpenAIService {
@@ -20,10 +21,11 @@ export default class OpenAIService {
     this.api_ = new OpenAIApi(this.config_)
   }
 
-  async completeFaq(req: FaqCompletionRequest): Promise<FaqModel> {
-    const query = `You provide ${req.activityDescription} as activity sessions your clients. What are the top 10 questions about the session that prospective clients may have in order to disambiguate or clarify the details and nature of the session? For each question, what are the top 5 applicable discrete answers or ranges of values? Do not include questions related to price, duration or schedule.`
+  async completeActivityFaq(req: ActivityFaqCompletionRequest): Promise<FaqModel> {
+    const context = `You provide "${req.name}" as an activity session to prospective clients.`
+    const query = `What are the top 10 questions about the session that prospective clients may have in order to better understand, disambiguate or clarify the details and nature of the session? For each question, what are the top 5 applicable discrete answers or ranges of values? Do not include questions related to location, duration or schedule.`
     const starter = `{"Questions": [{"Topic": "Sample","Question": "This is a sample question. What are the options?","Answers": ["A","B","C","D","E"]},{"Topic": "`
-    const prompt = `${query}\n\njson=${starter}`
+    const prompt = `${context}\n\n${query}\n\njson=${starter}`
     return this.api_.createCompletion({
       model: "text-davinci-003",
       prompt: prompt,
