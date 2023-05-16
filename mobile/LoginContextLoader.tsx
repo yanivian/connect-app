@@ -1,5 +1,4 @@
 import React, { PropsWithChildren, useContext, useEffect, useState } from 'react'
-import { Platform } from 'react-native'
 import { LoginContext, UserModelContext } from './Contexts'
 import FrontendService from './FrontendService'
 import { LoadingAnimation, Page, Section } from './Layouts'
@@ -14,11 +13,6 @@ const LoginContextLoader = (props: LoginContextLoaderProps): JSX.Element => {
 
   useEffect(() => {
     FrontendService.get(user).loginContext({
-      client: Platform.select({
-        ios: 'IOS',
-        android: 'ANDROID',
-        default: 'WEB',
-      }),
       phoneNumber: user.phoneNumber,
     }).then(setLoginContext).catch(setError)
   }, [])

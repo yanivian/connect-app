@@ -4,9 +4,11 @@ import { Linking, Platform, ScrollView, View } from 'react-native'
 import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import ActivityFaq from './ActivityFaq'
 import { LoginContext, UserModelContext } from './Contexts'
 import { LoadingAnimation, Section } from './Layouts'
-import { ActivityModel, LocationModel } from './Models'
+import { ActivityModel, FaqModel, LocationModel } from './Models'
+import OpenAIService from './OpenAIService'
 import styles from './Styles'
 
 function formatDate(date: Date) {
@@ -97,8 +99,12 @@ const Activity = (props: ActivityProps & {
   const loginContext = useContext(LoginContext)!
   const theme = useTheme()
 
+  const namePlaceholder = 'Play Date'
   const [name, setName] = useState<string | null>(props.activity?.Name || null)
-  const [location, setLocation] = useState<LocationModel | null>(props.activity?.Location || null)
+  const [location, setLocation] = useState<LocationModel | undefined>(props.activity?.Location)
+
+  const [faq, setFaq] = useState<FaqModel | null>()
+  const [generatingFaq, setGeneratingFaq] = useState(false)
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>()
@@ -134,6 +140,15 @@ const Activity = (props: ActivityProps & {
     })
   }
 
+  async function completeFaq() {
+    setGeneratingFaq(true)
+    OpenAIService.get(loginContext.Credentials.OpenAIApiKey)
+      .completeActivityFaq({ name: name || namePlaceholder })
+      .then(setFaq)
+      .catch(setError)
+      .finally(() => setGeneratingFaq(false))
+  }
+
   return (
     <Section title={`${title} activity`} close={{ icon: 'close', callback: props.close }}>
       <View>
@@ -162,7 +177,7 @@ const Activity = (props: ActivityProps & {
 
         {/* Start and end date and times. */}
         <View style={{ flexDirection: 'row' }}>
-          <View style={{ alignSelf: 'center', marginRight: 6 }}>
+          <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
             <MaterialIcons name={'access-time'} size={32} color={theme.colors.primary} />
           </View>
           <View style={{ flexDirection: 'column', flexGrow: 1 }}>
@@ -242,7 +257,7 @@ const Activity = (props: ActivityProps & {
         {/* Location added. */}
         {location &&
           <View style={{ flexDirection: 'row' }}>
-            <View style={{ alignSelf: 'center', marginRight: 6 }}>
+            <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
               <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
             </View>
             <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
@@ -260,7 +275,7 @@ const Activity = (props: ActivityProps & {
                   disabled={saving}
                   size={20}
                   icon='close'
-                  onPress={() => setLocation(null)} />
+                  onPress={() => setLocation(undefined)} />
               </View>
             </View>
           </View>
@@ -269,7 +284,7 @@ const Activity = (props: ActivityProps & {
         {/* Location not added. */}
         {!location &&
           <View style={{ flexDirection: 'row' }}>
-            <View style={{ alignSelf: 'center', marginRight: 6 }}>
+            <View style={{ alignSelf: 'flex-start', marginTop: 9, marginRight: 6 }}>
               <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
             </View>
             <View style={{ flexGrow: 1 }}>
@@ -326,33 +341,62 @@ const Activity = (props: ActivityProps & {
           </View>
         }
 
+        {/* FAQ */}
+        {faq &&
+          <View>
+            <Divider style={{ marginVertical: 24 }} />
+            <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+              <View style={{ alignSelf: 'flex-start', marginTop: 15, marginRight: 6 }}>
+                <MaterialIcons name={'info'} size={32} color={theme.colors.primary} />
+              </View>
+              <View style={{ flexGrow: 1 }}>
+                <ActivityFaq
+                  faq={faq}
+                  setFaq={setFaq} />
+              </View>
+            </View>
+          </View>
+        }
+
         <HelperText
           type="error"
           visible={!!error}>
           {error}
         </HelperText>
-        <Button
-          mode="contained"
-          style={[styles.button, { marginBottom: 12 }]}
-          labelStyle={styles.buttonLabel}
-          onPress={() => {
-            // TODO: Persist activity.
-            const nowMillis = Date.now()
-            props.save({
-              ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
-              CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
-              Name: name || 'Play Date',
-              Location: location || undefined,
-              StartTimestampMillis: startDate.getTime(),
-              EndTimestampMillis: endDate.getTime(),
-              LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
-            })
-            props.close()
-          }}
-          disabled={saving}>
-          Save
-        </Button>
-        {saving && <LoadingAnimation />}
+        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+          {!faq && <Button
+            icon={"sign-caution"}
+            mode="outlined"
+            style={[styles.button, { flex: 1, marginRight: 6 }]}
+            labelStyle={styles.buttonLabel}
+            onPress={completeFaq}
+            disabled={generatingFaq || saving}>
+            FAQ
+          </Button>
+          }
+          <Button
+            mode="contained"
+            style={[styles.button, { flex: 1 }]}
+            labelStyle={styles.buttonLabel}
+            onPress={() => {
+              // TODO: Persist activity.
+              const nowMillis = Date.now()
+              props.save({
+                ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
+                CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
+                Name: name || namePlaceholder,
+                Location: location || undefined,
+                StartTimestampMillis: startDate.getTime(),
+                EndTimestampMillis: endDate.getTime(),
+                LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
+              })
+              props.close()
+            }}
+            disabled={generatingFaq || saving}>
+            Save
+          </Button>
+        </View>
+        {(generatingFaq || saving) && <LoadingAnimation />}
       </View>
     </Section>
   )

@@ -9,7 +9,6 @@ interface AuthRequest {
 
 interface LoginContextRequest {
   phoneNumber: string,
-  client: string,
 }
 
 interface UpdateProfileRequest {
