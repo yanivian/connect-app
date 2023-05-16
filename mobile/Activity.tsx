@@ -6,9 +6,9 @@ import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, Touchab
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import ActivityFaq from './ActivityFaq'
 import { LoginContext, UserModelContext } from './Contexts'
+import GenerativeLanguageService from './GenerativeLanguageService'
 import { LoadingAnimation, Section } from './Layouts'
 import { ActivityModel, FaqModel, LocationModel } from './Models'
-import OpenAIService from './OpenAIService'
 import styles from './Styles'
 
 function formatDate(date: Date) {
@@ -103,7 +103,7 @@ const Activity = (props: ActivityProps & {
   const [name, setName] = useState<string | null>(props.activity?.Name || null)
   const [location, setLocation] = useState<LocationModel | undefined>(props.activity?.Location)
 
-  const [faq, setFaq] = useState<FaqModel | null>()
+  const [faq, setFaq] = useState<FaqModel | undefined>(props.activity?.Faq)
   const [generatingFaq, setGeneratingFaq] = useState(false)
 
   const [saving, setSaving] = useState(false)
@@ -142,8 +142,8 @@ const Activity = (props: ActivityProps & {
 
   async function completeFaq() {
     setGeneratingFaq(true)
-    OpenAIService.get(loginContext.Credentials.OpenAIApiKey)
-      .completeActivityFaq({ name: name || namePlaceholder })
+    GenerativeLanguageService.get(loginContext.Credentials.GoogleCloudApiKey)
+      .generateActivityFaq({ name: name || namePlaceholder })
       .then(setFaq)
       .catch(setError)
       .finally(() => setGeneratingFaq(false))
@@ -361,7 +361,7 @@ const Activity = (props: ActivityProps & {
         <HelperText
           type="error"
           visible={!!error}>
-          {error}
+          {JSON.stringify(error)}
         </HelperText>
         <View style={{ flexDirection: 'row', marginBottom: 12 }}>
           {!faq && <Button
@@ -379,18 +379,21 @@ const Activity = (props: ActivityProps & {
             style={[styles.button, { flex: 1 }]}
             labelStyle={styles.buttonLabel}
             onPress={() => {
+              setSaving(true)
               // TODO: Persist activity.
               const nowMillis = Date.now()
               props.save({
                 ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
                 CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
                 Name: name || namePlaceholder,
-                Location: location || undefined,
+                Location: location,
+                Faq: faq,
                 StartTimestampMillis: startDate.getTime(),
                 EndTimestampMillis: endDate.getTime(),
                 LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
               })
               props.close()
+              setSaving(false)
             }}
             disabled={generatingFaq || saving}>
             Save

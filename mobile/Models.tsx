@@ -5,6 +5,7 @@ export interface ActivityModel {
   CreatedTimestampMillis: number
   Name: string
   Location?: LocationModel
+  Faq?: FaqModel
   StartTimestampMillis: number
   EndTimestampMillis: number
   LastUpdatedTimestampMillis: number | null
