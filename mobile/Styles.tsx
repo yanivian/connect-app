@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   button: {
+    paddingHorizontal: 12
   },
   buttonLabel: {
     fontSize: 16,

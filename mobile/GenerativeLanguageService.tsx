@@ -31,6 +31,8 @@ export default class GenerativeLanguageService {
   }
 
   async generateActivityFaq(props: GenerateActivityFaqRequest): Promise<FaqModel> {
+    console.info(`GenerativeLanguageService::generateActivityFaq Request: ${JSON.stringify(props)}`)
+
     const context = `You provide "${props.name}" as an activity session to prospective clients.`
     const query = `What are the top 10 questions about the session that prospective clients may have in order to better understand, disambiguate or clarify the details and nature of the session? For each question, what are the top 5 applicable discrete answers or ranges of values? Do not include questions related to location, duration or schedule.`
     const starter = `{"Questions": [{"Topic": "Location","Question": "Where will the activity be held?","Answers": ["Home","Work","Park","Cafe","Diner"]},{"Topic": "`
@@ -44,6 +46,7 @@ export default class GenerativeLanguageService {
     const respPromise: Promise<GenerateTextResponse> = this.doPost_('/models/text-bison-001:generateText', { key: this.apiKey_ }, req)
     return respPromise.then((resp) => {
       const jsonStr = `{"Questions": [{"Topic": "${resp.candidates![0].output}}`
+      console.info(`GenerativeLanguageService::generateActivityFaq Response: ${jsonStr}`)
       return JSON.parse(jsonStr)
     })
   }

@@ -35,6 +35,7 @@ interface ActivityCardProps {
 
 export const ActivityCard = (props: ActivityCardProps): JSX.Element => {
   const theme = useTheme()
+
   const startDate = new Date(props.activity.StartTimestampMillis)
   return (
     <Card style={{ marginBottom: 12 }}>
@@ -100,11 +101,7 @@ const Activity = (props: ActivityProps & {
   const theme = useTheme()
 
   const namePlaceholder = 'Play Date'
-  const [name, setName] = useState<string | null>(props.activity?.Name || null)
-  const [location, setLocation] = useState<LocationModel | undefined>(props.activity?.Location)
-
-  const [faq, setFaq] = useState<FaqModel | undefined>(props.activity?.Faq)
-  const [generatingFaq, setGeneratingFaq] = useState(false)
+  const [model, setModel] = useState<Partial<ActivityModel>>(props.activity || {})
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>()
@@ -140,15 +137,6 @@ const Activity = (props: ActivityProps & {
     })
   }
 
-  async function generateFaq() {
-    setGeneratingFaq(true)
-    GenerativeLanguageService.get(loginContext.Credentials.GoogleCloudApiKey)
-      .generateActivityFaq({ name: name || namePlaceholder })
-      .then(setFaq)
-      .catch(setError)
-      .finally(() => setGeneratingFaq(false))
-  }
-
   return (
     <Section title={`${title} activity`} close={{ icon: 'close', callback: props.close }}>
       <View>
@@ -164,8 +152,8 @@ const Activity = (props: ActivityProps & {
               }]}
               mode='flat'
               placeholder='Play Date'
-              value={name || ''}
-              onChangeText={setName}
+              value={model.Name || ''}
+              onChangeText={(text) => setModel({ ...model, Name: text })}
               autoCapitalize='words'
               autoComplete='off'
               inputMode='text'
@@ -255,7 +243,7 @@ const Activity = (props: ActivityProps & {
         <Divider style={{ marginTop: 12, marginBottom: 24 }} />
 
         {/* Location added. */}
-        {location &&
+        {model.Location &&
           <View style={{ flexDirection: 'row' }}>
             <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
               <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
@@ -263,10 +251,10 @@ const Activity = (props: ActivityProps & {
             <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
               <View style={{ flexDirection: 'column', flexGrow: 1 }}>
                 <Text variant="bodyLarge">
-                  {location.Name}
+                  {model.Location.Name}
                 </Text>
                 <Text variant="bodySmall">
-                  {location.Address}
+                  {model.Location.Address}
                 </Text>
               </View>
               <View style={{ alignSelf: 'flex-start', marginLeft: 'auto', marginRight: 0 }}>
@@ -275,14 +263,14 @@ const Activity = (props: ActivityProps & {
                   disabled={saving}
                   size={20}
                   icon='close'
-                  onPress={() => setLocation(undefined)} />
+                  onPress={() => setModel({ ...model, Location: undefined })} />
               </View>
             </View>
           </View>
         }
 
         {/* Location not added. */}
-        {!location &&
+        {!model.Location &&
           <View style={{ flexDirection: 'row' }}>
             <View style={{ alignSelf: 'flex-start', marginTop: 9, marginRight: 6 }}>
               <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
@@ -327,12 +315,15 @@ const Activity = (props: ActivityProps & {
                   enablePoweredByContainer={false}
                   fetchDetails={true}
                   onPress={(data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
-                    setLocation({
-                      ID: data.place_id,
-                      Name: detail!.name,
-                      Address: detail!.formatted_address,
-                      Latitude: detail!.geometry!.location!.lat,
-                      Longitude: detail!.geometry!.location!.lng,
+                    setModel({
+                      ...model,
+                      Location: {
+                        ID: data.place_id,
+                        Name: detail!.name,
+                        Address: detail!.formatted_address,
+                        Latitude: detail!.geometry!.location!.lat,
+                        Longitude: detail!.geometry!.location!.lng,
+                      }
                     })
                   }}
                   onFail={setError} />
@@ -342,21 +333,22 @@ const Activity = (props: ActivityProps & {
         }
 
         {/* FAQ */}
-        {faq &&
-          <View>
-            <Divider style={{ marginVertical: 24 }} />
-            <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-              <View style={{ alignSelf: 'flex-start', marginTop: 15, marginRight: 6 }}>
-                <MaterialIcons name={'info'} size={32} color={theme.colors.primary} />
-              </View>
-              <View style={{ flexGrow: 1 }}>
-                <ActivityFaq
-                  faq={faq}
-                  setFaq={setFaq} />
-              </View>
+        <View>
+          <Divider style={{ marginVertical: 24 }} />
+          <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+            <View style={{ alignSelf: 'flex-start', marginTop: 15, marginRight: 6 }}>
+              <MaterialIcons name={'info'} size={32} color={theme.colors.primary} />
+            </View>
+            <View style={{ flexGrow: 1 }}>
+              <ActivityFaq
+                faq={model.Faq}
+                setFaq={(updatedFaq) => setModel({ ...model, Faq: updatedFaq })}
+                activity={model}
+                namePlaceholder={namePlaceholder}
+              />
             </View>
           </View>
-        }
+        </View>
 
         <HelperText
           type="error"
@@ -364,16 +356,6 @@ const Activity = (props: ActivityProps & {
           {JSON.stringify(error)}
         </HelperText>
         <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-          {!faq && <Button
-            icon={"sign-caution"}
-            mode="outlined"
-            style={[styles.button, { flex: 1, marginRight: 6 }]}
-            labelStyle={styles.buttonLabel}
-            onPress={generateFaq}
-            disabled={generatingFaq || saving}>
-            FAQ
-          </Button>
-          }
           <Button
             mode="contained"
             style={[styles.button, { flex: 1 }]}
@@ -383,11 +365,10 @@ const Activity = (props: ActivityProps & {
               // TODO: Persist activity.
               const nowMillis = Date.now()
               props.save({
+                ...model,
+                Name: model.Name || namePlaceholder,
                 ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
                 CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
-                Name: name || namePlaceholder,
-                Location: location,
-                Faq: faq,
                 StartTimestampMillis: startDate.getTime(),
                 EndTimestampMillis: endDate.getTime(),
                 LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
@@ -395,11 +376,11 @@ const Activity = (props: ActivityProps & {
               props.close()
               setSaving(false)
             }}
-            disabled={generatingFaq || saving}>
+            disabled={saving}>
             Save
           </Button>
         </View>
-        {(generatingFaq || saving) && <LoadingAnimation />}
+        {(saving) && <LoadingAnimation />}
       </View>
     </Section>
   )
