@@ -140,7 +140,7 @@ const Activity = (props: ActivityProps & {
     })
   }
 
-  async function completeFaq() {
+  async function generateFaq() {
     setGeneratingFaq(true)
     GenerativeLanguageService.get(loginContext.Credentials.GoogleCloudApiKey)
       .generateActivityFaq({ name: name || namePlaceholder })
@@ -369,7 +369,7 @@ const Activity = (props: ActivityProps & {
             mode="outlined"
             style={[styles.button, { flex: 1, marginRight: 6 }]}
             labelStyle={styles.buttonLabel}
-            onPress={completeFaq}
+            onPress={generateFaq}
             disabled={generatingFaq || saving}>
             FAQ
           </Button>

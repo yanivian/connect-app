@@ -1,4 +1,4 @@
-/** This file defines a functional interface to Google's Generative Language service. */
+/** This file defines a functional interface to Google's Generative Language REST API. */
 import { FaqModel } from './Models'
 
 interface GenerateActivityFaqRequest {
