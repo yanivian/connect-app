@@ -12,11 +12,13 @@ export interface ActivityModel {
 }
 
 export interface FaqModel {
-  Questions: Array<{
-    Topic: string
-    Question: string
-    Answers: Array<string>
-  }>
+  Topics: Array<FaqTopicModel>
+}
+
+export interface FaqTopicModel {
+  Topic: string
+  Question: string
+  Answers: Array<string>
 }
 
 export interface ImageModel {

@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Button, Card, Dialog, IconButton, Portal, Text, TextInput, useTheme } from 'react-native-paper'
-import { ActivityModel, FaqModel } from './Models'
-import styles from './Styles'
 import { LoginContext } from './Contexts'
 import GenerativeLanguageService from './GenerativeLanguageService'
+import { LoadingAnimation } from './Layouts'
+import { ActivityModel, FaqModel } from './Models'
+import styles from './Styles'
 
 interface FaqState {
-  Questions: Array<QuestionState>
+  Topics: Array<TopicState>
 }
 
-interface QuestionState {
+interface TopicState {
   Topic: string
   Question: string
   Answers: Array<AnswerState>
@@ -22,27 +23,27 @@ interface AnswerState {
 }
 
 function stateFromModel(model: FaqModel | undefined): FaqState {
-  const questions: Array<QuestionState> = []
-  if (model && model.Questions) {
-    for (const question of model.Questions) {
-      const answers: Array<AnswerState> = question.Answers.map((answer) => {
+  const questions: Array<TopicState> = []
+  if (model && model.Topics) {
+    for (const topic of model.Topics) {
+      const answers: Array<AnswerState> = topic.Answers.map((answer) => {
         return {
           Answer: answer,
         }
       })
       questions.push({
-        Topic: question.Topic,
-        Question: question.Question,
+        Topic: topic.Topic,
+        Question: topic.Question,
         Answers: answers,
       })
     }
   }
-  return { Questions: questions }
+  return { Topics: questions }
 }
 
 function modelFromState(state: FaqState): FaqModel | undefined {
-  return state.Questions.length === 0 ? undefined : {
-    Questions: state.Questions.map((q) => {
+  return state.Topics.length === 0 ? undefined : {
+    Topics: state.Topics.map((q) => {
       return {
         Topic: q.Topic,
         Question: q.Question,
@@ -70,16 +71,19 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
   // Update the activity model whenever the FAQ is updated.
   useEffect(() => props.setFaq(modelFromState(faqState)), [faqState])
 
-  const [editingQuestion, setEditingQuestion] = useState<QuestionState>()
+  const [editingQuestion, setEditingQuestion] = useState<TopicState>()
   const [editingQuestionIdx, setEditingQuestionIdx] = useState<number>()
 
   const [updating, setUpdating] = useState(false)
 
   async function generateFaq() {
     setUpdating(true)
-    setFaqState(stateFromModel(undefined))
     GenerativeLanguageService.get(loginContext.Credentials.GoogleCloudApiKey)
-      .generateActivityFaq({ name: props.activity.Name || props.namePlaceholder })
+      .generateActivityFaq({
+        name: props.activity.Name || props.namePlaceholder,
+        count: 5,
+        prefix: modelFromState(faqState),
+      })
       .then(stateFromModel)
       .then(setFaqState)
       .catch(console.error)
@@ -87,18 +91,18 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
   }
 
   function toggleExpandQuestion(questionIdx: number) {
-    const questions: Array<QuestionState> = []
-    faqState.Questions.forEach((q, i) => {
+    const questions: Array<TopicState> = []
+    faqState.Topics.forEach((q, i) => {
       questions.push({
         ...q,
         IsExpanded: (i === questionIdx) ? !q.IsExpanded : false /* Minimize other questions */,
       })
     })
-    setFaqState({ Questions: questions })
+    setFaqState({ Topics: questions })
   }
 
   function beginEditingQuestion(questionIdx: number) {
-    setEditingQuestion(faqState.Questions[questionIdx]!)
+    setEditingQuestion(faqState.Topics[questionIdx]!)
     setEditingQuestionIdx(questionIdx)
   }
 
@@ -108,20 +112,20 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
   }
 
   function saveEditingQuestion() {
-    const questions: Array<QuestionState> = []
-    faqState.Questions.forEach((q, i) => {
+    const questions: Array<TopicState> = []
+    faqState.Topics.forEach((q, i) => {
       questions.push((i === editingQuestionIdx) ? editingQuestion! : q)
     })
-    setFaqState({ Questions: questions })
+    setFaqState({ Topics: questions })
     clearEditingQuestion()
   }
 
   function addQuestion() {
-    setFaqState({ Questions: [...faqState.Questions, { Topic: '', Question: '', Answers: [{ Answer: '' }] }] })
+    setFaqState({ Topics: [...faqState.Topics, { Topic: '', Question: '', Answers: [{ Answer: '' }] }] })
   }
 
   function deleteQuestion(questionIdx: number) {
-    setFaqState({ Questions: faqState.Questions.filter((q, i) => i !== questionIdx) })
+    setFaqState({ Topics: faqState.Topics.filter((q, i) => i !== questionIdx) })
   }
 
   return (
@@ -136,7 +140,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
       />
       <Card.Content>
         <View style={{ flexDirection: 'column' }}>
-          {faqState.Questions.map((question, questionIdx) => {
+          {faqState.Topics.map((question, questionIdx) => {
             return (
               <Card
                 key={questionIdx}
@@ -201,6 +205,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
               </Card>
             )
           })}
+          {updating && <LoadingAnimation />}
         </View>
         <Portal>
           <Dialog
