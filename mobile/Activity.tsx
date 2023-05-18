@@ -6,9 +6,8 @@ import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, Touchab
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import ActivityFaq from './ActivityFaq'
 import { LoginContext, UserModelContext } from './Contexts'
-import GenerativeLanguageService from './GenerativeLanguageService'
 import { LoadingAnimation, Section } from './Layouts'
-import { ActivityModel, FaqModel, LocationModel } from './Models'
+import { ActivityModel, LocationModel } from './Models'
 import styles from './Styles'
 
 function formatDate(date: Date) {
@@ -147,17 +146,17 @@ const Activity = (props: ActivityProps & {
           </View>
           <View style={{ flexGrow: 1 }}>
             <TextInput
-              style={[styles.textInput, {
-                backgroundColor: theme.colors.backdrop,
-              }]}
-              mode='flat'
-              placeholder='Play Date'
-              value={model.Name || ''}
-              onChangeText={(text) => setModel({ ...model, Name: text })}
               autoCapitalize='words'
               autoComplete='off'
+              contentStyle={{ backgroundColor: 'transparent' }}
+              disabled={saving}
               inputMode='text'
-              disabled={saving} />
+              mode='flat'
+              onChangeText={(text) => setModel({ ...model, Name: text })}
+              placeholder='Play Date'
+              style={{ backgroundColor: 'transparent' }}
+              value={model.Name || ''}
+            />
           </View>
         </View>
 
@@ -305,10 +304,9 @@ const Activity = (props: ActivityProps & {
                     }],
                     textInputContainer: {
                       paddingHorizontal: 12,
-                      borderRadius: theme.roundness,
-                      borderWidth: 1,
-                      borderColor: theme.colors.inverseSurface,
-                      backgroundColor: theme.colors.background,
+                      borderBottomWidth: .5,
+                      borderColor: theme.colors.onBackground,
+                      backgroundColor: 'transparent',
                     },
                     textInput: styles.textInput,
                   }}

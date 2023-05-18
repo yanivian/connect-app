@@ -121,18 +121,16 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
   }
 
   function addQuestion() {
-    setFaqState({ Topics: [...faqState.Topics, { Topic: '', Question: '', Answers: [{ Answer: '' }] }] })
+    const minimizedTopics: Array<TopicState> = faqState.Topics.map((t) => { return { ...t, IsExpanded: false } })
+    setFaqState({ Topics: [...minimizedTopics, { Topic: '', Question: '', Answers: [{ Answer: '' }], IsExpanded: true }] })
   }
 
-  function deleteQuestion(questionIdx: number) {
-    setFaqState({ Topics: faqState.Topics.filter((q, i) => i !== questionIdx) })
+  function deleteQuestion(topicIdx: number) {
+    setFaqState({ Topics: faqState.Topics.filter((q, i) => i !== topicIdx) })
   }
 
   return (
-    <Card mode="contained" style={{
-      backgroundColor: theme.colors.backdrop,
-      borderRadius: theme.roundness,
-    }}>
+    <Card mode="contained" style={{ backgroundColor: 'transparent' }}>
       <Card.Title
         title="FAQ"
         titleVariant="titleMedium"
@@ -146,7 +144,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                 key={questionIdx}
                 mode="contained"
                 style={{
-                  backgroundColor: theme.colors.backdrop,
+                  backgroundColor: 'transparent',
                   borderRadius: theme.roundness,
                   marginBottom: 6,
                 }}>
@@ -174,9 +172,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                   <Card.Content style={{ paddingHorizontal: 0 }}>
                     <Card
                       mode="contained"
-                      style={{
-                        backgroundColor: theme.colors.backdrop,
-                      }}
+                      style={{ backgroundColor: 'transparent' }}
                     >
                       <Card.Content style={{ padding: 12 }}>
                         <View>
@@ -211,7 +207,13 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
           <Dialog
             dismissable
             onDismiss={clearEditingQuestion}
-            style={{ maxHeight: '80%' }}
+            style={{
+              shadowColor: theme.colors.shadow,
+              shadowRadius: theme.roundness,
+              borderColor: theme.colors.surfaceDisabled,
+              borderRadius: theme.roundness,
+              borderWidth: 1,
+            }}
             visible={editingQuestionIdx != undefined}
           >
             <Dialog.Title>Edit FAQ</Dialog.Title>
@@ -225,7 +227,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                     mode='flat'
                     onChangeText={(text) => setEditingQuestion({ ...editingQuestion!, Topic: text })}
                     placeholder='Topic'
-                    style={{ backgroundColor: theme.colors.backdrop }}
+                    style={{ backgroundColor: 'transparent' }}
                     value={editingQuestion?.Topic}
                   />
                   <TextInput
@@ -236,7 +238,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                     multiline={true}
                     onChangeText={(text) => setEditingQuestion({ ...editingQuestion!, Question: text })}
                     placeholder='Question'
-                    style={{ backgroundColor: theme.colors.backdrop }}
+                    style={{ backgroundColor: 'transparent' }}
                     value={editingQuestion?.Question}
                   />
                   <View style={(editingQuestion?.Answers.length || 0) > 1 && { paddingLeft: 24 }}>
@@ -256,7 +258,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                             }}
                             placeholder={`Answer${answerIdx === 0 ? '' : ` ${answerIdx + 1}`}`}  // 'Answer', 'Answer 2', etc.
                             style={{
-                              backgroundColor: theme.colors.backdrop,
+                              backgroundColor: 'transparent',
                               flexGrow: 1,
                               flexBasis: '85%',
                             }}
@@ -284,7 +286,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                   + Answer
                 </Button>
               }
-              <Button mode='outlined' style={styles.button} onPress={saveEditingQuestion}>
+              <Button mode='contained' style={styles.button} onPress={saveEditingQuestion}>
                 Save
               </Button>
             </Dialog.Actions>
