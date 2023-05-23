@@ -1,6 +1,24 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
+
+const screen = Dimensions.get('screen')
 
 const styles = StyleSheet.create({
+  fab: {
+    bottom: 0,
+    margin: 12,
+    position: 'absolute',
+    right: 0,
+  },
+  fullscreen: {
+    margin: 0,
+    alignItems: undefined,
+    justifyContent: undefined,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: screen.width,
+    height: screen.height,
+},
   safeArea: {
     height: '100%',
     flexDirection: 'column',

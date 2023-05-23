@@ -89,7 +89,7 @@ export interface ActivityProps {
   clone?: boolean
 }
 
-const Activity = (props: ActivityProps & {
+export const Activity = (props: ActivityProps & {
   // Callback to save an activity.
   save: (activity: ActivityModel) => void
   // Callback to close this activity component if it is the current route.
@@ -383,5 +383,3 @@ const Activity = (props: ActivityProps & {
     </Section>
   )
 }
-
-export default Activity

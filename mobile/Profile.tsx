@@ -29,9 +29,9 @@ async function captureFromCamera(): Promise<ImagePicker.ImagePickerResponse> {
 }
 
 interface ProfileProps {
-  // Callback to update the profile in the context and navigate back.
-  setProfile: (profile: ProfileModel) => void
-  // Callback to navugate back without updating the profile.
+  // Callback to save any changes made to the profile.
+  save: (profile: ProfileModel) => void
+  // Callback to close the profile screen, abandoning any unsaved changes.
   close: () => void
 }
 
@@ -162,7 +162,8 @@ const Profile = (props: ProfileProps): JSX.Element => {
               name: name,
               emailAddress: emailAddress,
               image: image?.ID || null,
-            }).then(props.setProfile)
+            }).then(props.save)
+              .then(props.close)
               .catch(setError)
               .finally(() => setSaving(false))
           }}
