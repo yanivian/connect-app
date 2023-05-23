@@ -1,15 +1,11 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { View } from 'react-native'
 import { FAB, Modal, Portal, Text } from 'react-native-paper'
 import { Activity, ActivityCard, ActivityProps } from './Activity'
-import { LoginContext, UserModelContext } from './Contexts'
 import { ActivityModel } from './Models'
 import styles from './Styles'
 
 const MyActivities = (): JSX.Element => {
-  const user = useContext(UserModelContext)!
-  const loginContext = useContext(LoginContext)!
-
   // State capturing my activities.
   const [myActivities, setMyActivities] = useState<Array<ActivityModel>>([])
 
@@ -46,6 +42,7 @@ const MyActivities = (): JSX.Element => {
   function closeActivity() {
     setSelectedActivity(undefined)
   }
+
   return (
     <View>
       {myActivities.length === 0 &&
@@ -80,11 +77,7 @@ const MyActivities = (): JSX.Element => {
           theme={{ colors: { backdrop: 'transparent' } }}
           visible={!!selectedActivity}
         >
-          <UserModelContext.Provider value={user}>
-            <LoginContext.Provider value={loginContext}>
-              <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
-            </LoginContext.Provider>
-          </UserModelContext.Provider>
+          <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
         </Modal>
         <FAB
           aria-label='Add an activity'

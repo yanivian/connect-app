@@ -23,54 +23,52 @@ const Home = (): JSX.Element => {
 
   return (
     <ProfileModelContext.Provider value={profile}>
-      <Page>
-        <Section
-          title="Home"
-          actions={[
-            { label: 'Profile', icon: 'account', callback: () => setEditingProfile(true) },
-            { label: 'Sign out', icon: 'logout', callback: () => user.signOut() },
-          ]}
-        >
-          <Banner
-            visible={showIncompleteProfileBanner}
-            elevation={4}
-            style={{ marginBottom: 12 }}
+      <Portal.Host>
+        <Page>
+          <Section
+            title="Home"
             actions={[
-              {
-                label: 'Close',
-                onPress: () => setShowIncompleteProfileBanner(false),
-              },
-              {
-                label: 'Fix it',
-                onPress: () => setEditingProfile(true),
-              },
+              { label: 'Profile', icon: 'account', callback: () => setEditingProfile(true) },
+              { label: 'Sign out', icon: 'logout', callback: () => user.signOut() },
             ]}
-            icon="alert-circle-outline">
-            Your profile is incomplete. Please pick a name and avatar.
-          </Banner>
-
-          {!isEditingProfile &&
-            <MyActivities />
-          }
-        </Section>
-        <Portal>
-          <Modal
-            contentContainerStyle={styles.fullscreen}
-            onDismiss={() => setEditingProfile(false)}
-            theme={{ colors: { backdrop: 'transparent' } }}
-            visible={isEditingProfile}
           >
-            <UserModelContext.Provider value={user}>
-              <ProfileModelContext.Provider value={profile}>
-                <Profile
-                  save={setProfile}
-                  close={() => setEditingProfile(false)}
-                />
-              </ProfileModelContext.Provider>
-            </UserModelContext.Provider>
-          </Modal>
-        </Portal>
-      </Page>
+            <Banner
+              visible={showIncompleteProfileBanner}
+              elevation={4}
+              style={{ marginBottom: 12 }}
+              actions={[
+                {
+                  label: 'Close',
+                  onPress: () => setShowIncompleteProfileBanner(false),
+                },
+                {
+                  label: 'Fix it',
+                  onPress: () => setEditingProfile(true),
+                },
+              ]}
+              icon="alert-circle-outline">
+              Your profile is incomplete. Please pick a name and avatar.
+            </Banner>
+
+            {!isEditingProfile &&
+              <MyActivities />
+            }
+          </Section>
+          <Portal>
+            <Modal
+              contentContainerStyle={styles.fullscreen}
+              onDismiss={() => setEditingProfile(false)}
+              theme={{ colors: { backdrop: 'transparent' } }}
+              visible={isEditingProfile}
+            >
+              <Profile
+                save={setProfile}
+                close={() => setEditingProfile(false)}
+              />
+            </Modal>
+          </Portal>
+        </Page>
+      </Portal.Host>
     </ProfileModelContext.Provider>
   )
 }
