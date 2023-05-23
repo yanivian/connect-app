@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Banner, Modal, Portal } from 'react-native-paper'
+import { View } from 'react-native'
+import { Banner, Modal, Portal, SegmentedButtons } from 'react-native-paper'
 import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import MyActivities from './MyActivities'
@@ -20,6 +21,8 @@ const Home = (): JSX.Element => {
   // States for profile manipulation.
   const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
   const [isEditingProfile, setEditingProfile] = useState(loginContext.IsFirstLogin)
+
+  const [tab, setTab] = React.useState('MyActivities')
 
   return (
     <ProfileModelContext.Provider value={profile}>
@@ -51,14 +54,26 @@ const Home = (): JSX.Element => {
             </Banner>
 
             {!isEditingProfile &&
-              <MyActivities />
+              <View>
+                <SegmentedButtons
+                  value={tab}
+                  onValueChange={setTab}
+                  buttons={[
+                    { label: 'Activities', value: 'MyActivities' },
+                    { label: 'Friends', value: 'Friends', disabled: true },
+                  ]}
+                  style={{ marginBottom: 12 }}
+                />
+                {tab === 'MyActivities' &&
+                  <MyActivities />
+                }
+              </View>
             }
           </Section>
           <Portal>
             <Modal
               contentContainerStyle={styles.fullscreen}
               onDismiss={() => setEditingProfile(false)}
-              theme={{ colors: { backdrop: 'transparent' } }}
               visible={isEditingProfile}
             >
               <Profile

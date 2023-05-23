@@ -74,7 +74,6 @@ const MyActivities = (): JSX.Element => {
         <Modal
           contentContainerStyle={styles.fullscreen}
           onDismiss={closeActivity}
-          theme={{ colors: { backdrop: 'transparent' } }}
           visible={!!selectedActivity}
         >
           <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
