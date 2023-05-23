@@ -22,10 +22,11 @@ export const Page = (props: PageProps) => {
 
 type SectionProps = PropsWithChildren<{
   title: string
-  close?: {
+  actions?: Array<{
     icon: IconSource
+    label: string
     callback: () => void
-  }
+  }>
 }>
 
 export const Section = (props: SectionProps) => {
@@ -35,12 +36,19 @@ export const Section = (props: SectionProps) => {
         <Text style={{ flexGrow: 1 }} variant="titleLarge">
           {props.title}
         </Text>
-        {props.close &&
-          <IconButton
-            size={20}
-            mode='contained-tonal'
-            icon={props.close.icon}
-            onPress={props.close.callback} />
+        {props.actions &&
+          props.actions.map((action, actionIdx) => {
+            return (
+              <IconButton
+                aria-label={action.label}
+                icon={action.icon}
+                key={actionIdx}
+                mode='contained-tonal'
+                onPress={action.callback}
+                size={20}
+              />
+            )
+          })
         }
       </View>
       <View style={styles.sectionContent}>

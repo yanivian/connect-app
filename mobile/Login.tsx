@@ -147,7 +147,14 @@ const Login = (props: LoginProps): JSX.Element => {
   if (!user) {
     return (
       <Page>
-        <Section title="Login" close={{ icon: 'restart', callback: () => setConfirmationResult(null) }}>
+        <Section
+          title="Login"
+          actions={[{
+            label: 'Restart',
+            icon: 'restart',
+            callback: () => setConfirmationResult(null),
+          }]}
+        >
           <Text style={styles.text} variant="bodyLarge">
             We've sent a verification code to your phone number, and it should arrive momentarily.
           </Text>

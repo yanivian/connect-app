@@ -6,7 +6,7 @@ import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, Touchab
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import ActivityFaq from './ActivityFaq'
 import { LoginContext, UserModelContext } from './Contexts'
-import { LoadingAnimation, Section } from './Layouts'
+import { LoadingAnimation, Page, Section } from './Layouts'
 import { ActivityModel, LocationModel } from './Models'
 import styles from './Styles'
 
@@ -137,249 +137,258 @@ export const Activity = (props: ActivityProps & {
   }
 
   return (
-    <Section title={`${title} activity`} close={{ icon: 'close', callback: props.close }}>
-      <View>
-        {/* Name of the activity. */}
-        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-          <View style={{ alignSelf: 'center', marginRight: 6 }}>
-            <MaterialIcons name={'event'} size={32} color={theme.colors.primary} />
-          </View>
-          <View style={{ flexGrow: 1 }}>
-            <TextInput
-              autoCapitalize='words'
-              autoComplete='off'
-              contentStyle={{ backgroundColor: 'transparent' }}
-              disabled={saving}
-              inputMode='text'
-              mode='flat'
-              onChangeText={(text) => setModel({ ...model, Name: text })}
-              placeholder='Play Date'
-              style={{ backgroundColor: 'transparent' }}
-              value={model.Name || ''}
-            />
-          </View>
-        </View>
-
-        <Divider style={{ marginVertical: 12 }} />
-
-        {/* Start and end date and times. */}
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
-            <MaterialIcons name={'access-time'} size={32} color={theme.colors.primary} />
-          </View>
-          <View style={{ flexDirection: 'column', flexGrow: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ padding: 6 }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple
-                    onPress={() => showDatePicker('start', 'date')}
-                    disabled={saving}>
-                    <Text variant="bodyLarge">{formatDate(startDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={startDate}
-                    onChange={onStartDateChange}
-                    mode={'date'}
-                    disabled={saving} />
-                }
-              </View>
-              <View style={{ padding: 6, marginLeft: 'auto' }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple
-                    onPress={() => showDatePicker('start', 'time')}
-                    disabled={saving}>
-                    <Text variant="bodyLarge">{formatTime(startDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={startDate}
-                    onChange={onStartDateChange}
-                    mode={'time'}
-                    disabled={saving} />
-                }
-              </View>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ padding: 6 }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple
-                    onPress={() => showDatePicker('end', 'date')}
-                    disabled={saving}>
-                    <Text variant="bodyLarge">{formatDate(endDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={endDate}
-                    onChange={onEndDateChange}
-                    mode={'date'}
-                    disabled={saving} />
-                }
-              </View>
-              <View style={{ padding: 6, marginLeft: 'auto' }}>
-                {Platform.OS === 'android' &&
-                  <TouchableRipple
-                    onPress={() => showDatePicker('end', 'time')}
-                    disabled={saving}>
-                    <Text variant="bodyLarge">{formatTime(endDate)}</Text>
-                  </TouchableRipple>
-                }
-                {Platform.OS == 'ios' &&
-                  <DateTimePicker
-                    value={endDate}
-                    onChange={onEndDateChange}
-                    mode={'time'}
-                    disabled={saving} />
-                }
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <Divider style={{ marginTop: 12, marginBottom: 24 }} />
-
-        {/* Location added. */}
-        {model.Location &&
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
-              <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
-            </View>
-            <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
-              <View style={{ flexDirection: 'column', flexGrow: 1 }}>
-                <Text variant="bodyLarge">
-                  {model.Location.Name}
-                </Text>
-                <Text variant="bodySmall">
-                  {model.Location.Address}
-                </Text>
-              </View>
-              <View style={{ alignSelf: 'flex-start', marginLeft: 'auto', marginRight: 0 }}>
-                <IconButton
-                  style={{ margin: 0 }}
-                  disabled={saving}
-                  size={20}
-                  icon='close'
-                  onPress={() => setModel({ ...model, Location: undefined })} />
-              </View>
-            </View>
-          </View>
-        }
-
-        {/* Location not added. */}
-        {!model.Location &&
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ alignSelf: 'flex-start', marginTop: 9, marginRight: 6 }}>
-              <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
-            </View>
-            <View style={{ flexGrow: 1 }}>
-              <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
-                <GooglePlacesAutocomplete
-                  renderDescription={(row) => row.description}
-                  suppressDefaultStyles={true}
-                  keepResultsAfterBlur={true}
-                  debounce={200}
-                  placeholder='Add location'
-                  query={{
-                    key: loginContext.Credentials.GoogleCloudApiKey,
-                    language: 'en',
-                  }}
-                  styles={{
-                    container: {
-                      width: '100%',
-                    },
-                    row: {
-                      paddingVertical: 6,
-                      alignContent: 'center',
-                      justifyContent: 'center',
-                      elevation: 2,
-                    },
-                    listView: [styles.text, {
-                      paddingHorizontal: 12,
-                      borderRadius: theme.roundness,
-                      borderWidth: 1,
-                      borderColor: theme.colors.primary,
-                    }],
-                    textInputContainer: {
-                      paddingHorizontal: 12,
-                      borderBottomWidth: .5,
-                      borderColor: theme.colors.onBackground,
-                      backgroundColor: 'transparent',
-                    },
-                    textInput: styles.textInput,
-                  }}
-                  enablePoweredByContainer={false}
-                  fetchDetails={true}
-                  onPress={(data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
-                    setModel({
-                      ...model,
-                      Location: {
-                        ID: data.place_id,
-                        Name: detail!.name,
-                        Address: detail!.formatted_address,
-                        Latitude: detail!.geometry!.location!.lat,
-                        Longitude: detail!.geometry!.location!.lng,
-                      }
-                    })
-                  }}
-                  onFail={setError} />
-              </ScrollView>
-            </View>
-          </View>
-        }
-
-        {/* FAQ */}
+    <Page>
+      <Section
+        title={`${title} activity`}
+        actions={[{
+          label: 'Cancel',
+          icon: 'close',
+          callback: props.close,
+        }]}
+      >
         <View>
-          <Divider style={{ marginVertical: 24 }} />
+          {/* Name of the activity. */}
           <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-            <View style={{ alignSelf: 'flex-start', marginTop: 15, marginRight: 6 }}>
-              <MaterialIcons name={'info'} size={32} color={theme.colors.primary} />
+            <View style={{ alignSelf: 'center', marginRight: 6 }}>
+              <MaterialIcons name={'event'} size={32} color={theme.colors.primary} />
             </View>
             <View style={{ flexGrow: 1 }}>
-              <ActivityFaq
-                faq={model.Faq}
-                setFaq={(updatedFaq) => setModel({ ...model, Faq: updatedFaq })}
-                activity={model}
-                namePlaceholder={namePlaceholder}
+              <TextInput
+                autoCapitalize='words'
+                autoComplete='off'
+                contentStyle={{ backgroundColor: 'transparent' }}
+                disabled={saving}
+                inputMode='text'
+                mode='flat'
+                onChangeText={(text) => setModel({ ...model, Name: text })}
+                placeholder='Play Date'
+                style={{ backgroundColor: 'transparent' }}
+                value={model.Name || ''}
               />
             </View>
           </View>
-        </View>
 
-        <HelperText
-          type="error"
-          visible={!!error}>
-          {JSON.stringify(error)}
-        </HelperText>
-        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-          <Button
-            mode="contained"
-            style={[styles.button, { flex: 1 }]}
-            labelStyle={styles.buttonLabel}
-            onPress={() => {
-              setSaving(true)
-              // TODO: Persist activity.
-              const nowMillis = Date.now()
-              props.save({
-                ...model,
-                Name: model.Name || namePlaceholder,
-                ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
-                CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
-                StartTimestampMillis: startDate.getTime(),
-                EndTimestampMillis: endDate.getTime(),
-                LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
-              })
-              props.close()
-              setSaving(false)
-            }}
-            disabled={saving}>
-            Save
-          </Button>
+          <Divider style={{ marginVertical: 12 }} />
+
+          {/* Start and end date and times. */}
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
+              <MaterialIcons name={'access-time'} size={32} color={theme.colors.primary} />
+            </View>
+            <View style={{ flexDirection: 'column', flexGrow: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ padding: 6 }}>
+                  {Platform.OS === 'android' &&
+                    <TouchableRipple
+                      onPress={() => showDatePicker('start', 'date')}
+                      disabled={saving}>
+                      <Text variant="bodyLarge">{formatDate(startDate)}</Text>
+                    </TouchableRipple>
+                  }
+                  {Platform.OS == 'ios' &&
+                    <DateTimePicker
+                      value={startDate}
+                      onChange={onStartDateChange}
+                      mode={'date'}
+                      disabled={saving} />
+                  }
+                </View>
+                <View style={{ padding: 6, marginLeft: 'auto' }}>
+                  {Platform.OS === 'android' &&
+                    <TouchableRipple
+                      onPress={() => showDatePicker('start', 'time')}
+                      disabled={saving}>
+                      <Text variant="bodyLarge">{formatTime(startDate)}</Text>
+                    </TouchableRipple>
+                  }
+                  {Platform.OS == 'ios' &&
+                    <DateTimePicker
+                      value={startDate}
+                      onChange={onStartDateChange}
+                      mode={'time'}
+                      disabled={saving} />
+                  }
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ padding: 6 }}>
+                  {Platform.OS === 'android' &&
+                    <TouchableRipple
+                      onPress={() => showDatePicker('end', 'date')}
+                      disabled={saving}>
+                      <Text variant="bodyLarge">{formatDate(endDate)}</Text>
+                    </TouchableRipple>
+                  }
+                  {Platform.OS == 'ios' &&
+                    <DateTimePicker
+                      value={endDate}
+                      onChange={onEndDateChange}
+                      mode={'date'}
+                      disabled={saving} />
+                  }
+                </View>
+                <View style={{ padding: 6, marginLeft: 'auto' }}>
+                  {Platform.OS === 'android' &&
+                    <TouchableRipple
+                      onPress={() => showDatePicker('end', 'time')}
+                      disabled={saving}>
+                      <Text variant="bodyLarge">{formatTime(endDate)}</Text>
+                    </TouchableRipple>
+                  }
+                  {Platform.OS == 'ios' &&
+                    <DateTimePicker
+                      value={endDate}
+                      onChange={onEndDateChange}
+                      mode={'time'}
+                      disabled={saving} />
+                  }
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <Divider style={{ marginTop: 12, marginBottom: 24 }} />
+
+          {/* Location added. */}
+          {model.Location &&
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
+                <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
+              </View>
+              <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
+                <View style={{ flexDirection: 'column', flexGrow: 1 }}>
+                  <Text variant="bodyLarge">
+                    {model.Location.Name}
+                  </Text>
+                  <Text variant="bodySmall">
+                    {model.Location.Address}
+                  </Text>
+                </View>
+                <View style={{ alignSelf: 'flex-start', marginLeft: 'auto', marginRight: 0 }}>
+                  <IconButton
+                    style={{ margin: 0 }}
+                    disabled={saving}
+                    size={20}
+                    icon='close'
+                    onPress={() => setModel({ ...model, Location: undefined })} />
+                </View>
+              </View>
+            </View>
+          }
+
+          {/* Location not added. */}
+          {!model.Location &&
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ alignSelf: 'flex-start', marginTop: 9, marginRight: 6 }}>
+                <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
+              </View>
+              <View style={{ flexGrow: 1 }}>
+                <ScrollView horizontal contentContainerStyle={{ flex: 1, width: '100%' }}>
+                  <GooglePlacesAutocomplete
+                    renderDescription={(row) => row.description}
+                    suppressDefaultStyles={true}
+                    keepResultsAfterBlur={true}
+                    debounce={200}
+                    placeholder='Add location'
+                    query={{
+                      key: loginContext.Credentials.GoogleCloudApiKey,
+                      language: 'en',
+                    }}
+                    styles={{
+                      container: {
+                        width: '100%',
+                      },
+                      row: {
+                        paddingVertical: 6,
+                        alignContent: 'center',
+                        justifyContent: 'center',
+                        elevation: 2,
+                      },
+                      listView: [styles.text, {
+                        paddingHorizontal: 12,
+                        borderRadius: theme.roundness,
+                        borderWidth: 1,
+                        borderColor: theme.colors.primary,
+                      }],
+                      textInputContainer: {
+                        paddingHorizontal: 12,
+                        borderBottomWidth: .5,
+                        borderColor: theme.colors.onBackground,
+                        backgroundColor: 'transparent',
+                      },
+                      textInput: styles.textInput,
+                    }}
+                    enablePoweredByContainer={false}
+                    fetchDetails={true}
+                    onPress={(data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
+                      setModel({
+                        ...model,
+                        Location: {
+                          ID: data.place_id,
+                          Name: detail!.name,
+                          Address: detail!.formatted_address,
+                          Latitude: detail!.geometry!.location!.lat,
+                          Longitude: detail!.geometry!.location!.lng,
+                        }
+                      })
+                    }}
+                    onFail={setError} />
+                </ScrollView>
+              </View>
+            </View>
+          }
+
+          {/* FAQ */}
+          <View>
+            <Divider style={{ marginVertical: 24 }} />
+            <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+              <View style={{ alignSelf: 'flex-start', marginTop: 15, marginRight: 6 }}>
+                <MaterialIcons name={'info'} size={32} color={theme.colors.primary} />
+              </View>
+              <View style={{ flexGrow: 1 }}>
+                <ActivityFaq
+                  faq={model.Faq}
+                  setFaq={(updatedFaq) => setModel({ ...model, Faq: updatedFaq })}
+                  activity={model}
+                  namePlaceholder={namePlaceholder}
+                />
+              </View>
+            </View>
+          </View>
+
+          <HelperText
+            type="error"
+            visible={!!error}>
+            {JSON.stringify(error)}
+          </HelperText>
+          <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+            <Button
+              mode="contained"
+              style={[styles.button, { flex: 1 }]}
+              labelStyle={styles.buttonLabel}
+              onPress={() => {
+                setSaving(true)
+                // TODO: Persist activity.
+                const nowMillis = Date.now()
+                props.save({
+                  ...model,
+                  Name: model.Name || namePlaceholder,
+                  ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
+                  CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
+                  StartTimestampMillis: startDate.getTime(),
+                  EndTimestampMillis: endDate.getTime(),
+                  LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
+                })
+                props.close()
+                setSaving(false)
+              }}
+              disabled={saving}>
+              Save
+            </Button>
+          </View>
+          {(saving) && <LoadingAnimation />}
         </View>
-        {(saving) && <LoadingAnimation />}
-      </View>
-    </Section>
+      </Section>
+    </Page>
   )
 }

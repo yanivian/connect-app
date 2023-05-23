@@ -80,9 +80,11 @@ const MyActivities = (): JSX.Element => {
           theme={{ colors: { backdrop: 'transparent' } }}
           visible={!!selectedActivity}
         >
-          <LoginContext.Provider value={loginContext}>
-            <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
-          </LoginContext.Provider>
+          <UserModelContext.Provider value={user}>
+            <LoginContext.Provider value={loginContext}>
+              <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
+            </LoginContext.Provider>
+          </UserModelContext.Provider>
         </Modal>
         <FAB
           aria-label='Add an activity'

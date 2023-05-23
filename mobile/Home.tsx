@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { View } from 'react-native'
-import { Banner, Button, Modal, Portal, Text } from 'react-native-paper'
+import { Banner, Modal, Portal } from 'react-native-paper'
 import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import MyActivities from './MyActivities'
@@ -25,10 +24,13 @@ const Home = (): JSX.Element => {
   return (
     <ProfileModelContext.Provider value={profile}>
       <Page>
-        <Section title="Home">
-          <Text style={[styles.text, { marginBottom: 12 }]} variant="bodyLarge">
-            Welcome {profile.Name || profile.PhoneNumber || 'Nameless'}!
-          </Text>
+        <Section
+          title="Home"
+          actions={[
+            { label: 'Profile', icon: 'account', callback: () => setEditingProfile(true) },
+            { label: 'Sign out', icon: 'logout', callback: () => user.signOut() },
+          ]}
+        >
           <Banner
             visible={showIncompleteProfileBanner}
             elevation={4}
@@ -50,19 +52,6 @@ const Home = (): JSX.Element => {
           {!isEditingProfile &&
             <MyActivities />
           }
-
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1, marginEnd: 12 }}>
-              <Button style={styles.button} labelStyle={[styles.buttonLabel]} mode="contained-tonal" onPress={() => setEditingProfile(true)}>
-                Profile
-              </Button>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Button style={styles.button} labelStyle={[styles.buttonLabel]} mode="contained-tonal" onPress={user.signOut}>
-                Sign out
-              </Button>
-            </View>
-          </View>
         </Section>
         <Portal>
           <Modal
@@ -71,12 +60,14 @@ const Home = (): JSX.Element => {
             theme={{ colors: { backdrop: 'transparent' } }}
             visible={isEditingProfile}
           >
-            <ProfileModelContext.Provider value={profile}>
-              <Profile
-                save={setProfile}
-                close={() => setEditingProfile(false)}
-              />
-            </ProfileModelContext.Provider>
+            <UserModelContext.Provider value={user}>
+              <ProfileModelContext.Provider value={profile}>
+                <Profile
+                  save={setProfile}
+                  close={() => setEditingProfile(false)}
+                />
+              </ProfileModelContext.Provider>
+            </UserModelContext.Provider>
           </Modal>
         </Portal>
       </Page>
