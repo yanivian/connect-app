@@ -50,7 +50,7 @@ const MyActivities = (): JSX.Element => {
     <View>
       {myActivities.length === 0 &&
         <Text style={styles.text} variant="bodyLarge">
-          You will find the activities you create here. Get started by creating one now.
+          This is where your activities will be shown. Create one to get started.
         </Text>
       }
       {myActivities.map((thisActivity) => {
