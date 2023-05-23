@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { View } from 'react-native'
-import { FAB, Modal, Portal, Text, useTheme } from 'react-native-paper'
+import { FAB, Modal, Portal, Text } from 'react-native-paper'
 import { Activity, ActivityCard, ActivityProps } from './Activity'
 import { LoginContext, UserModelContext } from './Contexts'
 import { ActivityModel } from './Models'
@@ -9,7 +9,6 @@ import styles from './Styles'
 const MyActivities = (): JSX.Element => {
   const user = useContext(UserModelContext)!
   const loginContext = useContext(LoginContext)!
-  const theme = useTheme()
 
   // State capturing my activities.
   const [myActivities, setMyActivities] = useState<Array<ActivityModel>>([])
