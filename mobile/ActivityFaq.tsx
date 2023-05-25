@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView, View } from 'react-native'
-import { Button, Card, Dialog, IconButton, Portal, Text, TextInput, useTheme } from 'react-native-paper'
+import { Button, Card, Dialog, IconButton, Portal, Snackbar, Text, TextInput, useTheme } from 'react-native-paper'
 import { LoginContext } from './Contexts'
 import GenerativeLanguageService from './GenerativeLanguageService'
 import { LoadingAnimation } from './Layouts'
@@ -75,6 +75,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
   const [editingQuestionIdx, setEditingQuestionIdx] = useState<number>()
 
   const [updating, setUpdating] = useState(false)
+  const [error, setError] = useState<string>()
 
   async function generateFaq() {
     setUpdating(true)
@@ -86,7 +87,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
       })
       .then(stateFromModel)
       .then(setFaqState)
-      .catch(console.error)
+      .catch(setError)
       .finally(() => setUpdating(false))
   }
 
@@ -291,6 +292,13 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
               </Button>
             </Dialog.Actions>
           </Dialog>
+          <Snackbar
+            onDismiss={() => setError(undefined)}
+            style={styles.snackbar}
+            visible={!!error}
+          >
+            {`Something went wrong: ${error}`}
+          </Snackbar>
         </Portal>
       </Card.Content>
       <Card.Actions>
