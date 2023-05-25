@@ -6,6 +6,7 @@ import { Page, Section } from './Layouts'
 import MyActivities from './MyActivities'
 import Profile from './Profile'
 import styles from './Styles'
+import MyFriends from './MyFriends'
 
 const Home = (): JSX.Element => {
   const user = useContext(UserModelContext)!
@@ -60,12 +61,15 @@ const Home = (): JSX.Element => {
                   onValueChange={setTab}
                   buttons={[
                     { label: 'Activities', value: 'MyActivities' },
-                    { label: 'Friends', value: 'Friends', disabled: true },
+                    { label: 'Friends', value: 'MyFriends' },
                   ]}
                   style={{ marginBottom: 12 }}
                 />
                 {tab === 'MyActivities' &&
                   <MyActivities />
+                }
+                {tab === 'MyFriends' &&
+                  <MyFriends />
                 }
               </View>
             }

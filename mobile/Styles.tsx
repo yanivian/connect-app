@@ -5,7 +5,7 @@ const window = Dimensions.get('window')
 const styles = StyleSheet.create({
   fab: {
     bottom: 0,
-    margin: 12,
+    margin: 16,
     position: 'absolute',
     right: 0,
   },
@@ -70,6 +70,11 @@ const styles = StyleSheet.create({
     height: 150,
     justifyContent: "center",
     alignItems: "center",
+  },
+  snackbar: {
+    bottom: 0,
+    margin: 12,
+    position: 'absolute',
   },
 })
 
