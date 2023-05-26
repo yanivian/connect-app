@@ -183,7 +183,7 @@ export function MyContacts(props: MyContactsProps & {
           </View>
           <View style={{ height: 12 }}></View>
           <Card
-            mode='contained'
+            mode='outlined'
             style={{
               flex: 1,
               flexGrow: 1,

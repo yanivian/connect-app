@@ -1,6 +1,6 @@
 import parsePhoneNumber, { NumberType } from 'libphonenumber-js'
 import React, { useState } from 'react'
-import { PermissionsAndroid, StyleSheet, View } from 'react-native'
+import { PermissionsAndroid, ScrollView, StyleSheet, View } from 'react-native'
 import Contacts from 'react-native-contacts'
 import { ActivityIndicator, Card, FAB, IconButton, Modal, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
 import { compareContacts, compareInvites } from './Compare'
@@ -80,6 +80,7 @@ export const MyFriends = (): JSX.Element => {
 
   async function deleteInvite(invite: InviteModel): Promise<void> {
     setDeletingInvites([...deletingInvitesRef.current, invite])
+    // TODO: Persist invite deletion via frontend.
     return delayedPromise(3000, undefined)
       .then(() => {
         setDeletingInvites(deletingInvitesRef.current.filter((i) => i !== invite))
@@ -146,7 +147,7 @@ export const MyFriends = (): JSX.Element => {
   }
 
   return (
-    <View>
+    <ScrollView style={{ flex: 1, flexGrow: 1 }}>
       {invites.length === 0 &&
         <Text style={{ paddingTop: 18, textAlign: 'center' }} variant="bodyLarge">
           Invite more peeps, make more friends!
@@ -214,7 +215,7 @@ export const MyFriends = (): JSX.Element => {
           {`Something went wrong: ${error}`}
         </Snackbar>
       </Portal>
-    </View>
+    </ScrollView>
   )
 }
 

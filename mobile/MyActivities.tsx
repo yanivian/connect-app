@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ScrollView } from 'react-native'
-import { FAB, Modal, Portal, Text } from 'react-native-paper'
+import { Card, FAB, Modal, Portal, Text } from 'react-native-paper'
 import { Activity, ActivityCard, ActivityProps } from './Activity'
 import { ActivityModel } from './Models'
 import styles from './Styles'
@@ -44,32 +44,47 @@ const MyActivities = (): JSX.Element => {
   }
 
   return (
-    <ScrollView style={{ flexGrow: 1 }}>
+    <ScrollView style={{ flex: 1, flexGrow: 1 }}>
       {myActivities.length === 0 &&
         <Text style={{ paddingTop: 18, textAlign: 'center' }} variant="bodyLarge">
           Create an activity to get started!
         </Text>
       }
-      {myActivities.map((thisActivity) => {
-        return (
-          <ActivityCard
-            key={thisActivity.ID}
-            activity={thisActivity}
-            cloneActivity={(activity) => {
-              setSelectedActivity({
-                activity,
-                clone: true,
-              })
-            }}
-            deleteActivity={(activity) => deleteActivity(activity.ID)}
-            editActivity={(activity) => {
-              setSelectedActivity({
-                activity,
-                clone: false,
-              })
-            }} />
-        )
-      })}
+      {myActivities.length > 0 &&
+        <Card
+          mode='outlined'
+          style={{
+            backgroundColor: 'transparent',
+            flex: 1,
+            flexGrow: 1,
+          }}
+        >
+          <Card.Title title='My Activities' titleVariant='titleMedium' />
+          <Card.Content>
+            {myActivities.map((thisActivity) => {
+              return (
+                <ActivityCard
+                  key={thisActivity.ID}
+                  activity={thisActivity}
+                  cloneActivity={(activity) => {
+                    setSelectedActivity({
+                      activity,
+                      clone: true,
+                    })
+                  }}
+                  deleteActivity={(activity) => deleteActivity(activity.ID)}
+                  editActivity={(activity) => {
+                    setSelectedActivity({
+                      activity,
+                      clone: false,
+                    })
+                  }}
+                />
+              )
+            })}
+          </Card.Content>
+        </Card>
+      }
       <Portal>
         <Modal
           contentContainerStyle={styles.fullscreen}
