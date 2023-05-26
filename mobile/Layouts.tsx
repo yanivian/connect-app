@@ -1,6 +1,6 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
-import { SafeAreaView, ScrollView, View } from 'react-native'
+import { SafeAreaView, View } from 'react-native'
 import { IconButton, Surface, Text } from 'react-native-paper'
 import { IconSource } from 'react-native-paper/src/components/Icon'
 import styles from './Styles'
@@ -12,10 +12,10 @@ type PageProps = PropsWithChildren<{
 
 export const Page = (props: PageProps) => {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
+    <SafeAreaView>
+      <View style={styles.page}>
         {props.children}
-      </ScrollView>
+      </View>
     </SafeAreaView>
   )
 }
@@ -33,7 +33,7 @@ export const Section = (props: SectionProps) => {
   return (
     <Surface style={styles.section} elevation={4}>
       <View style={styles.sectionTitle}>
-        <Text style={{ flexGrow: 1 }} variant="titleLarge">
+        <Text style={{ flexGrow: 1 }} variant="headlineSmall">
           {props.title}
         </Text>
         {props.actions &&

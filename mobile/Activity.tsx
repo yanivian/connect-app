@@ -304,12 +304,13 @@ export const Activity = (props: ActivityProps & {
                         justifyContent: 'center',
                         elevation: 2,
                       },
-                      listView: [styles.text, {
-                        paddingHorizontal: 12,
+                      listView: {
+                        borderColor: theme.colors.primary,
                         borderRadius: theme.roundness,
                         borderWidth: 1,
-                        borderColor: theme.colors.primary,
-                      }],
+                        marginBottom: 12,
+                        paddingHorizontal: 12,
+                      },
                       textInputContainer: {
                         paddingHorizontal: 12,
                         borderBottomWidth: .5,

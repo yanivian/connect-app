@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View } from 'react-native'
+import { ScrollView } from 'react-native'
 import { FAB, Modal, Portal, Text } from 'react-native-paper'
 import { Activity, ActivityCard, ActivityProps } from './Activity'
 import { ActivityModel } from './Models'
@@ -44,10 +44,10 @@ const MyActivities = (): JSX.Element => {
   }
 
   return (
-    <View>
+    <ScrollView style={{ flexGrow: 1 }}>
       {myActivities.length === 0 &&
-        <Text style={styles.text} variant="bodyLarge">
-          This is where your activities will be shown. Create one to get started.
+        <Text style={{ paddingTop: 18, textAlign: 'center' }} variant="bodyLarge">
+          Create an activity to get started!
         </Text>
       }
       {myActivities.map((thisActivity) => {
@@ -88,7 +88,7 @@ const MyActivities = (): JSX.Element => {
           visible={!selectedActivity}
         />
       </Portal>
-    </View>
+    </ScrollView>
   )
 }
 

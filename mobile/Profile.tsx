@@ -82,7 +82,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
         }]}
       >
         <View>
-          <Text style={styles.text} variant="bodyLarge">
+          <Text style={{ marginBottom: 12 }} variant="bodyLarge">
             Can you share a little more about yourself? Only your name and avatar will be visible to others.
           </Text>
           <View style={{ flexDirection: 'row', marginBottom: 12 }}>

@@ -4,9 +4,9 @@ import { Banner, Modal, Portal, SegmentedButtons } from 'react-native-paper'
 import { LoginContext, ProfileModelContext, UserModelContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import MyActivities from './MyActivities'
+import { MyFriends } from './MyFriends'
 import Profile from './Profile'
 import styles from './Styles'
-import MyFriends from './MyFriends'
 
 const Home = (): JSX.Element => {
   const user = useContext(UserModelContext)!
@@ -55,7 +55,7 @@ const Home = (): JSX.Element => {
             </Banner>
 
             {!isEditingProfile &&
-              <View>
+              <View style={{ flex: 1, flexGrow: 1 }}>
                 <SegmentedButtons
                   value={tab}
                   onValueChange={setTab}

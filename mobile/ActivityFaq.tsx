@@ -177,7 +177,7 @@ const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
                     >
                       <Card.Content style={{ padding: 12 }}>
                         <View>
-                          <Text style={styles.text} variant='bodyLarge'>
+                          <Text style={{ marginBottom: 12 }} variant='bodyLarge'>
                             {question.Question || `Question${questionIdx === 0 ? '' : ` ${questionIdx + 1}`}`}
                           </Text>
                         </View>

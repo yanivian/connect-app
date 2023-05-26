@@ -19,16 +19,16 @@ const styles = StyleSheet.create({
     top: 0,
     width: window.width,
   },
-  safeArea: {
-    height: '100%',
+  page: {
     flexDirection: 'column',
-    flex: 1,
+    height: window.height,
   },
   section: {
+    borderRadius: 12,
+    flex: 1,
     flexDirection: 'column',
     paddingBottom: 12,
-    borderRadius: 12,
-    margin: 12,
+    margin: 8,
   },
   sectionTitle: {
     alignItems: 'center',
@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
   },
   sectionContent: {
+    flex: 1,
     flexDirection: 'column',
     paddingHorizontal: 12,
   },
@@ -46,9 +47,6 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     fontSize: 16,
-  },
-  text: {
-    marginBottom: 12,
   },
   textInput: {
     fontSize: 16,

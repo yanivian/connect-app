@@ -1,5 +1,6 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import React, { PropsWithChildren, useEffect, useState } from 'react'
+import { View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
 import { UserModelContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
@@ -108,9 +109,10 @@ const Login = (props: LoginProps): JSX.Element => {
     return (
       <Page>
         <Section title="Login">
-          <Text style={styles.text} variant="bodyLarge">
+          <Text variant="bodyLarge">
             We collect your phone number to uniquely identify you.
           </Text>
+          <View style={{ height: 12 }}></View>
           <TextInput
             autoFocus
             style={styles.textInput}
@@ -155,9 +157,10 @@ const Login = (props: LoginProps): JSX.Element => {
             callback: () => setConfirmationResult(null),
           }]}
         >
-          <Text style={styles.text} variant="bodyLarge">
+          <Text variant="bodyLarge">
             We've sent a verification code to your phone number, and it should arrive momentarily.
           </Text>
+          <View style={{ height: 12 }}></View>
           <TextInput
             autoFocus
             style={styles.textInput}

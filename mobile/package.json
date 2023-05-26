@@ -16,6 +16,7 @@
     "@react-native-firebase/app-check": "^17.4.2",
     "@react-native-firebase/auth": "^17.4.2",
     "@react-native-firebase/crashlytics": "^17.4.2",
+    "libphonenumber-js": "^1.10.30",
     "lottie-react-native": "^5.1.5",
     "openai": "^3.2.1",
     "react": "18.2.0",

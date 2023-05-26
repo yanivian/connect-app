@@ -1,5 +1,7 @@
 /** This file exports the various model interfaces and types pertinent to the app. */
 
+import { PhoneNumber } from "libphonenumber-js"
+
 export interface ActivityModel {
   ID: string
   CreatedTimestampMillis: number
@@ -9,6 +11,12 @@ export interface ActivityModel {
   StartTimestampMillis: number
   EndTimestampMillis: number
   LastUpdatedTimestampMillis: number | null
+}
+
+export interface ContactModel {
+  Name: string
+  Label: string
+  PhoneNumber: PhoneNumber
 }
 
 export interface FaqModel {
@@ -25,6 +33,13 @@ export interface ImageModel {
   ID: string
   CreatedTimestampMillis: number
   URL: string
+}
+
+export interface InviteModel {
+  ID: string
+  Name: string
+  PhoneNumber: string
+  CreatedTimestampMillis: number
 }
 
 export interface LocationModel {
