@@ -39,7 +39,8 @@ function ContactCard(props: ContactCardProps): JSX.Element {
               textAlign: 'center',
               paddingHorizontal: 6,
               marginRight: 6,
-              backgroundColor: theme.colors.onTertiary,
+              backgroundColor: theme.colors.primary,
+              color: theme.colors.onPrimary,
             }}
             variant="bodyMedium"
           >
@@ -88,13 +89,13 @@ async function createInvite(contact: ContactModel): Promise<InviteModel> {
   })
 }
 
-export interface MyContactsProps {
+export interface ContactsPageProps {
   contacts: Array<ContactModel>
   invited: Array<InviteModel>
   inviteCallback: (invites: Array<InviteModel>) => void
 }
 
-export function MyContacts(props: MyContactsProps & {
+export function ContactsPage(props: ContactsPageProps & {
   close: () => void
 }): JSX.Element {
   const [searchQuery, setSearchQuery] = useState('')
@@ -160,7 +161,7 @@ export function MyContacts(props: MyContactsProps & {
           callback: props.close,
         }]}
       >
-        <View style={{ flex: 1, flexGrow: 1, flexDirection: 'column', marginBottom: 50 }}>
+        <View style={{ flex: 1, flexGrow: 1, flexDirection: 'column' }}>
           <Searchbar
             placeholder='Search'
             onChangeText={setSearchQuery}

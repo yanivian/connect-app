@@ -4,8 +4,8 @@ import { PermissionsAndroid, ScrollView, StyleSheet, View } from 'react-native'
 import Contacts from 'react-native-contacts'
 import { ActivityIndicator, Card, FAB, IconButton, Modal, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
 import { compareContacts, compareInvites } from './Compare'
+import { ContactsPage } from './Contacts'
 import { ContactModel, InviteModel } from './Models'
-import { MyContacts } from './MyContacts'
 import { delayedPromise, useMutatingState } from './React'
 import styles from './Styles'
 
@@ -183,7 +183,7 @@ export const MyFriends = (): JSX.Element => {
           onDismiss={clearContacts}
           visible={contacts.length > 0}
         >
-          <MyContacts
+          <ContactsPage
             invited={invites}
             contacts={contacts}
             inviteCallback={mergeInvites}

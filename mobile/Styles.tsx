@@ -27,8 +27,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flex: 1,
     flexDirection: 'column',
-    paddingBottom: 12,
+    flexGrow: 1,
     margin: 8,
+    paddingBottom: 12,
   },
   sectionTitle: {
     alignItems: 'center',

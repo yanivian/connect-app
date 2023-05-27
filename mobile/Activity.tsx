@@ -146,7 +146,7 @@ export const Activity = (props: ActivityProps & {
           callback: props.close,
         }]}
       >
-        <View>
+        <ScrollView style={{ flex: 1, flexGrow: 1 }}>
           {/* Name of the activity. */}
           <View style={{ flexDirection: 'row', marginBottom: 12 }}>
             <View style={{ alignSelf: 'center', marginRight: 6 }}>
@@ -255,23 +255,21 @@ export const Activity = (props: ActivityProps & {
               <View style={{ alignSelf: 'flex-start', marginTop: 3, marginRight: 6 }}>
                 <MaterialIcons name={'location-pin'} size={32} color={theme.colors.primary} />
               </View>
-              <View style={{ flexDirection: 'row', flexGrow: 1, marginLeft: 'auto' }}>
-                <View style={{ flexDirection: 'column', flexGrow: 1 }}>
-                  <Text variant="bodyLarge">
-                    {model.Location.Name}
-                  </Text>
-                  <Text variant="bodySmall">
-                    {model.Location.Address}
-                  </Text>
-                </View>
-                <View style={{ alignSelf: 'flex-start', marginLeft: 'auto', marginRight: 0 }}>
-                  <IconButton
-                    style={{ margin: 0 }}
-                    disabled={saving}
-                    size={20}
-                    icon='close'
-                    onPress={() => setModel({ ...model, Location: undefined })} />
-                </View>
+              <View style={{ flex: 1, flexDirection: 'column', flexGrow: 1 }}>
+                <Text variant="bodyLarge" numberOfLines={1}>
+                  {model.Location.Name}
+                </Text>
+                <Text variant="bodySmall" numberOfLines={1}>
+                  {model.Location.Address}
+                </Text>
+              </View>
+              <View style={{ marginLeft: 'auto', marginRight: 0 }}>
+                <IconButton
+                  style={{ margin: 0 }}
+                  disabled={saving}
+                  size={20}
+                  icon='close'
+                  onPress={() => setModel({ ...model, Location: undefined })} />
               </View>
             </View>
           }
@@ -346,7 +344,7 @@ export const Activity = (props: ActivityProps & {
               <View style={{ alignSelf: 'flex-start', marginTop: 15, marginRight: 6 }}>
                 <MaterialIcons name={'info'} size={32} color={theme.colors.primary} />
               </View>
-              <View style={{ flexGrow: 1 }}>
+              <View style={{ flex: 1, flexGrow: 1 }}>
                 <ActivityFaq
                   faq={model.Faq}
                   setFaq={(updatedFaq) => setModel({ ...model, Faq: updatedFaq })}
@@ -388,7 +386,7 @@ export const Activity = (props: ActivityProps & {
             </Button>
           </View>
           {(saving) && <LoadingAnimation />}
-        </View>
+        </ScrollView>
       </Section>
     </Page>
   )
