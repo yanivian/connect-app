@@ -220,9 +220,10 @@ export function ContactsPage(props: ContactsPageProps & {
 const localStyles = StyleSheet.create({
   inviteContainer: {
     height: 40,
-    width: 90,
+    width: 100,
     alignContent: 'center',
     justifyContent: 'center',
+    marginLeft: 'auto',
   },
   statusText: {
     textAlign: 'center',

@@ -1,7 +1,7 @@
 import parsePhoneNumber, { NumberType } from 'libphonenumber-js'
 import React, { useState } from 'react'
-import { PermissionsAndroid, ScrollView, StyleSheet, View } from 'react-native'
-import Contacts from 'react-native-contacts'
+import { PermissionsAndroid, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import Contacts, { requestPermission } from 'react-native-contacts'
 import { ActivityIndicator, Card, FAB, IconButton, Modal, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
 import { compareContacts, compareInvites } from './Compare'
 import { ContactsPage } from './Contacts'
@@ -101,20 +101,59 @@ export const MyFriends = (): JSX.Element => {
     setContacts([])
   }
 
-  async function openContacts() {
+  async function fetchContacts_Android(): Promise<Array<Contacts.Contact>> {
     return PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)
       .then((status) => {
         if (status !== 'granted') {
           return Promise.reject(PERMISSION_NOT_GRANTED)
         }
         return Contacts.getAllWithoutPhotos()
-      }).then((contacts) => {
+      })
+  }
+
+  async function fetchContacts_iOS(): Promise<Array<Contacts.Contact>> {
+    return requestPermission()
+      .then((permission) => {
+        if (permission !== 'authorized') {
+          return Promise.reject(PERMISSION_NOT_GRANTED)
+        }
+        return Contacts.getAllWithoutPhotos()
+      })
+  }
+
+  async function fetchContacts(): Promise<Array<Contacts.Contact>> {
+    const os = Platform.OS
+    if (os === 'android') {
+      return fetchContacts_Android()
+    }
+    if (os === 'ios') {
+      return fetchContacts_iOS()
+    }
+    return Promise.reject(`Contacts not available for ${Platform.OS}`)
+  }
+
+  function getContactName(contact: Contacts.Contact): string | undefined {
+    if (contact.displayName) {
+      return contact.displayName
+    }
+    if (contact.givenName && contact.familyName) {
+      return `${contact.givenName} ${contact.familyName}`
+    }
+    if (contact.givenName) {
+      return contact.givenName
+    }
+    return undefined
+  }
+
+  async function openContacts() {
+    return fetchContacts()
+      .then((contacts) => {
         const uniqueKeys = new Set<string>()
         const models: Array<ContactModel> = []
         // Iterate from back which are more recent.
         for (let contactIdx = contacts.length - 1; contactIdx >= 0; contactIdx--) {
           const contact = contacts[contactIdx]
-          const name = contact.displayName
+          const name = getContactName(contact)
           if (name) {
             for (const phoneNumberRecord of contact.phoneNumbers) {
               const label = phoneNumberRecord.label
@@ -197,11 +236,12 @@ export const MyFriends = (): JSX.Element => {
               label: 'Phone Number',
               onPress: () => { },
             },
-            {
+            // Contacts only on Android and iOS.
+            ...(Platform.OS === 'android' || Platform.OS === 'ios') ? [{
               icon: 'contacts',
               label: 'Contact',
               onPress: openContacts,
-            },
+            }] : [],
           ]}
           icon={isFabOpen ? 'minus' : 'plus'}
           onStateChange={({ open }) => setIsFabOpen(open)}
