@@ -14,6 +14,9 @@ interface ContactCardProps {
   inviteCallback: () => void
 }
 
+const CONTACT_CARD_HEIGHT = 56
+const CONTACT_CARD_WINDOW_SIZE = 4
+
 function ContactCard(props: ContactCardProps): JSX.Element {
   const theme = useTheme()
 
@@ -21,6 +24,7 @@ function ContactCard(props: ContactCardProps): JSX.Element {
     <View style={{
       borderRadius: theme.roundness,
       flexDirection: 'row',
+      height: CONTACT_CARD_HEIGHT,
       paddingHorizontal: 12,
       paddingVertical: 6,
     }}>
@@ -98,6 +102,8 @@ export interface ContactsPageProps {
 export function ContactsPage(props: ContactsPageProps & {
   close: () => void
 }): JSX.Element {
+  const labels = useMemo<Array<string>>(() => Array.from(new Set(props.contacts.map((contact) => contact.Label))).sort(), [])
+
   const [searchQuery, setSearchQuery] = useState('')
 
   function testSearchQuery(contact: ContactModel): boolean {
@@ -110,19 +116,10 @@ export function ContactsPage(props: ContactsPageProps & {
       .length > 0
   }
 
-  const [labels] = useState<Array<string>>(Array.from(new Set(props.contacts.map((contact) => contact.Label))).sort())
-  const [activeLabels, setActiveLabels] = React.useState(labels)
+  const [activeLabel, setActiveLabel] = React.useState<string | undefined>(undefined)
 
-  function isLabelActive(label: string) {
-    return activeLabels.filter((activeLabel) => activeLabel === label).length > 0
-  }
-
-  function toggleLabel(label: string) {
-    if (isLabelActive(label)) {
-      setActiveLabels(activeLabels.filter((activeLabel) => activeLabel !== label))
-    } else {
-      setActiveLabels([...activeLabels, label])
-    }
+  function toggleActiveLabel(label: string) {
+    setActiveLabel((label === activeLabel) ? undefined : label)
   }
 
   const [inviting, invitingRef, setInviting] = useMutatingState<Array<string>>([])
@@ -154,8 +151,8 @@ export function ContactsPage(props: ContactsPageProps & {
   // Memoization to improve virtualized list performance for contacts.
   // Reference: https://codingislove.com/optimize-react-native-flatlist-performance/
   const contacts = useMemo(() => props.contacts
-    .filter((contact) => isLabelActive(contact.Label))
-    .filter(testSearchQuery), [activeLabels, searchQuery])
+    .filter((contact) => !activeLabel || contact.Label === activeLabel)
+    .filter(testSearchQuery), [activeLabel, searchQuery])
   const contactKeyExtractor = useCallback((contact: ContactModel) => contact.PhoneNumber.number, [])
   const contactRenderer: ListRenderItem<ContactModel> = useCallback(({ item }) => {
     return (
@@ -166,6 +163,15 @@ export function ContactsPage(props: ContactsPageProps & {
       />
     )
   }, [invited, inviting])
+  const contactItemLayout = useCallback<(data: any, index: number) => {
+    length: number,
+    offset: number,
+    index: number,
+  }>((_data, index) => ({
+    length: CONTACT_CARD_HEIGHT,
+    offset: CONTACT_CARD_HEIGHT * index,
+    index,
+  }), [])
 
   return (
     <Page>
@@ -190,8 +196,9 @@ export function ContactsPage(props: ContactsPageProps & {
                 <Chip
                   key={label}
                   mode='flat'
-                  onPress={() => toggleLabel(label)}
-                  selected={isLabelActive(label)}
+                  onPress={() => toggleActiveLabel(label)}
+                  selected={label === activeLabel}
+                  showSelectedOverlay={true}
                 >
                   {label}
                 </Chip>
@@ -210,10 +217,10 @@ export function ContactsPage(props: ContactsPageProps & {
             <Card.Content>
               <FlatList
                 data={contacts}
+                getItemLayout={contactItemLayout}
                 keyExtractor={contactKeyExtractor}
-                pagingEnabled={true}
                 renderItem={contactRenderer}
-                windowSize={9}
+                windowSize={CONTACT_CARD_WINDOW_SIZE}
               />
             </Card.Content>
           </Card>
