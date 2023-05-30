@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { FlatList, StyleSheet, View } from 'react-native'
+import React, { useCallback, useMemo, useState } from 'react'
+import { FlatList, ListRenderItem, StyleSheet, View } from 'react-native'
 import { ActivityIndicator, Button, Card, Chip, Searchbar, Text, useTheme } from 'react-native-paper'
 import { compareInvites } from './Compare'
 import { Page, Section } from './Layouts'
@@ -151,6 +151,22 @@ export function ContactsPage(props: ContactsPageProps & {
       })
   }
 
+  // Memoization to improve virtualized list performance for contacts.
+  // Reference: https://codingislove.com/optimize-react-native-flatlist-performance/
+  const contacts = useMemo(() => props.contacts
+    .filter((contact) => isLabelActive(contact.Label))
+    .filter(testSearchQuery), [activeLabels, searchQuery])
+  const contactKeyExtractor = useCallback((contact: ContactModel) => contact.PhoneNumber.number, [])
+  const contactRenderer: ListRenderItem<ContactModel> = useCallback(({ item }) => {
+    return (
+      <ContactCard
+        contact={item}
+        state={determineContactState(item)}
+        inviteCallback={async () => inviteNow(item)}
+      />
+    )
+  }, [invited, inviting])
+
   return (
     <Page>
       <Section
@@ -193,22 +209,11 @@ export function ContactsPage(props: ContactsPageProps & {
           >
             <Card.Content>
               <FlatList
-                data={
-                  props.contacts
-                    .filter((contact) => isLabelActive(contact.Label))
-                    .filter(testSearchQuery)
-                }
-                keyExtractor={item => item.PhoneNumber.number}
+                data={contacts}
+                keyExtractor={contactKeyExtractor}
                 pagingEnabled={true}
-                renderItem={({ item }) => {
-                  return (
-                    <ContactCard
-                      contact={item}
-                      state={determineContactState(item)}
-                      inviteCallback={async () => inviteNow(item)}
-                    />
-                  )
-                }}
+                renderItem={contactRenderer}
+                windowSize={9}
               />
             </Card.Content>
           </Card>
