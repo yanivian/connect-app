@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import { ActivityIndicator, Button, Card, Chip, Searchbar, Text, useTheme } from 'react-native-paper'
 import { compareInvites } from './Compare'
 import { Page, Section } from './Layouts'
@@ -192,23 +192,24 @@ export function ContactsPage(props: ContactsPageProps & {
             }}
           >
             <Card.Content>
-              <ScrollView>
-                {
+              <FlatList
+                data={
                   props.contacts
                     .filter((contact) => isLabelActive(contact.Label))
                     .filter(testSearchQuery)
-                    .map((contact) => {
-                      return (
-                        <ContactCard
-                          key={contact.PhoneNumber.number}
-                          contact={contact}
-                          state={determineContactState(contact)}
-                          inviteCallback={async () => inviteNow(contact)}
-                        />
-                      )
-                    })
                 }
-              </ScrollView>
+                keyExtractor={item => item.PhoneNumber.number}
+                pagingEnabled={true}
+                renderItem={({ item }) => {
+                  return (
+                    <ContactCard
+                      contact={item}
+                      state={determineContactState(item)}
+                      inviteCallback={async () => inviteNow(item)}
+                    />
+                  )
+                }}
+              />
             </Card.Content>
           </Card>
         </View>
