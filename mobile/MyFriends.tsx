@@ -3,11 +3,13 @@ import React, { useState } from 'react'
 import { PermissionsAndroid, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import Contacts, { requestPermission } from 'react-native-contacts'
 import { ActivityIndicator, Card, FAB, IconButton, Modal, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
-import { compareContacts, compareInvites } from './Compare'
+import { compareContacts } from './Compare'
 import { ContactsPage } from './Contacts'
 import { ContactModel, InviteModel } from './Models'
 import { delayedPromise, useMutatingState } from './React'
 import styles from './Styles'
+import { useAppDispatch, useAppSelector } from './redux/Hooks'
+import { addInvite, deleteInvite } from './redux/MyFriendsSlice'
 
 const PERMISSION_NOT_GRANTED = 'NOT_GRANTED'
 const ALLOWED_PHONE_NUMBER_TYPES = new Set<NumberType>(['FIXED_LINE_OR_MOBILE', 'MOBILE'])
@@ -63,28 +65,18 @@ export const MyFriends = (): JSX.Element => {
   const [isFabOpen, setIsFabOpen] = useState(false)
   const [error, setError] = useState<string>()
 
-  const [invites, invitesRef, setInvites] = useMutatingState<Array<InviteModel>>([])
-
-  async function mergeInvites(newInvites: Array<InviteModel>) {
-    const setOfNewInviteIDs = new Set(newInvites.map((invite) => invite.ID))
-    const mergedInvites = [...newInvites]
-    for (const invite of invitesRef.current) {
-      if (!setOfNewInviteIDs.has(invite.ID)) {
-        mergedInvites.push(invite)
-      }
-    }
-    setInvites(mergedInvites.sort(compareInvites))
-  }
+  const myFriends = useAppSelector((state) => state.myFriendsSlice)
+  const dispatch = useAppDispatch()
 
   const [deletingInvites, deletingInvitesRef, setDeletingInvites] = useMutatingState<Array<InviteModel>>([])
 
-  async function deleteInvite(invite: InviteModel): Promise<void> {
+  async function beginDeleteInvite(invite: InviteModel): Promise<void> {
     setDeletingInvites([...deletingInvitesRef.current, invite])
     // TODO: Persist invite deletion via frontend.
     return delayedPromise(3000, undefined)
       .then(() => {
         setDeletingInvites(deletingInvitesRef.current.filter((i) => i !== invite))
-        setInvites(invitesRef.current.filter((i) => i !== invite))
+        dispatch(deleteInvite(invite))
       })
   }
 
@@ -187,12 +179,12 @@ export const MyFriends = (): JSX.Element => {
 
   return (
     <ScrollView style={{ flex: 1, flexGrow: 1 }}>
-      {invites.length === 0 &&
+      {myFriends.invites.length === 0 &&
         <Text style={{ paddingTop: 18, textAlign: 'center' }} variant="bodyLarge">
           Invite more peeps, make more friends!
         </Text>
       }
-      {invites.length > 0 &&
+      {myFriends.invites.length > 0 &&
         <Card
           mode='outlined'
           style={{
@@ -201,10 +193,10 @@ export const MyFriends = (): JSX.Element => {
         >
           <Card.Title title='Invites' titleVariant='titleMedium' />
           <Card.Content>
-            {invites.map((invite) => {
+            {myFriends.invites.map((invite) => {
               return (
                 <InviteCard
-                  deleteCallback={() => deleteInvite(invite)}
+                  deleteCallback={async () => beginDeleteInvite(invite)}
                   invite={invite}
                   key={invite.ID}
                   state={determineInviteState(invite)}
@@ -223,9 +215,9 @@ export const MyFriends = (): JSX.Element => {
           visible={contacts.length > 0}
         >
           <ContactsPage
-            invited={invites}
+            invited={myFriends.invites}
             contacts={contacts}
-            inviteCallback={mergeInvites}
+            inviteCallback={(invite) => dispatch(addInvite(invite))}
             close={clearContacts}
           />
         </Modal>

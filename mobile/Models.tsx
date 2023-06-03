@@ -70,7 +70,8 @@ export interface ProfileModel {
   LastUpdatedTimestampMillis: number | null
 }
 
-export interface UserModel {
+// Note: Not serializable.
+export interface UserApi {
   uid: string
   phoneNumber: string
   getIdToken: () => Promise<string>

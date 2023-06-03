@@ -2,17 +2,18 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
-import { UserModelContext } from './Contexts'
+import { UserApiContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
-import { UserModel } from './Models'
+import { UserApi } from './Models'
 import styles from './Styles'
+import { useAppDispatch } from './redux/Hooks'
 
 type LoginProps = PropsWithChildren<{}>
 
 /** React component that logs a user in via Firebase's phone number auth flow. */
 const Login = (props: LoginProps): JSX.Element => {
   // State that this component is responsible for providing to its children.
-  const [user, setUser] = useState<UserModel | null>(null)
+  const [userApi, setUserApi] = useState<UserApi | null>(null)
 
   // State that is collected internal to this component towards the auth flow.
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -23,11 +24,13 @@ const Login = (props: LoginProps): JSX.Element => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>()
 
+  const dispatch = useAppDispatch()
+
   /**
    * Encapsulates the Firebase User and provides a revised contract.
    * Nested within the component because signOut accessed internal state.
    */
-  class FirebaseUserModel implements UserModel {
+  class FirebaseUserApi implements UserApi {
     private user_: FirebaseAuthTypes.User
 
     uid: string  // Same as Firebase User.
@@ -56,7 +59,7 @@ const Login = (props: LoginProps): JSX.Element => {
 
   // Propagate auth state changes to user state.
   useEffect(() => auth().onAuthStateChanged((user) => {
-    setUser(!user ? null : new FirebaseUserModel(user))
+    setUserApi(!user ? null : new FirebaseUserApi(user))
   }), [] /* Only on first render */)
 
   async function signInWithPhoneNumber() {
@@ -84,7 +87,9 @@ const Login = (props: LoginProps): JSX.Element => {
     setError(null)
     // TODO: Validate code.
     return confirmationResult!.confirm(code).then((userCredential) => {
-      userCredential?.user && setUser(new FirebaseUserModel(userCredential.user))
+      if (userCredential?.user) {
+        setUserApi(new FirebaseUserApi(userCredential.user))
+      }
     })
       .catch((err) => {
         const errorCode = err.message.match(/\[([^\]]*)\]\s/)?.[1] || 'unknown'
@@ -105,7 +110,7 @@ const Login = (props: LoginProps): JSX.Element => {
   }
 
   // Step 1: Collect phone number and get ConfirmationResult.
-  if (!user && !confirmationResult) {
+  if (!userApi && !confirmationResult) {
     return (
       <Page>
         <Section title="Login">
@@ -146,7 +151,7 @@ const Login = (props: LoginProps): JSX.Element => {
   }
 
   // Step 2: Collect verification code and get Firebase User.
-  if (!user) {
+  if (!userApi) {
     return (
       <Page>
         <Section
@@ -195,9 +200,9 @@ const Login = (props: LoginProps): JSX.Element => {
 
   // Step 3: Show children within the context of the logged-in user.
   return (
-    <UserModelContext.Provider value={user}>
+    <UserApiContext.Provider value={userApi}>
       {props.children}
-    </UserModelContext.Provider>
+    </UserApiContext.Provider>
   )
 }
 

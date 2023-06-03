@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Button, Card, Dialog, IconButton, Portal, Snackbar, Text, TextInput, useTheme } from 'react-native-paper'
-import { LoginContext } from './Contexts'
 import GenerativeLanguageService from './GenerativeLanguageService'
 import { LoadingAnimation } from './Layouts'
 import { ActivityModel, FaqModel } from './Models'
 import styles from './Styles'
+import { useAppSelector } from './redux/Hooks'
 
 interface FaqState {
   Topics: Array<TopicState>
@@ -63,7 +63,7 @@ interface ActivityFaqProps {
 }
 
 const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
-  const loginContext = useContext(LoginContext)!
+  const loginContext = useAppSelector((state) => state.loginSlice.loginContext!)
   const theme = useTheme()
 
   const [faqState, setFaqState] = useState<FaqState>(stateFromModel(props.faq))

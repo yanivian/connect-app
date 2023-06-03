@@ -1,6 +1,6 @@
 /** This file defines a functional interface to the frontend service. */
 
-import { ImageModel, LoginContextModel, ProfileModel, UserModel } from './Models'
+import { ImageModel, LoginContextModel, ProfileModel, UserApi } from './Models'
 
 interface AuthRequest {
   id: string,
@@ -26,15 +26,15 @@ interface LocalFile {
 export default class FrontendService {
   private static baseUrlProd_ = "https://connect-on-firebase.wm.r.appspot.com"
 
-  public static get(user: UserModel): FrontendService {
-    return new FrontendService(user, FrontendService.baseUrlProd_)
+  public static get(userApi: UserApi): FrontendService {
+    return new FrontendService(userApi, FrontendService.baseUrlProd_)
   }
 
-  private user_: UserModel
+  private userApi_: UserApi
   private baseUrl_: string
 
-  private constructor(user: UserModel, baseUrl: string) {
-    this.user_ = user
+  private constructor(userApi: UserApi, baseUrl: string) {
+    this.userApi_ = userApi
     this.baseUrl_ = baseUrl
   }
 
@@ -83,9 +83,9 @@ export default class FrontendService {
   }
 
   private async newAuthRequest_(): Promise<AuthRequest> {
-    return this.user_.getIdToken().then((token) => {
+    return this.userApi_.getIdToken().then((token) => {
       return {
-        id: this.user_.uid,
+        id: this.userApi_.uid,
         token: token,
       }
     })

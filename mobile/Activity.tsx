@@ -1,14 +1,14 @@
 import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker'
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Linking, Platform, ScrollView, View } from 'react-native'
 import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { Button, Card, Divider, HelperText, IconButton, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import ActivityFaq from './ActivityFaq'
-import { LoginContext, UserModelContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { ActivityModel, LocationModel } from './Models'
 import styles from './Styles'
+import { useAppSelector } from './redux/Hooks'
 
 function formatDate(date: Date) {
   return date.toLocaleDateString('en-us', { weekday: "short", year: 'numeric', month: 'short', day: 'numeric' })
@@ -95,8 +95,7 @@ export const Activity = (props: ActivityProps & {
   // Callback to close this activity component if it is the current route.
   close: () => void
 }): JSX.Element => {
-  const user = useContext(UserModelContext)!
-  const loginContext = useContext(LoginContext)!
+  const loginContext = useAppSelector((state) => state.loginSlice.loginContext!)
   const theme = useTheme()
 
   const namePlaceholder = 'Play Date'

@@ -2,12 +2,13 @@ import React, { useContext, useState } from 'react'
 import { Image, View } from 'react-native'
 import * as ImagePicker from 'react-native-image-picker'
 import { Button, HelperText, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
-import { ProfileModelContext, UserModelContext } from './Contexts'
+import { UserApiContext } from './Contexts'
 import FrontendService from './FrontendService'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { ImageModel, ProfileModel } from './Models'
 import styles from './Styles'
 import ProfilePlaceholder from './images/ProfilePlaceholder.svg'
+import { useAppSelector } from './redux/Hooks'
 
 async function pickFromImageLibrary(): Promise<ImagePicker.ImagePickerResponse> {
   const options: ImagePicker.ImageLibraryOptions = {
@@ -36,8 +37,8 @@ interface ProfileProps {
 }
 
 const Profile = (props: ProfileProps): JSX.Element => {
-  const user = useContext(UserModelContext)!
-  const profile = useContext(ProfileModelContext)!
+  const userApi = useContext(UserApiContext)!
+  const profile = useAppSelector((state) => state.profileSlice.profile!)
   const theme = useTheme()
 
   const [name, setName] = useState<string | null>(profile.Name)
@@ -64,7 +65,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
       uri: asset.uri!,
     }
     setUploadingImage(true)
-    return FrontendService.get(user)
+    return FrontendService.get(userApi)
       .uploadImage(localFile)
       .then(setImage)
       .catch(setError)
@@ -165,7 +166,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
             onPress={async () => {
               setSaving(true)
               setError(null)
-              return FrontendService.get(user).updateProfile({
+              return FrontendService.get(userApi).updateProfile({
                 name: name,
                 emailAddress: emailAddress,
                 image: image?.ID || null,

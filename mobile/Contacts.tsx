@@ -96,7 +96,7 @@ async function createInvite(contact: ContactModel): Promise<InviteModel> {
 export interface ContactsPageProps {
   contacts: Array<ContactModel>
   invited: Array<InviteModel>
-  inviteCallback: (invites: Array<InviteModel>) => void
+  inviteCallback: (invite: InviteModel) => void
 }
 
 export function ContactsPage(props: ContactsPageProps & {
@@ -143,7 +143,7 @@ export function ContactsPage(props: ContactsPageProps & {
       .then((invite) => {
         setInviting(invitingRef.current.filter((inviting) => inviting !== phoneNumber))
         setInvited(invitedRef.current = [...invitedRef.current, invite].sort(compareInvites))
-        props.inviteCallback([invite])
+        props.inviteCallback(invite)
         return invite
       })
   }
