@@ -12,7 +12,7 @@ import { setProfile as setReduxProfile } from './redux/ProfileSlice'
 
 const Home = (): JSX.Element => {
   const user = useContext(UserApiContext)!
-  const loginContext = useAppSelector((state) => state.loginSlice.loginContext!)
+  const loginContext = useAppSelector((state) => state.LoginSlice.loginContext!)
   const dispatch = useAppDispatch()
 
   // State with which to override the profile available to its children.

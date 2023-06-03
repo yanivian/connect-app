@@ -95,7 +95,7 @@ export const Activity = (props: ActivityProps & {
   // Callback to close this activity component if it is the current route.
   close: () => void
 }): JSX.Element => {
-  const loginContext = useAppSelector((state) => state.loginSlice.loginContext!)
+  const loginContext = useAppSelector((state) => state.LoginSlice.loginContext!)
   const theme = useTheme()
 
   const namePlaceholder = 'Play Date'

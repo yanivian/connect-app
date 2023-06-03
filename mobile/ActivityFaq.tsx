@@ -63,7 +63,7 @@ interface ActivityFaqProps {
 }
 
 const ActivityFaq = (props: ActivityFaqProps): JSX.Element => {
-  const loginContext = useAppSelector((state) => state.loginSlice.loginContext!)
+  const loginContext = useAppSelector((state) => state.LoginSlice.loginContext!)
   const theme = useTheme()
 
   const [faqState, setFaqState] = useState<FaqState>(stateFromModel(props.faq))

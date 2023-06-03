@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit'
-import loginSlice from './LoginSlice'
-import myFriendsSlice from './MyFriendsSlice'
-import profileSlice from './ProfileSlice'
+import LoginSlice from './LoginSlice'
+import MyActivitiesSlice from './MyActivitiesSlice'
+import MyFriendsSlice from './MyFriendsSlice'
+import ProfileSlice from './ProfileSlice'
 
 export const store = configureStore({
   reducer: {
-    loginSlice,
-    myFriendsSlice,
-    profileSlice,
+    LoginSlice,
+    MyActivitiesSlice,
+    MyFriendsSlice,
+    ProfileSlice,
   }
 })
 

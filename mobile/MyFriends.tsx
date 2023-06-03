@@ -65,7 +65,7 @@ export const MyFriends = (): JSX.Element => {
   const [isFabOpen, setIsFabOpen] = useState(false)
   const [error, setError] = useState<string>()
 
-  const myFriends = useAppSelector((state) => state.myFriendsSlice)
+  const myFriends = useAppSelector((state) => state.MyFriendsSlice)
   const dispatch = useAppDispatch()
 
   const [deletingInvites, deletingInvitesRef, setDeletingInvites] = useMutatingState<Array<InviteModel>>([])

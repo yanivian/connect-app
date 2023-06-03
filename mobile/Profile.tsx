@@ -38,7 +38,7 @@ interface ProfileProps {
 
 const Profile = (props: ProfileProps): JSX.Element => {
   const userApi = useContext(UserApiContext)!
-  const profile = useAppSelector((state) => state.profileSlice.profile!)
+  const profile = useAppSelector((state) => state.ProfileSlice.profile!)
   const theme = useTheme()
 
   const [name, setName] = useState<string | null>(profile.Name)

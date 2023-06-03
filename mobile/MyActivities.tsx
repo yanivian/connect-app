@@ -3,37 +3,35 @@ import { ScrollView } from 'react-native'
 import { Card, FAB, Modal, Portal, Text } from 'react-native-paper'
 import { Activity, ActivityCard, ActivityProps } from './Activity'
 import { ActivityModel } from './Models'
+import { delayedPromise, useMutatingState } from './React'
 import styles from './Styles'
+import { useAppDispatch, useAppSelector } from './redux/Hooks'
+import { addActivity, deleteActivityById } from './redux/MyActivitiesSlice'
 
 const MyActivities = (): JSX.Element => {
-  // State capturing my activities.
-  const [myActivities, setMyActivities] = useState<Array<ActivityModel>>([])
+  const myActivities = useAppSelector((state) => state.MyActivitiesSlice)
+  const dispatch = useAppDispatch()
 
-  function mergeMyActivity(myActivity: ActivityModel) {
-    const activities: Array<ActivityModel> = []
-    let found = false
-    for (const activity of myActivities) {
-      if (activity.ID === myActivity.ID) {
-        activities.push(myActivity)
-        found = true
-      } else {
-        activities.push(activity)
-      }
-    }
-    if (!found) {
-      activities.push(myActivity)
-    }
-    setMyActivities(activities)
+  // State capturing my activities.
+  const [creating, creatingRef, setCreating] = useMutatingState<Array<ActivityModel>>([])
+  const [deleting, deletingRef, setDeleting] = useMutatingState<Array<ActivityModel>>([])
+
+  async function createActivity(activity: ActivityModel) {
+    setCreating([...creatingRef.current, activity])
+    dispatch(addActivity(activity))
+    return delayedPromise(3000, undefined)
+      .then(() => {
+        setCreating(creatingRef.current.filter((a) => a !== activity))
+      })
   }
 
-  function deleteActivity(activityID: string) {
-    const activities: Array<ActivityModel> = []
-    for (const activity of myActivities) {
-      if (activity.ID !== activityID) {
-        activities.push(activity)
-      }
-    }
-    setMyActivities(activities)
+  async function deleteActivity(activity: ActivityModel) {
+    setDeleting([...deletingRef.current, activity])
+    dispatch(deleteActivityById(activity.ID))
+    return delayedPromise(3000, undefined)
+      .then(() => {
+        setDeleting(deletingRef.current.filter((a) => a !== activity))
+      })
   }
 
   // State capturing a selected activity.
@@ -45,12 +43,12 @@ const MyActivities = (): JSX.Element => {
 
   return (
     <ScrollView style={{ flex: 1, flexGrow: 1 }}>
-      {myActivities.length === 0 &&
+      {myActivities.created.length === 0 &&
         <Text style={{ paddingTop: 18, textAlign: 'center' }} variant="bodyLarge">
           Create an activity to get started!
         </Text>
       }
-      {myActivities.length > 0 &&
+      {myActivities.created.length > 0 &&
         <Card
           mode='outlined'
           style={{
@@ -61,7 +59,7 @@ const MyActivities = (): JSX.Element => {
         >
           <Card.Title title='My Activities' titleVariant='titleMedium' />
           <Card.Content>
-            {myActivities.map((thisActivity) => {
+            {myActivities.created.map((thisActivity) => {
               return (
                 <ActivityCard
                   key={thisActivity.ID}
@@ -72,7 +70,7 @@ const MyActivities = (): JSX.Element => {
                       clone: true,
                     })
                   }}
-                  deleteActivity={(activity) => deleteActivity(activity.ID)}
+                  deleteActivity={deleteActivity}
                   editActivity={(activity) => {
                     setSelectedActivity({
                       activity,
@@ -91,7 +89,7 @@ const MyActivities = (): JSX.Element => {
           onDismiss={closeActivity}
           visible={!!selectedActivity}
         >
-          <Activity {...selectedActivity!} save={mergeMyActivity} close={closeActivity} />
+          <Activity {...selectedActivity!} save={createActivity} close={closeActivity} />
         </Modal>
         <FAB
           aria-label='Add an activity'
