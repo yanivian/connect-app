@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { FlatList, ListRenderItem, StyleSheet, View } from 'react-native'
 import { ActivityIndicator, Button, Card, Chip, Searchbar, Text, useTheme } from 'react-native-paper'
 import { compareInvites } from './Compare'
+import { FrontendServiceContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import { ContactModel, InviteModel } from './Models'
-import { delayedPromise, useMutatingState } from './React'
+import { useMutatingState } from './React'
 
 type ContactState = 'OPEN' | 'INVITING' | 'INVITED' | 'FRIEND'
 
@@ -82,17 +83,6 @@ function ContactCard(props: ContactCardProps): JSX.Element {
   )
 }
 
-async function createInvite(contact: ContactModel): Promise<InviteModel> {
-  // TODO: Persist invite via frontend.
-  const phoneNumber = contact.PhoneNumber.number
-  return delayedPromise(3000, {
-    ID: phoneNumber,
-    Name: contact.Name,
-    PhoneNumber: phoneNumber,
-    CreatedTimestampMillis: Date.now(),
-  })
-}
-
 export interface ContactsPageProps {
   contacts: Array<ContactModel>
   invited: Array<InviteModel>
@@ -102,6 +92,7 @@ export interface ContactsPageProps {
 export function ContactsPage(props: ContactsPageProps & {
   close: () => void
 }): JSX.Element {
+  const frontendService = useContext(FrontendServiceContext)!
   const labels = useMemo<Array<string>>(() => Array.from(new Set(props.contacts.map((contact) => contact.Label))).sort(), [])
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -139,7 +130,7 @@ export function ContactsPage(props: ContactsPageProps & {
   async function inviteNow(contact: ContactModel) {
     const phoneNumber = contact.PhoneNumber.number
     setInviting([...invitingRef.current, phoneNumber])
-    return createInvite(contact)
+    return frontendService.inviteContact(contact)
       .then((invite) => {
         setInviting(invitingRef.current.filter((inviting) => inviting !== phoneNumber))
         setInvited(invitedRef.current = [...invitedRef.current, invite].sort(compareInvites))

@@ -2,11 +2,12 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
-import { UserApiContext } from './Contexts'
+import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { UserApi } from './Models'
 import styles from './Styles'
 import { useAppDispatch } from './redux/Hooks'
+import FrontendService from './FrontendService'
 
 type LoginProps = PropsWithChildren<{}>
 
@@ -201,7 +202,9 @@ const Login = (props: LoginProps): JSX.Element => {
   // Step 3: Show children within the context of the logged-in user.
   return (
     <UserApiContext.Provider value={userApi}>
-      {props.children}
+      <FrontendServiceContext.Provider value={FrontendService.get(userApi)}>
+        {props.children}
+      </FrontendServiceContext.Provider>
     </UserApiContext.Provider>
   )
 }

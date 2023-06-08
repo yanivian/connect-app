@@ -75,6 +75,10 @@ const styles = StyleSheet.create({
     margin: 12,
     position: 'absolute',
   },
+  userImage: {
+    width: 40,
+    height: 40,
+  },
 })
 
 export default styles

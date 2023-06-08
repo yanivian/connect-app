@@ -1,20 +1,25 @@
 /** This file defines a functional interface to the frontend service. */
 
-import { ImageModel, LoginContextModel, ProfileModel, UserApi } from './Models'
+import { ContactModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
 
 interface AuthRequest {
-  id: string,
-  token: string,
+  id: string
+  token: string
 }
 
 interface LoginContextRequest {
-  phoneNumber: string,
+  phoneNumber: string
 }
 
 interface UpdateProfileRequest {
-  name: string | null,
-  emailAddress: string | null,
-  image: string | null,
+  name: string | null
+  emailAddress: string | null
+  image: string | null
+}
+
+interface AddConnectionResult {
+  User: UserInfo
+  IsConnected: boolean
 }
 
 interface LocalFile {
@@ -36,6 +41,39 @@ export default class FrontendService {
   private constructor(userApi: UserApi, baseUrl: string) {
     this.userApi_ = userApi
     this.baseUrl_ = baseUrl
+  }
+
+  async addConnection(targetUser: UserInfo): Promise<AddConnectionResult> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        targetUserID: targetUser.UserID,
+      }
+      return this.doPost_('/connection/add', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
+  }
+
+  async inviteContact(contact: ContactModel): Promise<InviteModel> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        name: contact.Name,
+        phoneNumber: contact.PhoneNumber.number,
+      }
+      return this.doPost_('/contact/update', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
   }
 
   async loginContext(req: LoginContextRequest): Promise<LoginContextModel> {

@@ -13,6 +13,14 @@ export interface ActivityModel {
   LastUpdatedTimestampMillis: number | null
 }
 
+export interface ConnectionsSnapshot {
+  Invites: Array<InviteModel>
+  Inviters: Array<UserInfo>
+  Connections: Array<UserInfo>
+  Incoming: Array<UserInfo>
+  Outgoing: Array<UserInfo>
+}
+
 export interface ContactModel {
   Name: string
   Label: string
@@ -40,6 +48,7 @@ export interface InviteModel {
   Name: string
   PhoneNumber: string
   CreatedTimestampMillis: number
+  LastUpdatedTimestampMillis: number | null
 }
 
 export interface LocationModel {
@@ -55,9 +64,10 @@ export interface LoginContextModel {
   // Profile at the time of login. Use ProfileModelContext for more current profile.
   Profile: ProfileModel
   Credentials: {
-    GoogleCloudApiKey: string,
-    OpenAIApiKey: string,
+    GoogleCloudApiKey: string
+    OpenAIApiKey: string
   }
+  ConnectionsSnapshot: ConnectionsSnapshot
 }
 
 export interface ProfileModel {
@@ -76,4 +86,11 @@ export interface UserApi {
   phoneNumber: string
   getIdToken: () => Promise<string>
   signOut: () => Promise<void>
+}
+
+export interface UserInfo {
+  UserID: string
+  Name: string | null
+  Image: ImageModel | null
+  PhoneNumber: string | null
 }

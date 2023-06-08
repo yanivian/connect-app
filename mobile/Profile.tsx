@@ -2,8 +2,7 @@ import React, { useContext, useState } from 'react'
 import { Image, View } from 'react-native'
 import * as ImagePicker from 'react-native-image-picker'
 import { Button, HelperText, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
-import { UserApiContext } from './Contexts'
-import FrontendService from './FrontendService'
+import { FrontendServiceContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { ImageModel, ProfileModel } from './Models'
 import styles from './Styles'
@@ -37,7 +36,7 @@ interface ProfileProps {
 }
 
 const Profile = (props: ProfileProps): JSX.Element => {
-  const userApi = useContext(UserApiContext)!
+  const frontendService = useContext(FrontendServiceContext)!
   const profile = useAppSelector((state) => state.ProfileSlice.profile!)
   const theme = useTheme()
 
@@ -65,7 +64,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
       uri: asset.uri!,
     }
     setUploadingImage(true)
-    return FrontendService.get(userApi)
+    return frontendService
       .uploadImage(localFile)
       .then(setImage)
       .catch(setError)
@@ -166,7 +165,7 @@ const Profile = (props: ProfileProps): JSX.Element => {
             onPress={async () => {
               setSaving(true)
               setError(null)
-              return FrontendService.get(userApi).updateProfile({
+              return frontendService.updateProfile({
                 name: name,
                 emailAddress: emailAddress,
                 image: image?.ID || null,

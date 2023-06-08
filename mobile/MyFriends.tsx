@@ -1,91 +1,30 @@
 import parsePhoneNumber, { NumberType } from 'libphonenumber-js'
-import React, { useState } from 'react'
-import { PermissionsAndroid, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import React, { useContext, useState } from 'react'
+import { PermissionsAndroid, Platform, ScrollView } from 'react-native'
 import Contacts, { requestPermission } from 'react-native-contacts'
-import { ActivityIndicator, Card, FAB, IconButton, Modal, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
+import { Card, FAB, Modal, Portal, Snackbar, Text } from 'react-native-paper'
 import { compareContacts } from './Compare'
 import { ContactsPage } from './Contacts'
-import { ContactModel, InviteModel } from './Models'
-import { delayedPromise, useMutatingState } from './React'
+import { FrontendServiceContext, UserApiContext } from './Contexts'
+import { ContactModel, UserInfo } from './Models'
+import { useMutatingState } from './React'
 import styles from './Styles'
+import ConnectionCard from './components/ConnectionCard'
+import { InviteCard } from './components/InviteCard'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
-import { addInvite, deleteInvite } from './redux/MyFriendsSlice'
+import { addConnection, addInvite, addOrReplaceUserIn, isUserIn, removeUserFrom } from './redux/MyFriendsSlice'
 
 const PERMISSION_NOT_GRANTED = 'NOT_GRANTED'
 const ALLOWED_PHONE_NUMBER_TYPES = new Set<NumberType>(['FIXED_LINE_OR_MOBILE', 'MOBILE'])
 
-type InviteState = 'ACTIVE' | 'DELETING'
-
-interface InviteCardProps {
-  invite: InviteModel
-  state: InviteState
-  deleteCallback: () => void
-}
-
-function InviteCard(props: InviteCardProps): JSX.Element {
-  const theme = useTheme()
-
-  return (
-    <View style={{
-      borderRadius: theme.roundness,
-      flexDirection: 'row',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-    }}>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-          flexGrow: 1,
-        }}>
-        <Text numberOfLines={1} variant="bodyLarge">
-          {props.invite.Name}
-        </Text>
-        <Text numberOfLines={1} variant="bodyMedium">
-          {props.invite.PhoneNumber}
-        </Text>
-      </View>
-      <View style={[localStyles.inviteActionsContainer, { paddingLeft: 6 }]}>
-        {props.state === 'ACTIVE' &&
-          <IconButton
-            icon='delete'
-            mode='contained-tonal'
-            onPress={props.deleteCallback}
-          />
-        }
-        {props.state === 'DELETING' &&
-          <ActivityIndicator animating={true} size='small' />
-        }
-      </View>
-    </View>
-  )
-}
-
 export const MyFriends = (): JSX.Element => {
+  const myPhoneNumber = useContext(UserApiContext)!.phoneNumber
+  const frontendService = useContext(FrontendServiceContext)!
   const [isFabOpen, setIsFabOpen] = useState(false)
   const [error, setError] = useState<string>()
 
   const myFriends = useAppSelector((state) => state.MyFriendsSlice)
   const dispatch = useAppDispatch()
-
-  const [deletingInvites, deletingInvitesRef, setDeletingInvites] = useMutatingState<Array<InviteModel>>([])
-
-  async function beginDeleteInvite(invite: InviteModel): Promise<void> {
-    setDeletingInvites([...deletingInvitesRef.current, invite])
-    // TODO: Persist invite deletion via frontend.
-    return delayedPromise(3000, undefined)
-      .then(() => {
-        setDeletingInvites(deletingInvitesRef.current.filter((i) => i !== invite))
-        dispatch(deleteInvite(invite))
-      })
-  }
-
-  function determineInviteState(invite: InviteModel): InviteState {
-    if (deletingInvites.includes(invite)) {
-      return 'DELETING'
-    }
-    return 'ACTIVE'
-  }
 
   const [contacts, setContacts] = useState<Array<ContactModel>>([])
 
@@ -148,11 +87,11 @@ export const MyFriends = (): JSX.Element => {
           const name = getContactName(contact)
           if (name) {
             for (const phoneNumberRecord of contact.phoneNumbers) {
-              const label = phoneNumberRecord.label
               const phoneNumber = parsePhoneNumber(phoneNumberRecord.number, 'US')
               if (phoneNumber && phoneNumber.isValid()
                 && phoneNumber.country === 'US'
-                && ALLOWED_PHONE_NUMBER_TYPES.has(phoneNumber.getType())) {
+                && ALLOWED_PHONE_NUMBER_TYPES.has(phoneNumber.getType())
+                && phoneNumber.number !== myPhoneNumber) {
                 // Keep at most one instance for each phone number.
                 const uniqueKey = phoneNumber.number
                 if (!uniqueKeys.has(uniqueKey)) {
@@ -177,36 +116,150 @@ export const MyFriends = (): JSX.Element => {
       })
   }
 
+  const [connecting, connectingRef, setConnecting] = useMutatingState<Array<UserInfo>>([])
+
+  async function beginConnect(targetUser: UserInfo) {
+    setConnecting(addOrReplaceUserIn(targetUser, connectingRef.current))
+    return frontendService.addConnection(targetUser)
+      .then((result) => dispatch(addConnection(result)))
+      .catch(setError)
+      .finally(() => setConnecting(removeUserFrom(targetUser, connectingRef.current)))
+  }
+
   return (
     <ScrollView style={{ flex: 1, flexGrow: 1 }}>
-      {myFriends.invites.length === 0 &&
-        <Text style={{ paddingTop: 18, textAlign: 'center' }} variant="bodyLarge">
-          Invite more peeps, make more friends!
-        </Text>
-      }
-      {myFriends.invites.length > 0 &&
+
+      {/** Users that are bilaterally connected with you. */}
+      {myFriends.Connections.length > 0 &&
         <Card
           mode='outlined'
           style={{
             backgroundColor: 'transparent',
+            paddingVertical: 6,
           }}
         >
-          <Card.Title title='Invites' titleVariant='titleMedium' />
+          <Card.Title title="Connections" titleVariant='titleMedium' />
           <Card.Content>
-            {myFriends.invites.map((invite) => {
-              return (
-                <InviteCard
-                  deleteCallback={async () => beginDeleteInvite(invite)}
-                  invite={invite}
-                  key={invite.ID}
-                  state={determineInviteState(invite)}
-                />
-              )
+            {
+              myFriends.Connections.map((user) => {
+                return (
+                  <ConnectionCard
+                    key={user.UserID}
+                    user={user}
+                  />
+                )
+              })
             }
-            )}
           </Card.Content>
         </Card>
       }
+
+      {/** Users that invite asked to connect with you. */}
+      {myFriends.Incoming.length > 0 &&
+        <Card
+          mode='outlined'
+          style={{
+            backgroundColor: 'transparent',
+            paddingVertical: 6,
+          }}
+        >
+          <Card.Title title="Incoming" titleVariant='titleMedium' />
+          <Card.Content>
+            {
+              myFriends.Incoming.map((targetUser) => {
+                return (
+                  <ConnectionCard
+                    key={targetUser.UserID}
+                    user={targetUser}
+                    actionLabel='Accept'
+                    actionCallback={() => beginConnect(targetUser)}
+                    actionStarted={isUserIn(targetUser, connecting)}
+                    actionCompleted={isUserIn(targetUser, myFriends.Connections)}
+                  />
+                )
+              })
+            }
+          </Card.Content>
+        </Card>
+      }
+
+      {/** Users that have invited you to use the app. */}
+      {myFriends.Inviters.length > 0 &&
+        <Card
+          mode='outlined'
+          style={{
+            backgroundColor: 'transparent',
+            paddingVertical: 6,
+          }}
+        >
+          <Card.Title title="Peeps That Invited You" titleVariant='titleMedium' />
+          <Card.Content>
+            {
+              myFriends.Inviters.map((targetUser) => {
+                return (
+                  <ConnectionCard
+                    key={targetUser.UserID}
+                    user={targetUser}
+                    actionLabel='Connect'
+                    actionCallback={() => beginConnect(targetUser)}
+                    actionStarted={isUserIn(targetUser, connecting)}
+                    actionCompleted={isUserIn(targetUser, myFriends.Connections) || isUserIn(targetUser, myFriends.Outgoing)}
+                  />
+                )
+              })
+            }
+          </Card.Content>
+        </Card>
+      }
+
+      {/** Outgoing connection requests that haven't been accepted yet. */}
+      {myFriends.Outgoing.length > 0 &&
+        <Card
+          mode='outlined'
+          style={{
+            backgroundColor: 'transparent',
+            paddingVertical: 6,
+          }}
+        >
+          <Card.Title title="Outgoing" titleVariant='titleMedium' />
+          <Card.Content>
+            {
+              myFriends.Outgoing.map((user) => {
+                return (
+                  <ConnectionCard
+                    key={user.UserID}
+                    user={user}
+                  />
+                )
+              })
+            }
+          </Card.Content>
+        </Card>
+      }
+
+      {/** Contacts (not users) that you have invited to use the app via their phone number. */}
+      {myFriends.Invites.length === 0 &&
+        <Text style={{ paddingVertical: 6, textAlign: 'center' }} variant="bodyLarge">
+          Invite more peeps, make more friends!
+        </Text>
+      }
+      {myFriends.Invites.length > 0 &&
+        <Card
+          mode='outlined'
+          style={{
+            backgroundColor: 'transparent',
+            paddingVertical: 6,
+          }}
+        >
+          <Card.Title title="Contacts You've Invited" titleVariant='titleMedium' />
+          <Card.Content>
+            {
+              myFriends.Invites.map((invite) => <InviteCard key={invite.ID} invite={invite} />)
+            }
+          </Card.Content>
+        </Card>
+      }
+
       <Portal>
         <Modal
           contentContainerStyle={styles.fullscreen}
@@ -215,7 +268,7 @@ export const MyFriends = (): JSX.Element => {
           visible={contacts.length > 0}
         >
           <ContactsPage
-            invited={myFriends.invites}
+            invited={myFriends.Invites}
             contacts={contacts}
             inviteCallback={(invite) => dispatch(addInvite(invite))}
             close={clearContacts}
@@ -250,13 +303,3 @@ export const MyFriends = (): JSX.Element => {
     </ScrollView>
   )
 }
-
-const localStyles = StyleSheet.create({
-  inviteActionsContainer: {
-    height: 40,
-    width: 40,
-    alignItems: 'center',
-    alignContent: 'center',
-    justifyContent: 'center',
-  },
-})
