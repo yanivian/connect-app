@@ -1,7 +1,7 @@
 import parsePhoneNumber, { NumberType } from 'libphonenumber-js'
 import React, { useContext, useState } from 'react'
-import { PermissionsAndroid, Platform, ScrollView } from 'react-native'
-import Contacts, { requestPermission } from 'react-native-contacts'
+import { Platform, ScrollView } from 'react-native'
+import Contacts from 'react-native-contacts'
 import { Card, FAB, Modal, Portal, Snackbar, Text } from 'react-native-paper'
 import { compareContacts } from './Compare'
 import { ContactsPage } from './Contacts'
@@ -13,8 +13,8 @@ import ConnectionCard from './components/ConnectionCard'
 import { InviteCard } from './components/InviteCard'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 import { addConnection, addInvite, addOrReplaceUserIn, isUserIn, removeUserFrom } from './redux/MyFriendsSlice'
+import { ERROR_CONTACTS_PERMISSION_NOT_GRANTED, fetchContacts } from './utils/ContactsUtils'
 
-const PERMISSION_NOT_GRANTED = 'NOT_GRANTED'
 const ALLOWED_PHONE_NUMBER_TYPES = new Set<NumberType>(['FIXED_LINE_OR_MOBILE', 'MOBILE'])
 
 export const MyFriends = (): JSX.Element => {
@@ -30,37 +30,6 @@ export const MyFriends = (): JSX.Element => {
 
   function clearContacts() {
     setContacts([])
-  }
-
-  async function fetchContacts_Android(): Promise<Array<Contacts.Contact>> {
-    return PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)
-      .then((status) => {
-        if (status !== 'granted') {
-          return Promise.reject(PERMISSION_NOT_GRANTED)
-        }
-        return Contacts.getAllWithoutPhotos()
-      })
-  }
-
-  async function fetchContacts_iOS(): Promise<Array<Contacts.Contact>> {
-    return requestPermission()
-      .then((permission) => {
-        if (permission !== 'authorized') {
-          return Promise.reject(PERMISSION_NOT_GRANTED)
-        }
-        return Contacts.getAllWithoutPhotos()
-      })
-  }
-
-  async function fetchContacts(): Promise<Array<Contacts.Contact>> {
-    const os = Platform.OS
-    if (os === 'android') {
-      return fetchContacts_Android()
-    }
-    if (os === 'ios') {
-      return fetchContacts_iOS()
-    }
-    return Promise.reject(`Contacts not available for ${Platform.OS}`)
   }
 
   function getContactName(contact: Contacts.Contact): string | undefined {
@@ -108,7 +77,7 @@ export const MyFriends = (): JSX.Element => {
         }
         setContacts(Array.from(models).sort(compareContacts))
       }).catch((err) => {
-        if (err === PERMISSION_NOT_GRANTED) {
+        if (err === ERROR_CONTACTS_PERMISSION_NOT_GRANTED) {
           // User has declined access to their contacts.
           return
         }
