@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from "react-native";
 
-const window = Dimensions.get('window')
+const window = Dimensions.get('screen')
 
 const styles = StyleSheet.create({
   fab: {
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flexGrow: 1,
     margin: 8,
-    paddingBottom: 12,
+    minHeight: window.height - 36,
   },
   sectionTitle: {
     alignItems: 'center',
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
   sectionContent: {
     flex: 1,
     flexDirection: 'column',
+    flexGrow: 1,
     paddingHorizontal: 12,
   },
   button: {
@@ -72,7 +73,8 @@ const styles = StyleSheet.create({
   },
   snackbar: {
     bottom: 0,
-    margin: 12,
+    margin: 15,
+    width: window.width - 30,
     position: 'absolute',
   },
   userImage: {

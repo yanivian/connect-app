@@ -8,43 +8,33 @@ import { MyFriends } from './MyFriends'
 import Profile from './Profile'
 import styles from './Styles'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
-import { setProfile as setReduxProfile } from './redux/ProfileSlice'
-import { ERROR_MESSAGING_PERMISSION_NOT_GRANTED, checkMessagingEnabled } from './utils/MessagingUtils'
+import { setProfile } from './redux/ProfileSlice'
+import { checkMessagingEnabled } from './utils/MessagingUtils'
 
 const Home = (): JSX.Element => {
-  const user = useContext(UserApiContext)!
-  const loginContext = useAppSelector((state) => state.LoginSlice.loginContext!)
   const dispatch = useAppDispatch()
+  const loginContext = useAppSelector((state) => state.LoginSlice.loginContext!)
+  const profile = useAppSelector((state) => state.ProfileSlice.profile!)
+
+  const userApi = useContext(UserApiContext)!
   const [error, setError] = useState<string>()
 
-  // Check for messaging permissions.
+  // Enable Messaging With APNS.
+  const [showMessagingPermissionsBanner, setShowMessagingPermissionsBanner] = useState(false)
   useEffect(() => {
-    checkMessagingEnabled()
-      .catch((err) => {
-        switch (err) {
-          case ERROR_MESSAGING_PERMISSION_NOT_GRANTED:
-            setError('Please enable notifications for real-time features.')
-            break
-          default:
-            setError(`Something went wrong: ${error}`)
-        }
-      })
+    // IIFE (Immediately Invoked Function Expression) because effect callbacks cannot be async.
+    (async function check() {
+      setShowMessagingPermissionsBanner(!await checkMessagingEnabled())
+    })()
   }, [] /* Only on first render */)
 
-  // State with which to override the profile available to its children.
-  const [profile, setProfile] = useState(loginContext.Profile)
-  const isProfileComplete = !!profile.Name && !!profile.Image
-
-  // Update visibility state of the banner when profile completion state changes.
-  useEffect(() => setShowIncompleteProfileBanner(!isProfileComplete), [isProfileComplete])
-
-  // States for profile manipulation.
-  const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
+  // Profile Management.
   const [isEditingProfile, setEditingProfile] = useState(loginContext.IsFirstLogin)
+  const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
+  useEffect(() => setShowIncompleteProfileBanner(!profile.Name || !profile.Image), [profile])
 
   const [tab, setTab] = React.useState('MyActivities')
 
-  dispatch(setReduxProfile(profile))
   return (
     <Portal.Host>
       <Page>
@@ -52,9 +42,25 @@ const Home = (): JSX.Element => {
           title="Home"
           actions={[
             { label: 'Profile', icon: 'account', callback: () => setEditingProfile(true) },
-            { label: 'Sign out', icon: 'logout', callback: () => user.signOut() },
+            { label: 'Sign out', icon: 'logout', callback: () => userApi.signOut() },
           ]}
         >
+          {/* Messaging Permissions Banner. */}
+          <Banner
+            visible={showMessagingPermissionsBanner}
+            elevation={4}
+            style={{ marginBottom: 12 }}
+            actions={[
+              {
+                label: 'Close',
+                onPress: () => setShowMessagingPermissionsBanner(false),
+              },
+            ]}
+            icon="alert-circle-outline">
+            Grant notification permissions to enable real-time features.
+          </Banner>
+
+          {/* Incomplete Profile Banner. */}
           <Banner
             visible={showIncompleteProfileBanner}
             elevation={4}
@@ -70,7 +76,7 @@ const Home = (): JSX.Element => {
               },
             ]}
             icon="alert-circle-outline">
-            Your profile is incomplete. Please pick a name and avatar.
+            Your profile is incomplete. Please pick both a name and an avatar.
           </Banner>
 
           {!isEditingProfile &&
@@ -100,7 +106,7 @@ const Home = (): JSX.Element => {
             visible={isEditingProfile}
           >
             <Profile
-              save={setProfile}
+              save={(profile) => dispatch(setProfile(profile))}
               close={() => setEditingProfile(false)}
             />
           </Modal>
