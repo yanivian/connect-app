@@ -43,6 +43,22 @@ export default class FrontendService {
     this.baseUrl_ = baseUrl
   }
 
+  async refreshDeviceToken(deviceToken: string | undefined): Promise<{}> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        deviceToken,
+      }
+      return this.doPost_('/profile/refreshdevicetoken', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
+  }
+
   async addConnection(targetUser: UserInfo): Promise<AddConnectionResult> {
     return this.newAuthRequest_().then((authParams) => {
       const params = {

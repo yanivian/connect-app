@@ -3,11 +3,10 @@ import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
 import { FrontendServiceContext, UserApiContext } from './Contexts'
+import FrontendService from './FrontendService'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { UserApi } from './Models'
 import styles from './Styles'
-import { useAppDispatch } from './redux/Hooks'
-import FrontendService from './FrontendService'
 
 type LoginProps = PropsWithChildren<{}>
 
@@ -24,8 +23,6 @@ const Login = (props: LoginProps): JSX.Element => {
   // UI state for when content is loading or when an error occurs.
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>()
-
-  const dispatch = useAppDispatch()
 
   /**
    * Encapsulates the Firebase User and provides a revised contract.

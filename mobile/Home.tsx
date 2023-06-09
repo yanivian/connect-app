@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Banner, Modal, Portal, SegmentedButtons, Snackbar } from 'react-native-paper'
-import { UserApiContext } from './Contexts'
+import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import MyActivities from './MyActivities'
 import { MyFriends } from './MyFriends'
@@ -9,7 +9,7 @@ import Profile from './Profile'
 import styles from './Styles'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 import { setProfile } from './redux/ProfileSlice'
-import { checkMessagingEnabled } from './utils/MessagingUtils'
+import { getDeviceToken } from './utils/MessagingUtils'
 
 const Home = (): JSX.Element => {
   const dispatch = useAppDispatch()
@@ -17,14 +17,19 @@ const Home = (): JSX.Element => {
   const profile = useAppSelector((state) => state.ProfileSlice.profile!)
 
   const userApi = useContext(UserApiContext)!
+  const frontendService = useContext(FrontendServiceContext)!
+
   const [error, setError] = useState<string>()
 
   // Enable Messaging With APNS.
+  // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
   const [showMessagingPermissionsBanner, setShowMessagingPermissionsBanner] = useState(false)
   useEffect(() => {
     // IIFE (Immediately Invoked Function Expression) because effect callbacks cannot be async.
     (async function check() {
-      setShowMessagingPermissionsBanner(!await checkMessagingEnabled())
+      const token = await getDeviceToken()
+      setShowMessagingPermissionsBanner(!token)
+      await frontendService.refreshDeviceToken(token)
     })()
   }, [] /* Only on first render */)
 
