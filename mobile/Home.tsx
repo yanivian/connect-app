@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { Banner, Modal, Portal, SegmentedButtons } from 'react-native-paper'
+import { Banner, Modal, Portal, SegmentedButtons, Snackbar } from 'react-native-paper'
 import { UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import MyActivities from './MyActivities'
@@ -9,11 +9,27 @@ import Profile from './Profile'
 import styles from './Styles'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 import { setProfile as setReduxProfile } from './redux/ProfileSlice'
+import { ERROR_MESSAGING_PERMISSION_NOT_GRANTED, checkMessagingEnabled } from './utils/MessagingUtils'
 
 const Home = (): JSX.Element => {
   const user = useContext(UserApiContext)!
   const loginContext = useAppSelector((state) => state.LoginSlice.loginContext!)
   const dispatch = useAppDispatch()
+  const [error, setError] = useState<string>()
+
+  // Check for messaging permissions.
+  useEffect(() => {
+    checkMessagingEnabled()
+      .catch((err) => {
+        switch (err) {
+          case ERROR_MESSAGING_PERMISSION_NOT_GRANTED:
+            setError('Please enable notifications for real-time features.')
+            break
+          default:
+            setError(`Something went wrong: ${error}`)
+        }
+      })
+  }, [] /* Only on first render */)
 
   // State with which to override the profile available to its children.
   const [profile, setProfile] = useState(loginContext.Profile)
@@ -88,6 +104,12 @@ const Home = (): JSX.Element => {
               close={() => setEditingProfile(false)}
             />
           </Modal>
+          <Snackbar style={styles.snackbar}
+            onDismiss={() => setError(undefined)}
+            visible={!!error}
+          >
+            {error}
+          </Snackbar>
         </Portal>
       </Page>
     </Portal.Host>
