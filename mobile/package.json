@@ -21,7 +21,7 @@
     "lottie-react-native": "^5.1.5",
     "openai": "^3.2.1",
     "react": "18.2.0",
-    "react-native": "0.71.6",
+    "react-native": "0.71.10",
     "react-native-clean-project": "^4.0.1",
     "react-native-contacts": "^7.0.5",
     "react-native-google-places-autocomplete": "^2.5.1",
