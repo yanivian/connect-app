@@ -1,6 +1,6 @@
 /** This file defines a functional interface to the frontend service. */
 
-import { ContactModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
+import { ConnectionAddedModel, ContactModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
 
 interface AuthRequest {
   id: string
@@ -15,11 +15,6 @@ interface UpdateProfileRequest {
   name: string | null
   emailAddress: string | null
   image: string | null
-}
-
-interface AddConnectionResult {
-  User: UserInfo
-  IsConnected: boolean
 }
 
 interface LocalFile {
@@ -59,7 +54,7 @@ export default class FrontendService {
     })
   }
 
-  async addConnection(targetUser: UserInfo): Promise<AddConnectionResult> {
+  async addConnection(targetUser: UserInfo): Promise<ConnectionAddedModel> {
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,

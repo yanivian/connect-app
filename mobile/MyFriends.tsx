@@ -12,8 +12,9 @@ import styles from './Styles'
 import ConnectionCard from './components/ConnectionCard'
 import { InviteCard } from './components/InviteCard'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
-import { addConnection, addInvite, addOrReplaceUserIn, isUserIn, removeUserFrom } from './redux/MyFriendsSlice'
+import { addInvite, addOutgoingConnection } from './redux/MyFriendsSlice'
 import { ERROR_CONTACTS_PERMISSION_NOT_GRANTED, fetchContacts } from './utils/ContactsUtils'
+import { addOrReplaceUserIn, isUserIn, removeUserFrom } from './utils/UserUtils'
 
 const ALLOWED_PHONE_NUMBER_TYPES = new Set<NumberType>(['FIXED_LINE_OR_MOBILE', 'MOBILE'])
 
@@ -90,7 +91,7 @@ export const MyFriends = (): JSX.Element => {
   async function beginConnect(targetUser: UserInfo) {
     setConnecting(addOrReplaceUserIn(targetUser, connectingRef.current))
     return frontendService.addConnection(targetUser)
-      .then((result) => dispatch(addConnection(result)))
+      .then((result) => dispatch(addOutgoingConnection(result)))
       .catch(setError)
       .finally(() => setConnecting(removeUserFrom(targetUser, connectingRef.current)))
   }

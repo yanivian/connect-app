@@ -1,15 +1,18 @@
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import React, { useContext, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Banner, Modal, Portal, SegmentedButtons, Snackbar } from 'react-native-paper'
 import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
+import { ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
 import { MyFriends } from './MyFriends'
 import Profile from './Profile'
 import styles from './Styles'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
+import { addIncomingConnection } from './redux/MyFriendsSlice'
 import { setProfile } from './redux/ProfileSlice'
-import { getDeviceToken } from './utils/MessagingUtils'
+import { getDeviceToken, subscribe } from './utils/MessagingUtils'
 
 const Home = (): JSX.Element => {
   const dispatch = useAppDispatch()
@@ -21,8 +24,18 @@ const Home = (): JSX.Element => {
 
   const [error, setError] = useState<string>()
 
+  /** Dispatches incoming remote messages. */
+  function dispatchMessage(message: FirebaseMessagingTypes.RemoteMessage) {
+    // Connection Added.
+    const connectionAdded = message.data && message.data['ConnectionAdded'] && JSON.parse(message.data['ConnectionAdded']) as ConnectionAddedModel || undefined
+    if (connectionAdded) {
+      dispatch(addIncomingConnection(connectionAdded))
+    }
+
+    setError(`Unhandled notification: ${JSON.stringify(message)}`)
+  }
+
   // Enable Messaging With APNS.
-  // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
   const [showMessagingPermissionsBanner, setShowMessagingPermissionsBanner] = useState(false)
   useEffect(() => {
     // IIFE (Immediately Invoked Function Expression) because effect callbacks cannot be async.
@@ -30,6 +43,10 @@ const Home = (): JSX.Element => {
       const token = await getDeviceToken()
       setShowMessagingPermissionsBanner(!token)
       await frontendService.refreshDeviceToken(token)
+      // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
+      if (token) {
+        subscribe(dispatchMessage)
+      }
     })()
   }, [] /* Only on first render */)
 

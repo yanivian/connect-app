@@ -1,5 +1,9 @@
-import messaging from '@react-native-firebase/messaging'
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { PermissionsAndroid, Platform } from 'react-native'
+
+export function subscribe(listener: (message: FirebaseMessagingTypes.RemoteMessage) => any): () => void {
+  return messaging().onMessage(listener)
+}
 
 export async function getDeviceToken(): Promise<string | undefined> {
   return checkMessagingEnabled()

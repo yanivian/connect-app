@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import { ConnectionsSnapshot, InviteModel, UserInfo } from '../Models'
-import { IsEqual, arrayFind, arrayRemove, arrayUpsert } from '../utils/ArrayUtils'
+import { ConnectionAddedModel, ConnectionsSnapshot, InviteModel } from '../Models'
+import { addOrReplaceUserIn, removeUserFrom } from '../utils/UserUtils'
 
 export const initialState: ConnectionsSnapshot = {
   Invites: [],
@@ -9,22 +9,6 @@ export const initialState: ConnectionsSnapshot = {
   Connections: [],
   Incoming: [],
   Outgoing: [],
-}
-
-const isSameUser: IsEqual<UserInfo> = (x: UserInfo, y: UserInfo) => {
-  return x.UserID === y.UserID
-}
-
-export function isUserIn(user: UserInfo, list: Array<UserInfo>): boolean {
-  return arrayFind(user, list, isSameUser).length > 0
-}
-
-export function removeUserFrom(user: UserInfo, list: Array<UserInfo>) {
-  return arrayRemove(user, list, isSameUser)
-}
-
-export function addOrReplaceUserIn(user: UserInfo, list: Array<UserInfo>) {
-  return arrayUpsert(user, list, isSameUser)
 }
 
 export const MyFriendsSlice = createSlice({
@@ -43,7 +27,17 @@ export const MyFriendsSlice = createSlice({
     deleteInvite: (state, action: PayloadAction<InviteModel>) => {
       state.Invites = state.Invites.filter((invite) => invite.ID !== action.payload.ID)
     },
-    addConnection: (state, action: PayloadAction<{ User: UserInfo, IsConnected: boolean }>) => {
+    addIncomingConnection: (state, action: PayloadAction<ConnectionAddedModel>) => {
+      const user = action.payload.User
+      const isConnected = action.payload.IsConnected
+      if (isConnected) {
+        state.Outgoing = removeUserFrom(user, state.Outgoing)
+        state.Connections = addOrReplaceUserIn(user, state.Connections)
+      } else {
+        state.Incoming = addOrReplaceUserIn(user, state.Incoming)
+      }
+    },
+    addOutgoingConnection: (state, action: PayloadAction<ConnectionAddedModel>) => {
       const user = action.payload.User
       const isConnected = action.payload.IsConnected
       if (isConnected) {
@@ -56,6 +50,6 @@ export const MyFriendsSlice = createSlice({
   },
 })
 
-export const { hydrate, addInvite, deleteInvite, addConnection } = MyFriendsSlice.actions
+export const { hydrate, addInvite, deleteInvite, addIncomingConnection, addOutgoingConnection } = MyFriendsSlice.actions
 
 export default MyFriendsSlice.reducer

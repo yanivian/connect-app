@@ -13,6 +13,11 @@ export interface ActivityModel {
   LastUpdatedTimestampMillis: number | null
 }
 
+export interface ConnectionAddedModel {
+  User: UserInfo
+  IsConnected: boolean
+}
+
 export interface ConnectionsSnapshot {
   Invites: Array<InviteModel>
   Inviters: Array<UserInfo>
