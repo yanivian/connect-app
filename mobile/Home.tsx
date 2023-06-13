@@ -25,29 +25,34 @@ const Home = (): JSX.Element => {
   const [error, setError] = useState<string>()
 
   /** Dispatches incoming remote messages. */
-  function dispatchMessage(message: FirebaseMessagingTypes.RemoteMessage) {
+  function dispatchRemoteMessage(message: FirebaseMessagingTypes.RemoteMessage): void {
     // Connection Added.
     const connectionAdded = message.data && message.data['ConnectionAdded'] && JSON.parse(message.data['ConnectionAdded']) as ConnectionAddedModel || undefined
     if (connectionAdded) {
       dispatch(addIncomingConnection(connectionAdded))
+      return
     }
 
     setError(`Unhandled notification: ${JSON.stringify(message)}`)
   }
 
+  async function startReceivingRemoteMessages() {
+    const token = await getDeviceToken()
+    await frontendService.refreshDeviceToken(token)
+    // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
+    if (token) {
+      subscribe(dispatchRemoteMessage) // the returned unsubscribe function is currently unused.
+      setShowMessagingPermissionsBanner(false)
+    } else {
+      setError('Real-time features are disabled.')
+      setShowMessagingPermissionsBanner(true)
+    }
+  }
+
   // Enable Messaging With APNS.
   const [showMessagingPermissionsBanner, setShowMessagingPermissionsBanner] = useState(false)
   useEffect(() => {
-    // IIFE (Immediately Invoked Function Expression) because effect callbacks cannot be async.
-    (async function check() {
-      const token = await getDeviceToken()
-      setShowMessagingPermissionsBanner(!token)
-      await frontendService.refreshDeviceToken(token)
-      // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
-      if (token) {
-        subscribe(dispatchMessage)
-      }
-    })()
+    startReceivingRemoteMessages()
   }, [] /* Only on first render */)
 
   // Profile Management.
@@ -76,6 +81,10 @@ const Home = (): JSX.Element => {
               {
                 label: 'Close',
                 onPress: () => setShowMessagingPermissionsBanner(false),
+              },
+              {
+                label: 'Fix it',
+                onPress: startReceivingRemoteMessages,
               },
             ]}
             icon="alert-circle-outline">
