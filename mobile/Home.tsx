@@ -4,7 +4,6 @@ import { View } from 'react-native'
 import { Banner, Modal, Portal, SegmentedButtons, Snackbar } from 'react-native-paper'
 import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
-import { ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
 import { MyFriends } from './MyFriends'
 import Profile from './Profile'
@@ -12,7 +11,7 @@ import styles from './Styles'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 import { addIncomingConnection } from './redux/MyFriendsSlice'
 import { setProfile } from './redux/ProfileSlice'
-import { getDeviceToken, subscribe } from './utils/MessagingUtils'
+import { getDeviceToken, subscribeBackgroundListener, subscribeForegroundListener } from './utils/MessagingUtils'
 
 const Home = (): JSX.Element => {
   const dispatch = useAppDispatch()
@@ -25,15 +24,28 @@ const Home = (): JSX.Element => {
   const [error, setError] = useState<string>()
 
   /** Dispatches incoming remote messages. */
-  function dispatchRemoteMessage(message: FirebaseMessagingTypes.RemoteMessage): void {
-    // Connection Added.
-    const connectionAdded = message.data && message.data['ConnectionAdded'] && JSON.parse(message.data['ConnectionAdded']) as ConnectionAddedModel || undefined
-    if (connectionAdded) {
-      dispatch(addIncomingConnection(connectionAdded))
+  function handleRemoteMessageInForeground(message: FirebaseMessagingTypes.RemoteMessage): void {
+    message.data && Object.entries(message.data).forEach(([key, value]) => dispatchRemoteMessageData(key, value))
+  }
+
+  function dispatchRemoteMessageData(key: string, payload: string): void {
+    const payloadJson = JSON.parse(payload)
+    if (!!payload && !payloadJson) {
+      console.error(`Error parsing remote message payload with key ${key}`)
       return
     }
+    switch (key) {
+      case 'ConnectionAdded':
+        dispatch(addIncomingConnection(payloadJson))
+        break
+      default:
+        console.error(`Unhandled remote message payload with key ${key}`)
+    }
+  }
 
-    setError(`Unhandled notification: ${JSON.stringify(message)}`)
+  function handleRemoteMessageInBackground(message: FirebaseMessagingTypes.RemoteMessage): Promise<any> {
+    console.error(`Unhandled background notification: ${JSON.stringify(message)}`)
+    return Promise.resolve()
   }
 
   async function startReceivingRemoteMessages() {
@@ -41,8 +53,8 @@ const Home = (): JSX.Element => {
     await frontendService.refreshDeviceToken(token)
     // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
     if (token) {
-      subscribe(dispatchRemoteMessage) // the returned unsubscribe function is currently unused.
-      setShowMessagingPermissionsBanner(false)
+      subscribeForegroundListener(handleRemoteMessageInForeground) // the returned unsubscribe function is currently unused.
+      subscribeBackgroundListener(handleRemoteMessageInBackground)
     } else {
       setError('Real-time features are disabled.')
       setShowMessagingPermissionsBanner(true)
@@ -141,8 +153,10 @@ const Home = (): JSX.Element => {
               close={() => setEditingProfile(false)}
             />
           </Modal>
-          <Snackbar style={styles.snackbar}
+          <Snackbar
+            duration={5_000}
             onDismiss={() => setError(undefined)}
+            style={styles.snackbar}
             visible={!!error}
           >
             {error}
