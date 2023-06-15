@@ -4,6 +4,7 @@ import { View } from 'react-native'
 import { Banner, Modal, Portal, SegmentedButtons, Snackbar } from 'react-native-paper'
 import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
+import { ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
 import { MyFriends } from './MyFriends'
 import Profile from './Profile'
@@ -27,23 +28,13 @@ const Home = (): JSX.Element => {
 
   /** Handles incoming remote messages when app is in foreground. */
   function handleRemoteMessageInForeground(message: FirebaseMessagingTypes.RemoteMessage): void {
-    message.data && Object.entries(message.data).forEach(([key, value]) => dispatchRemoteMessageData(key, value))
+    conditionallyDispatch<ConnectionAddedModel>(message, 'ConnectionAdded', (payload) => dispatch(addIncomingConnection(payload)))
   }
 
-  /** Dispatches remote message data payload when app is in foreground. */
-  function dispatchRemoteMessageData(key: string, payload: string): void {
-    const payloadJson = JSON.parse(payload)
-    if (!!payload && !payloadJson) {
-      console.error(`Error parsing remote message payload with key ${key}`)
-      return
-    }
-    switch (key) {
-      case 'ConnectionAdded':
-        dispatch(addIncomingConnection(payloadJson))
-        break
-      default:
-        console.error(`Unhandled remote message payload with key ${key}`)
-    }
+  function conditionallyDispatch<T>(message: FirebaseMessagingTypes.RemoteMessage, key: string, dispatcher: (payload: T) => void) {
+    const payload = message.data && message.data[key] || undefined
+    const json: T = payload && JSON.parse(payload) || undefined
+    json && dispatcher(json)
   }
 
   /** Stores incoming remote messages to local storage when app is in background. */
