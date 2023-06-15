@@ -1,37 +1,31 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { Card, FAB, Modal, Portal, Text } from 'react-native-paper'
 import { Activity, ActivityCard, ActivityProps } from './Activity'
+import { UserApiContext } from './Contexts'
 import { ActivityModel } from './Models'
-import { delayedPromise, useMutatingState } from './React'
 import styles from './Styles'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
-import { addActivity, deleteActivityById } from './redux/MyActivitiesSlice'
+import { addActivity, deleteActivityById, hydrate } from './redux/MyActivitiesSlice'
+import { loadLocalUserData, saveLocalUserData } from './utils/LocalStorage'
 
 const MyActivities = (): JSX.Element => {
+  const userApi = useContext(UserApiContext)!
+
   const myActivities = useAppSelector((state) => state.MyActivitiesSlice)
+  useEffect(() => {
+    (async () => loadLocalUserData(userApi.uid, 'MyActivities', myActivities).then((state) => dispatch(hydrate(state))))()
+  }, [])
+  useEffect(() => {
+    saveLocalUserData(userApi.uid, 'MyActivities', myActivities)
+  }, [myActivities])
+
   const dispatch = useAppDispatch()
-
-  // State capturing my activities.
-  const [creating, creatingRef, setCreating] = useMutatingState<Array<ActivityModel>>([])
-  const [deleting, deletingRef, setDeleting] = useMutatingState<Array<ActivityModel>>([])
-
   async function createActivity(activity: ActivityModel) {
-    setCreating([...creatingRef.current, activity])
     dispatch(addActivity(activity))
-    return delayedPromise(3000, undefined)
-      .then(() => {
-        setCreating(creatingRef.current.filter((a) => a !== activity))
-      })
   }
-
   async function deleteActivity(activity: ActivityModel) {
-    setDeleting([...deletingRef.current, activity])
     dispatch(deleteActivityById(activity.ID))
-    return delayedPromise(3000, undefined)
-      .then(() => {
-        setDeleting(deletingRef.current.filter((a) => a !== activity))
-      })
   }
 
   // State capturing a selected activity.

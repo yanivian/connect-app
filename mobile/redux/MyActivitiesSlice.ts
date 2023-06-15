@@ -14,6 +14,9 @@ export const MyActivitiesSlice = createSlice({
   name: 'MyActivities',
   initialState,
   reducers: {
+    hydrate: (state, action: PayloadAction<MyActivitiesState>) => {
+      Object.assign(state, { ...initialState, ...action.payload })
+    },
     addActivity: (state, action: PayloadAction<ActivityModel>) => {
       state.created = [
         action.payload,
@@ -26,6 +29,6 @@ export const MyActivitiesSlice = createSlice({
   },
 })
 
-export const { addActivity, deleteActivityById } = MyActivitiesSlice.actions
+export const { hydrate, addActivity, deleteActivityById } = MyActivitiesSlice.actions
 
 export default MyActivitiesSlice.reducer
