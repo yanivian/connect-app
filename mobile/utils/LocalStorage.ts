@@ -19,3 +19,7 @@ export async function saveLocalUserData<T>(userID: string, type: string, data: T
   return AsyncStorage.setItem(getLocalUserDataKey(userID, type), JSON.stringify(data))
     .catch(console.error)
 }
+
+export async function clearLocalUserData(userID: string, type: string): Promise<void> {
+  return AsyncStorage.removeItem(getLocalUserDataKey(userID, type))
+}

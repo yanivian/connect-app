@@ -8,9 +8,11 @@ import MyActivities from './MyActivities'
 import { MyFriends } from './MyFriends'
 import Profile from './Profile'
 import styles from './Styles'
+import AppStateListener from './components/AppStateListener'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 import { addIncomingConnection } from './redux/MyFriendsSlice'
 import { setProfile } from './redux/ProfileSlice'
+import { clearLocalUserData, loadLocalUserData, saveLocalUserData } from './utils/LocalStorage'
 import { getDeviceToken, subscribeBackgroundListener, subscribeForegroundListener } from './utils/MessagingUtils'
 
 const Home = (): JSX.Element => {
@@ -23,11 +25,12 @@ const Home = (): JSX.Element => {
 
   const [error, setError] = useState<string>()
 
-  /** Dispatches incoming remote messages. */
+  /** Handles incoming remote messages when app is in foreground. */
   function handleRemoteMessageInForeground(message: FirebaseMessagingTypes.RemoteMessage): void {
     message.data && Object.entries(message.data).forEach(([key, value]) => dispatchRemoteMessageData(key, value))
   }
 
+  /** Dispatches remote message data payload when app is in foreground. */
   function dispatchRemoteMessageData(key: string, payload: string): void {
     const payloadJson = JSON.parse(payload)
     if (!!payload && !payloadJson) {
@@ -43,9 +46,25 @@ const Home = (): JSX.Element => {
     }
   }
 
-  function handleRemoteMessageInBackground(message: FirebaseMessagingTypes.RemoteMessage): Promise<any> {
-    console.error(`Unhandled background notification: ${JSON.stringify(message)}`)
-    return Promise.resolve()
+  /** Stores incoming remote messages to local storage when app is in background. */
+  function storeRemoteMessageInBackground(message: FirebaseMessagingTypes.RemoteMessage): Promise<any> {
+    const userID = userApi.uid
+    const userDataType = 'RemoteMessages'
+    const defaultValue: Array<FirebaseMessagingTypes.RemoteMessage> = []
+    return loadLocalUserData(userID, userDataType, defaultValue)
+      .then((messages) => saveLocalUserData(userID, userDataType, [...messages, message]))
+      .catch(console.error)
+  }
+
+  /** Consumes any remote messages persisted to local storage while app was in background. */
+  async function processRemoteMessagesOnLocalStorage(): Promise<any> {
+    const userID = userApi.uid
+    const userDataType = 'RemoteMessages'
+    const defaultValue: Array<FirebaseMessagingTypes.RemoteMessage> = []
+    return loadLocalUserData(userID, userDataType, defaultValue)
+      .then((messages) => messages.forEach(handleRemoteMessageInForeground))
+      .then(() => clearLocalUserData(userID, userDataType))
+      .catch(console.error)
   }
 
   async function startReceivingRemoteMessages() {
@@ -54,7 +73,7 @@ const Home = (): JSX.Element => {
     // TODO: Listen for token refreshes. See https://rnfirebase.io/reference/messaging#onTokenRefresh
     if (token) {
       subscribeForegroundListener(handleRemoteMessageInForeground) // the returned unsubscribe function is currently unused.
-      subscribeBackgroundListener(handleRemoteMessageInBackground)
+      subscribeBackgroundListener(storeRemoteMessageInBackground)
     } else {
       setError('Real-time features are disabled.')
       setShowMessagingPermissionsBanner(true)
@@ -76,6 +95,7 @@ const Home = (): JSX.Element => {
 
   return (
     <Portal.Host>
+      <AppStateListener onForeground={processRemoteMessagesOnLocalStorage} />
       <Page>
         <Section
           title="Home"
