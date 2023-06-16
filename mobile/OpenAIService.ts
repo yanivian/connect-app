@@ -9,7 +9,7 @@ interface ActivityFaqCompletionRequest {
 
 export default class OpenAIService {
 
-  public static get(apiKey: string): OpenAIService {
+  static get(apiKey: string): OpenAIService {
     return new OpenAIService(apiKey)
   }
 

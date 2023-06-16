@@ -31,7 +31,7 @@ interface LocalFile {
 export default class FrontendService {
   private static baseUrlProd_ = "https://connect-on-firebase.wm.r.appspot.com"
 
-  public static get(userApi: UserApi): FrontendService {
+  static get(userApi: UserApi): FrontendService {
     return new FrontendService(userApi, FrontendService.baseUrlProd_)
   }
 

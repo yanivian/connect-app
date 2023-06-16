@@ -24,7 +24,7 @@ export default class GenerativeLanguageService {
 
   private static baseUrl_ = 'https://generativelanguage.googleapis.com/v1beta2'
 
-  public static get(apiKey: string): GenerativeLanguageService {
+  static get(apiKey: string): GenerativeLanguageService {
     return new GenerativeLanguageService(apiKey)
   }
 
