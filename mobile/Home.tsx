@@ -6,12 +6,13 @@ import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import { ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
-import { MyFriends } from './MyFriends'
+import { MyConnections } from './MyConnections'
+import { DeviceContacts } from './MyDeviceContacts'
 import Profile from './Profile'
 import styles from './Styles'
 import AppStateListener from './components/AppStateListener'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
-import { addIncomingConnection } from './redux/MyFriendsSlice'
+import { addIncomingConnection } from './redux/MyConnectionsSlice'
 import { setProfile } from './redux/ProfileSlice'
 import { clearLocalUserData, loadLocalUserData, saveLocalUserData } from './utils/LocalStorage'
 import { getDeviceToken, subscribeBackgroundListener, subscribeForegroundListener } from './utils/MessagingUtils'
@@ -82,7 +83,7 @@ const Home = (): JSX.Element => {
   const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
   useEffect(() => setShowIncompleteProfileBanner(!profile.Name || !profile.Image), [profile])
 
-  const [tab, setTab] = React.useState('MyActivities')
+  const [tab, setTab] = React.useState('DeviceContacts')
 
   return (
     <Portal.Host>
@@ -139,16 +140,20 @@ const Home = (): JSX.Element => {
                 value={tab}
                 onValueChange={setTab}
                 buttons={[
+                  { label: 'Contacts', value: 'DeviceContacts' },
+                  { label: 'Connections', value: 'MyConnections' },
                   { label: 'Activities', value: 'MyActivities' },
-                  { label: 'Friends', value: 'MyFriends' },
                 ]}
                 style={{ marginBottom: 12 }}
               />
+              {tab === 'DeviceContacts' &&
+                <DeviceContacts />
+              }
+              {tab === 'MyConnections' &&
+                <MyConnections />
+              }
               {tab === 'MyActivities' &&
                 <MyActivities />
-              }
-              {tab === 'MyFriends' &&
-                <MyFriends />
               }
             </View>
           }

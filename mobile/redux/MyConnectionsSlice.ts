@@ -11,8 +11,8 @@ export const initialState: ConnectionsSnapshot = {
   Outgoing: [],
 }
 
-export const MyFriendsSlice = createSlice({
-  name: 'MyFriends',
+export const MyConnectionsSlice = createSlice({
+  name: 'MyConnections',
   initialState,
   reducers: {
     hydrate: (state, action: PayloadAction<ConnectionsSnapshot>) => {
@@ -50,6 +50,6 @@ export const MyFriendsSlice = createSlice({
   },
 })
 
-export const { hydrate, addInvite, deleteInvite, addIncomingConnection, addOutgoingConnection } = MyFriendsSlice.actions
+export const { hydrate, addInvite, deleteInvite, addIncomingConnection, addOutgoingConnection } = MyConnectionsSlice.actions
 
-export default MyFriendsSlice.reducer
+export default MyConnectionsSlice.reducer

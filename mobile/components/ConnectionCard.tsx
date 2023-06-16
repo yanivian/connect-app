@@ -1,5 +1,5 @@
 import { parsePhoneNumber } from 'libphonenumber-js'
-import React from 'react'
+import React, { useState } from 'react'
 import { View } from 'react-native'
 import { ActivityIndicator, IconButton, Text, useTheme } from 'react-native-paper'
 import { UserInfo } from '../Models'
@@ -7,14 +7,12 @@ import AvatarCard from './AvatarCard'
 
 interface ConnectionCardProps {
   user: UserInfo
-  actionCallback?: (() => void)
-  actionLabel?: string
-  actionStarted?: boolean
-  actionCompleted?: boolean
+  actions?: Array<{ icon: string, label: string, completed: boolean, callback: () => Promise<any> }>
 }
 
 export default function ConnectionCard(props: ConnectionCardProps): JSX.Element {
   const theme = useTheme()
+  const [running, setRunning] = useState(false)
   return (
     <View style={{
       alignItems: 'center',
@@ -39,22 +37,31 @@ export default function ConnectionCard(props: ConnectionCardProps): JSX.Element 
           </Text>
         }
       </View>
-      {props.actionCallback &&
-        <View style={{ width: 40 }}>
-          {(!props.actionStarted || props.actionCompleted) &&
-            <IconButton
-              aria-label={props.actionLabel}
-              disabled={props.actionCompleted}
-              icon={props.actionCompleted ? 'check' : 'plus'}
-              mode={props.actionCompleted ? undefined : 'contained'}
-              onPress={props.actionCallback}
-              size={20}
-              style={{ margin: 0 }}
-            />
-          }
-          {props.actionStarted && !props.actionCompleted &&
-            <ActivityIndicator animating={true} size='small' />
-          }
+      {props.actions &&
+        <View>
+          {props.actions.map((action) => {
+            return (
+              <View key={action.label}>
+                {!running &&
+                  <IconButton
+                    aria-label={action.label}
+                    disabled={action.completed}
+                    icon={action.icon}
+                    mode={action.completed ? undefined : 'contained'}
+                    onPress={async () => {
+                      setRunning(true)
+                      await action.callback()
+                    }}
+                    size={20}
+                    style={{ margin: 0, marginLeft: 6 }}
+                  />
+                }
+                {running && !action.completed &&
+                  <ActivityIndicator animating={true} size='small' />
+                }
+              </View>
+            )
+          })}
         </View>
       }
     </View>

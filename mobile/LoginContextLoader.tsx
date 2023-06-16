@@ -3,7 +3,7 @@ import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { useAppDispatch } from './redux/Hooks'
 import { setLoginContext as setReduxLoginContext } from './redux/LoginSlice'
-import { hydrate } from './redux/MyFriendsSlice'
+import { hydrate } from './redux/MyConnectionsSlice'
 import { setProfile } from './redux/ProfileSlice'
 
 type LoginContextLoaderProps = PropsWithChildren<{}>

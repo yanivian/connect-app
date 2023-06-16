@@ -1,6 +1,6 @@
 /** This file defines a functional interface to the frontend service. */
 
-import { ConnectionAddedModel, ContactModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
+import { ConnectionAddedModel, ContactModel, DeviceContactsModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
 
 interface AuthRequest {
   id: string
@@ -9,6 +9,11 @@ interface AuthRequest {
 
 interface LoginContextRequest {
   phoneNumber: string
+}
+
+interface SyncDeviceContactsRequest {
+  PhoneNumbers?: Array<string>
+  UserIDs?: Array<string>
 }
 
 interface UpdateProfileRequest {
@@ -38,20 +43,8 @@ export default class FrontendService {
     this.baseUrl_ = baseUrl
   }
 
-  async refreshDeviceToken(deviceToken: string | undefined): Promise<{}> {
-    return this.newAuthRequest_().then((authParams) => {
-      const params = {
-        ...authParams,
-        deviceToken,
-      }
-      return this.doPost_('/profile/refreshdevicetoken', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+  getUserID() {
+    return this.userApi_.uid
   }
 
   async addConnection(targetUser: UserInfo): Promise<ConnectionAddedModel> {
@@ -94,6 +87,38 @@ export default class FrontendService {
         ...req,
       }
       return this.doPost_('/user/login', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
+  }
+
+  async refreshDeviceToken(deviceToken: string | undefined): Promise<{}> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        deviceToken,
+      }
+      return this.doPost_('/profile/refreshdevicetoken', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
+  }
+
+  async syncDeviceContacts(req: SyncDeviceContactsRequest): Promise<DeviceContactsModel> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        request: JSON.stringify(req),
+      }
+      return this.doPost_('/contacts/sync', params)
     }).then(async resp => {
       if (resp.ok) {
         return resp.json()

@@ -85,6 +85,10 @@ export interface ProfileModel {
   LastUpdatedTimestampMillis: number | null
 }
 
+export interface DeviceContactsModel {
+  Users?: Array<UserInfo>
+}
+
 // Note: Not serializable.
 export interface UserApi {
   uid: string

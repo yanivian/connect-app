@@ -7,24 +7,23 @@ import { compareContacts } from './Compare'
 import { ContactsPage } from './Contacts'
 import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { ContactModel, UserInfo } from './Models'
-import { useMutatingState } from './React'
 import styles from './Styles'
 import ConnectionCard from './components/ConnectionCard'
 import { InviteCard } from './components/InviteCard'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
-import { addInvite, addOutgoingConnection } from './redux/MyFriendsSlice'
+import { addInvite, addOutgoingConnection } from './redux/MyConnectionsSlice'
 import { ERROR_CONTACTS_PERMISSION_NOT_GRANTED, fetchContacts } from './utils/ContactsUtils'
-import { addOrReplaceUserIn, isUserIn, removeUserFrom } from './utils/UserUtils'
+import { isUserIn } from './utils/UserUtils'
 
 const ALLOWED_PHONE_NUMBER_TYPES = new Set<NumberType>(['FIXED_LINE_OR_MOBILE', 'MOBILE'])
 
-export const MyFriends = (): JSX.Element => {
+export const MyConnections = (): JSX.Element => {
   const myPhoneNumber = useContext(UserApiContext)!.phoneNumber
   const frontendService = useContext(FrontendServiceContext)!
   const [isFabOpen, setIsFabOpen] = useState(false)
   const [error, setError] = useState<string>()
 
-  const myFriends = useAppSelector((state) => state.MyFriendsSlice)
+  const myFriends = useAppSelector((state) => state.MyConnectionsSlice)
   const dispatch = useAppDispatch()
 
   const [contacts, setContacts] = useState<Array<ContactModel>>([])
@@ -86,14 +85,10 @@ export const MyFriends = (): JSX.Element => {
       })
   }
 
-  const [connecting, connectingRef, setConnecting] = useMutatingState<Array<UserInfo>>([])
-
-  async function beginConnect(targetUser: UserInfo) {
-    setConnecting(addOrReplaceUserIn(targetUser, connectingRef.current))
+  async function addConnection(targetUser: UserInfo) {
     return frontendService.addConnection(targetUser)
       .then((result) => dispatch(addOutgoingConnection(result)))
       .catch(setError)
-      .finally(() => setConnecting(removeUserFrom(targetUser, connectingRef.current)))
   }
 
   return (
@@ -141,10 +136,12 @@ export const MyFriends = (): JSX.Element => {
                   <ConnectionCard
                     key={targetUser.UserID}
                     user={targetUser}
-                    actionLabel='Accept'
-                    actionCallback={() => beginConnect(targetUser)}
-                    actionStarted={isUserIn(targetUser, connecting)}
-                    actionCompleted={isUserIn(targetUser, myFriends.Connections)}
+                    actions={[{
+                      icon: 'check',
+                      label: 'Accept',
+                      callback: () => addConnection(targetUser),
+                      completed: isUserIn(targetUser, myFriends.Connections),
+                    }]}
                   />
                 )
               })
@@ -170,10 +167,12 @@ export const MyFriends = (): JSX.Element => {
                   <ConnectionCard
                     key={targetUser.UserID}
                     user={targetUser}
-                    actionLabel='Connect'
-                    actionCallback={() => beginConnect(targetUser)}
-                    actionStarted={isUserIn(targetUser, connecting)}
-                    actionCompleted={isUserIn(targetUser, myFriends.Connections) || isUserIn(targetUser, myFriends.Outgoing)}
+                    actions={[{
+                      icon: 'plus',
+                      label: 'Connect',
+                      callback: () => addConnection(targetUser),
+                      completed: isUserIn(targetUser, myFriends.Connections) || isUserIn(targetUser, myFriends.Outgoing),
+                    }]}
                   />
                 )
               })

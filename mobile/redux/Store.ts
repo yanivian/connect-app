@@ -1,14 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
+import DeviceContactsSlice from './DeviceContactsSlice'
 import LoginSlice from './LoginSlice'
 import MyActivitiesSlice from './MyActivitiesSlice'
-import MyFriendsSlice from './MyFriendsSlice'
+import MyConnectionsSlice from './MyConnectionsSlice'
 import ProfileSlice from './ProfileSlice'
 
 export const store = configureStore({
   reducer: {
+    DeviceContactsSlice,
     LoginSlice,
     MyActivitiesSlice,
-    MyFriendsSlice,
+    MyConnectionsSlice,
     ProfileSlice,
   }
 })
