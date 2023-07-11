@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import DeviceContactsSlice from './DeviceContactsSlice'
 import LoginSlice from './LoginSlice'
 import MyActivitiesSlice from './MyActivitiesSlice'
+import MyChatsSlice from './MyChatsSlice'
 import MyConnectionsSlice from './MyConnectionsSlice'
 import ProfileSlice from './ProfileSlice'
 
@@ -10,6 +11,7 @@ export const store = configureStore({
     DeviceContactsSlice,
     LoginSlice,
     MyActivitiesSlice,
+    MyChatsSlice,
     MyConnectionsSlice,
     ProfileSlice,
   }

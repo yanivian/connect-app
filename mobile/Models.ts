@@ -13,6 +13,29 @@ export interface ActivityModel {
   LastUpdatedTimestampMillis: number | null
 }
 
+export interface ChatGistModel {
+  ChatID: string
+  Participants: Array<UserInfo>
+  LatestMessage: ChatMessageModel
+  LastSeenMessageID?: number
+}
+
+export interface ChatMessageModel {
+  MessageID: number
+  Poster: UserInfo
+  CreatedTimestampMillis: number
+  Text?: string
+}
+
+export interface ChatModel {
+  Gist: ChatGistModel
+  Messages: Array<ChatMessageModel>
+}
+
+export interface ChatsSnapshot {
+  Chats?: Array<ChatModel>
+}
+
 export interface ConnectionAddedModel {
   User: UserInfo
   IsConnected: boolean
@@ -72,6 +95,7 @@ export interface LoginContextModel {
     GoogleCloudApiKey: string
     OpenAIApiKey: string
   }
+  ChatsSnapshot: ChatsSnapshot
   ConnectionsSnapshot: ConnectionsSnapshot
 }
 

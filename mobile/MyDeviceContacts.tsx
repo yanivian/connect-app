@@ -29,6 +29,7 @@ export const DeviceContacts = (): JSX.Element => {
   useEffect(() => {
     (async () => {
       const loadedDeviceContacts = await loadLocalUserData(userID, 'DeviceContacts', {} as DeviceContactsModel)
+      // Explicitly refresh contacts to capture any profile changes, deletions, etc.
       const userIDs = (loadedDeviceContacts.Users || []).map((user) => user.UserID)
       if (!!userIDs) {
         const refreshedDeviceContacts = await frontendService.syncDeviceContacts({ UserIDs: userIDs })
@@ -39,6 +40,7 @@ export const DeviceContacts = (): JSX.Element => {
   }, [])
 
   // Save to local storage.
+  // TODO: Use checksum to avoid redundant saves.
   useEffect(() => {
     (async () => {
       await saveLocalUserData(userID, 'DeviceContacts', deviceContacts).catch(setError)
