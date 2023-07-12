@@ -6,6 +6,7 @@ import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import { ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
+import { MyChats } from './MyChats'
 import { MyConnections } from './MyConnections'
 import { DeviceContacts } from './MyDeviceContacts'
 import Profile from './Profile'
@@ -140,6 +141,7 @@ const Home = (): JSX.Element => {
                 value={tab}
                 onValueChange={setTab}
                 buttons={[
+                  { label: 'Chats', value: 'MyChats' },
                   { label: 'Contacts', value: 'DeviceContacts' },
                   { label: 'Connections', value: 'MyConnections' },
                   { label: 'Activities', value: 'MyActivities' },
@@ -148,6 +150,9 @@ const Home = (): JSX.Element => {
               />
               {tab === 'DeviceContacts' &&
                 <DeviceContacts />
+              }
+              {tab === 'MyChats' &&
+                <MyChats />
               }
               {tab === 'MyConnections' &&
                 <MyConnections />
