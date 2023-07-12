@@ -9,7 +9,7 @@ import ChatCard from './components/ChatCard'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 
 const ChatViewTypes = {
-  FULL: 1,
+  ROW: 1,
 }
 
 export const MyChats = (): JSX.Element => {
@@ -22,10 +22,10 @@ export const MyChats = (): JSX.Element => {
   const { width } = Dimensions.get('window')
   const [dataProvider] = useState(new DataProvider((r1, r2: any) => r1 !== r2).cloneWithRows(state.Chats || []))
   const layoutProvider = new LayoutProvider(
-    (index) => ChatViewTypes.FULL,
+    (index) => ChatViewTypes.ROW,
     (type, dim) => {
       switch (type) {
-        case ChatViewTypes.FULL:
+        case ChatViewTypes.ROW:
           dim.width = width
           dim.height = 62
           break;
@@ -37,7 +37,7 @@ export const MyChats = (): JSX.Element => {
   )
   const rowRenderer = (type: string | number, chat: ChatModel, index: number) => {
     switch (type) {
-      case ChatViewTypes.FULL:
+      case ChatViewTypes.ROW:
         return (
           <ChatCard
             key={chat.Gist.ChatID}
@@ -50,7 +50,6 @@ export const MyChats = (): JSX.Element => {
   }
 
   return (
-
     <Card
       mode='outlined'
       style={{
