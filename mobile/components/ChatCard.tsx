@@ -57,7 +57,6 @@ export default function ChatCard(props: ChatCardProps): JSX.Element {
       alignItems: 'center',
       borderRadius: theme.roundness,
       flexDirection: 'row',
-      marginVertical: 6,
     }}>
       <AvatarCard
         imageURL={avatarParticipant.Image?.URL}
