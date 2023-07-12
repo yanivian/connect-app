@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { FlatList, ListRenderItem, StyleSheet, View } from 'react-native'
 import { ActivityIndicator, Button, Card, Chip, Searchbar, Text, useTheme } from 'react-native-paper'
-import { compareInvites } from './Compare'
+import { compareInvites } from './utils/CompareUtils'
 import { FrontendServiceContext } from './Contexts'
 import { Page, Section } from './Layouts'
 import { ContactModel, InviteModel } from './Models'

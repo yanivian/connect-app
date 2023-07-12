@@ -33,7 +33,7 @@ export const Section = (props: SectionProps) => {
   return (
     <Surface style={styles.section} elevation={4}>
       <View style={styles.sectionTitle}>
-        <Text style={{ flexGrow: 1 }} variant="headlineSmall">
+        <Text numberOfLines={1} style={{ flexGrow: 1 }} variant="headlineSmall">
           {props.title}
         </Text>
         {props.actions &&

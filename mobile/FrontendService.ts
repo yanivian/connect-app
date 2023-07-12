@@ -1,6 +1,6 @@
 /** This file defines a functional interface to the frontend service. */
 
-import { ConnectionAddedModel, ContactModel, DeviceContactsModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
+import { ChatModel, ConnectionAddedModel, ContactModel, DeviceContactsModel, ImageModel, InviteModel, LoginContextModel, ProfileModel, UserApi, UserInfo } from './Models'
 
 interface AuthRequest {
   id: string
@@ -80,6 +80,22 @@ export default class FrontendService {
     })
   }
 
+  async listChatMessages(chatID: string): Promise<ChatModel> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        chatID,
+      }
+      return this.doPost_('/chat/listmessages', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
+  }
+
   async loginContext(req: LoginContextRequest): Promise<LoginContextModel> {
     return this.newAuthRequest_().then((authParams) => {
       const params = {
@@ -87,6 +103,23 @@ export default class FrontendService {
         ...req,
       }
       return this.doPost_('/user/login', params)
+    }).then(async resp => {
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+      }
+    })
+  }
+
+  async postChatMessage(targetUserID: string, text: string | undefined): Promise<ChatModel> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        targetUserID,
+        text,
+      }
+      return this.doPost_('/chat/postmessage', params)
     }).then(async resp => {
       if (resp.ok) {
         return resp.json()

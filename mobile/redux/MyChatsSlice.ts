@@ -1,8 +1,11 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import { ChatsSnapshot } from '../Models'
+import { ChatModel, ChatsSnapshot } from '../Models'
+import { addOrReplaceChatMessageIn, getChatMessageIn } from '../utils/ChatMessageUtils'
+import { addOrReplaceChatIn, getChatIn } from '../utils/ChatUtils'
+import { compareChatGists, compareChatMessages } from '../utils/CompareUtils'
 
-export const initialState: ChatsSnapshot = {
+const initialState: ChatsSnapshot = {
   Chats: undefined,
 }
 
@@ -10,12 +13,31 @@ export const MyChatsSlice = createSlice({
   name: 'MyChats',
   initialState,
   reducers: {
-    refresh: (state, action: PayloadAction<ChatsSnapshot>) => {
+    refreshChats: (state, action: PayloadAction<ChatsSnapshot>) => {
       Object.assign(state, { ...initialState, ...action.payload })
+    },
+    incorporateChat: (state, action: PayloadAction<ChatModel>) => {
+      const chat = action.payload
+      let list = state.Chats || []
+      const existingChat = getChatIn(chat, list)
+
+      let messages = existingChat?.Messages || []
+      chat.Messages.forEach((message) => {
+        const existingMessage = getChatMessageIn(message, messages)
+        if (!existingMessage || compareChatMessages(existingMessage, message) <= 0) {
+          messages = addOrReplaceChatMessageIn(message, messages)
+        }
+      })
+
+      const updatedChat: ChatModel = {
+        Gist: (!existingChat || compareChatGists(existingChat.Gist, chat.Gist) <= 0) ? chat.Gist : existingChat.Gist,
+        Messages: messages,
+      }
+      state.Chats = addOrReplaceChatIn(updatedChat, list)
     },
   },
 })
 
-export const { refresh } = MyChatsSlice.actions
+export const { refreshChats, incorporateChat } = MyChatsSlice.actions
 
 export default MyChatsSlice.reducer

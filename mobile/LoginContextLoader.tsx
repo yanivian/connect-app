@@ -3,9 +3,9 @@ import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { LoadingAnimation, Page, Section } from './Layouts'
 import { useAppDispatch } from './redux/Hooks'
 import { setLoginContext as setReduxLoginContext } from './redux/LoginSlice'
+import { refreshChats } from './redux/MyChatsSlice'
 import { hydrate } from './redux/MyConnectionsSlice'
 import { setProfile } from './redux/ProfileSlice'
-import { refresh } from './redux/MyChatsSlice'
 
 type LoginContextLoaderProps = PropsWithChildren<{}>
 
@@ -25,7 +25,7 @@ const LoginContextLoader = (props: LoginContextLoaderProps): JSX.Element => {
     }).then((loginContext) => {
       // Update redux initial state.
       dispatch(setReduxLoginContext(loginContext))
-      dispatch(refresh(loginContext.ChatsSnapshot))
+      dispatch(refreshChats(loginContext.ChatsSnapshot))
       dispatch(hydrate(loginContext.ConnectionsSnapshot))
       dispatch(setProfile(loginContext.Profile))
     }).then(() => setReady(true))
