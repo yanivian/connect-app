@@ -10,6 +10,7 @@ import ChatMessageCard from '../components/ChatMessageCard'
 import { useAppDispatch, useAppSelector } from '../redux/Hooks'
 import { incorporateChat } from '../redux/MyChatsSlice'
 import { summarizeParticipants } from '../utils/ChatUtils'
+import { compareChatGists } from '../utils/CompareUtils'
 
 export interface ChatPageProps {
   chatID?: string
@@ -59,11 +60,10 @@ export function ChatPage(props: ChatPageProps & {
   const frontendService = useContext(FrontendServiceContext)!
 
   const [chatID, setChatID] = useState(props.chatID)
-  let chat = chatID && state.Chats && findChatByID(chatID, state.Chats) || undefined
+  const [chat, setChat] = useState<ChatModel>()
 
-  const [refreshing, setRefreshing] = useState(false)
+  const [locked, setLocked] = useState(false)
   const [text, setText] = useState('')
-  const [sending, setSending] = useState(false)
 
   // Fetch chat messages from server if needed.
   useEffect(() => {
@@ -71,25 +71,25 @@ export function ChatPage(props: ChatPageProps & {
       if (!chatID) {
         return
       }
-      setRefreshing(true)
+      setLocked(true)
       dispatch(incorporateChat(await frontendService.listChatMessages(chatID)))
-      setRefreshing(false)
-      scrollToEnd()
+      setLocked(false)
+      scrollToEnd(true)
     })()
   }, [])
 
   async function postChatMessage() {
     // TODO: Handle the case of more than one target user.
     const targetUserID = otherParticipantUserIDs && otherParticipantUserIDs[0] || userApi.uid
-    setSending(true)
-    chat = await frontendService.postChatMessage(targetUserID, text || undefined)
+    setLocked(true)
+
+    const fresherChat = await frontendService.postChatMessage(targetUserID, text || undefined)
     if (!chatID) {
-      setChatID(chat.Gist.ChatID)
+      setChatID(fresherChat.Gist.ChatID)
     }
-    dispatch(incorporateChat(chat))
+    dispatch(incorporateChat(fresherChat))
     setText('')
-    setSending(false)
-    scrollToEnd()
+    setLocked(false)
   }
 
   const chatMessagesRecyclerListView = useRef<any>()
@@ -111,11 +111,16 @@ export function ChatPage(props: ChatPageProps & {
 
   // Refresh the data provider when the chat changes.
   useEffect(() => {
-    setChatMessagesDataProvider(dataProvider.cloneWithRows(chat?.Messages || []))
-  }, [chat])
+    const updatedChat = chatID && state.Chats && findChatByID(chatID, state.Chats) || undefined
+    setChat(updatedChat)
+    setChatMessagesDataProvider(dataProvider.cloneWithRows(updatedChat?.Messages || []))
+    if (!!chat) {
+      scrollToEnd(true)
+    }
+  }, [chatID, state.Chats])
 
-  function scrollToEnd() {
-    (chatMessagesRecyclerListView.current! as RecyclerListView<any, any>).scrollToEnd(true)
+  function scrollToEnd(animate?: boolean) {
+    (chatMessagesRecyclerListView.current! as RecyclerListView<any, any>).scrollToEnd(animate)
   }
 
   return (
@@ -149,9 +154,6 @@ export function ChatPage(props: ChatPageProps & {
                 ref={chatMessagesRecyclerListView}
                 rowRenderer={chatMessageCardRenderer}
               />
-              {refreshing &&
-                <ActivityIndicator animating={true} size='small' />
-              }
               <Divider />
               <View style={{
                 flexDirection: 'row',
@@ -167,11 +169,11 @@ export function ChatPage(props: ChatPageProps & {
                   onChangeText={setText}
                   placeholder='Message'
                   inputMode='text'
-                  disabled={sending}
+                  disabled={locked}
                   error={!!error}
                 />
                 <View style={{ alignItems: 'flex-end' }}>
-                  {!sending &&
+                  {!locked &&
                     <IconButton
                       icon='send'
                       iconColor={theme.colors.primary}
@@ -179,7 +181,7 @@ export function ChatPage(props: ChatPageProps & {
                       style={{ margin: 0 }}
                     />
                   }
-                  {sending &&
+                  {locked &&
                     <ActivityIndicator animating={true} size='small' />
                   }
                 </View>
