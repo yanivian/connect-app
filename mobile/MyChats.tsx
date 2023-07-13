@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Dimensions } from 'react-native'
-import { Card, Modal, Portal, Snackbar } from 'react-native-paper'
+import { Card, FAB, Modal, Portal, Snackbar } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
 import { UserApiContext } from './Contexts'
-import { ChatModel } from './Models'
+import { ChatModel, UserInfo } from './Models'
 import styles from './Styles'
 import ChatCard from './components/ChatCard'
 import { ChatPage, ChatPageProps } from './pages/ChatPage'
+import { DeviceContactPickerPage } from './pages/DeviceContactPickerPage'
 import { useAppSelector } from './redux/Hooks'
 
 const { width } = Dimensions.get('window')
@@ -48,6 +49,18 @@ export const MyChats = (): JSX.Element => {
   }
   function unselectChat() {
     setSelectedChat(undefined)
+  }
+
+  const [showDeviceContactPicker, setShowDeviceContactPicker] = useState(false)
+  function pickParticipant(user: UserInfo | undefined) {
+    if (!user) {
+      unselectChat()
+    } else {
+      setSelectedChat({
+        otherParticipants: [user]
+      })
+    }
+    setShowDeviceContactPicker(false)
   }
 
   const [chatsDataProvider, setChatsDataProvider] = useState(dataProvider.cloneWithRows(state.Chats || []))
@@ -95,6 +108,16 @@ export const MyChats = (): JSX.Element => {
         >
           {`Something went wrong: ${error}`}
         </Snackbar>
+
+        <Modal
+          contentContainerStyle={styles.fullscreen}
+          dismissable
+          onDismiss={() => pickParticipant(undefined)}
+          visible={showDeviceContactPicker}
+        >
+          <DeviceContactPickerPage select={pickParticipant} />
+        </Modal>
+
         <Modal
           contentContainerStyle={styles.fullscreen}
           dismissable
@@ -106,6 +129,14 @@ export const MyChats = (): JSX.Element => {
             close={unselectChat}
           />
         </Modal>
+
+        <FAB
+          aria-label='Start a chat'
+          icon='plus'
+          onPress={() => setShowDeviceContactPicker(true)}
+          style={styles.fab}
+          visible={!selectedChat && !showDeviceContactPicker}
+        />
       </Portal>
     </Card>
   )

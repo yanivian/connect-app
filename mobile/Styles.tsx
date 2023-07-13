@@ -4,10 +4,11 @@ const window = Dimensions.get('screen')
 
 const styles = StyleSheet.create({
   fab: {
-    bottom: 0,
-    margin: 16,
+    bottom: 12,
+    margin: 4,
     position: 'absolute',
-    right: 0,
+    right: 20,
+    borderRadius: 50,
   },
   fullscreen: {
     alignItems: undefined,
