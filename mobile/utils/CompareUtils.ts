@@ -30,15 +30,15 @@ function compare<T extends Object>(obj1: T, obj2: T, sortByList: Array<SortBy<T>
 
 export function compareChatGists(first: ChatGistModel, second: ChatGistModel): -1 | 0 | 1 {
   return compare(first, second, [
-    { value: (model) => model.LatestMessage.MessageID, order: 'ASC' },
-    { value: (model) => model.LastSeenMessageID, order: 'ASC' },
+    { value: (model) => Number(model.LatestMessage.MessageID), order: 'ASC' },
+    { value: (model) => Number(model.LastSeenMessageID), order: 'ASC' },
   ] as Array<SortBy<ChatGistModel>>)
 }
 
 export function compareChatMessages(first: ChatMessageModel, second: ChatMessageModel): -1 | 0 | 1 {
   return compare(first, second, [
-    { value: (model) => model.MessageID, order: 'ASC' },
-    { value: (model) => model.CreatedTimestampMillis, order: 'ASC' },
+    { value: (model) => Number(model.MessageID), order: 'ASC' },
+    { value: (model) => Number(model.CreatedTimestampMillis), order: 'ASC' },
   ] as Array<SortBy<ChatMessageModel>>)
 }
 

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Dimensions } from 'react-native'
 import { Card, Modal, Portal, Snackbar } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
@@ -6,7 +6,7 @@ import { UserApiContext } from './Contexts'
 import { ChatModel } from './Models'
 import styles from './Styles'
 import ChatCard from './components/ChatCard'
-import { ChatPage, ChatPageProps } from './components/ChatPage'
+import { ChatPage, ChatPageProps } from './pages/ChatPage'
 import { useAppSelector } from './redux/Hooks'
 
 const { width } = Dimensions.get('window')
@@ -30,6 +30,8 @@ const chatCardLayoutProvider = new LayoutProvider(
   }
 )
 
+const dataProvider = new DataProvider((r1, r2: any) => r1 !== r2)
+
 export const MyChats = (): JSX.Element => {
   const [error, setError] = useState<string>()
 
@@ -48,7 +50,7 @@ export const MyChats = (): JSX.Element => {
     setSelectedChat(undefined)
   }
 
-  const [chatsDataProvider] = useState(new DataProvider((r1, r2: any) => r1 !== r2).cloneWithRows(state.Chats || []))
+  const [chatsDataProvider, setChatsDataProvider] = useState(dataProvider.cloneWithRows(state.Chats || []))
   const chatCardRenderer = (type: string | number, chat: ChatModel, index: number) => {
     switch (type) {
       case ChatCardViewTypes.ROW:
@@ -63,6 +65,11 @@ export const MyChats = (): JSX.Element => {
         return null
     }
   }
+
+  // Refresh the data provider when the list of chats changes.
+  useEffect(() => {
+    setChatsDataProvider(dataProvider.cloneWithRows(state.Chats || []))
+  }, [state.Chats])
 
   return (
     <Card

@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import { Banner, Modal, Portal, SegmentedButtons, Snackbar } from 'react-native-paper'
 import { FrontendServiceContext, UserApiContext } from './Contexts'
 import { Page, Section } from './Layouts'
-import { ConnectionAddedModel } from './Models'
+import { ChatModel, ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
 import { MyChats } from './MyChats'
 import { MyConnections } from './MyConnections'
@@ -13,6 +13,7 @@ import Profile from './Profile'
 import styles from './Styles'
 import AppStateListener from './components/AppStateListener'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
+import { incorporateChat } from './redux/MyChatsSlice'
 import { addIncomingConnection } from './redux/MyConnectionsSlice'
 import { setProfile } from './redux/ProfileSlice'
 import { clearLocalUserData, loadLocalUserData, saveLocalUserData } from './utils/LocalStorage'
@@ -31,6 +32,7 @@ const Home = (): JSX.Element => {
   /** Handles incoming remote messages when app is in foreground. */
   function handleRemoteMessageInForeground(message: FirebaseMessagingTypes.RemoteMessage): void {
     conditionallyDispatch<ConnectionAddedModel>(message, 'ConnectionAdded', (payload) => dispatch(addIncomingConnection(payload)))
+    conditionallyDispatch<ChatModel>(message, 'ChatMessagePosted', (payload) => dispatch(incorporateChat(payload)))
   }
 
   function conditionallyDispatch<T>(message: FirebaseMessagingTypes.RemoteMessage, key: string, dispatcher: (payload: T) => void) {
@@ -46,7 +48,7 @@ const Home = (): JSX.Element => {
     const defaultValue: Array<FirebaseMessagingTypes.RemoteMessage> = []
     return loadLocalUserData(userID, userDataType, defaultValue)
       .then((messages) => saveLocalUserData(userID, userDataType, [...messages, message]))
-      .catch(console.error)
+      .catch(setError)
   }
 
   /** Consumes any remote messages persisted to local storage while app was in background. */
@@ -57,7 +59,7 @@ const Home = (): JSX.Element => {
     return loadLocalUserData(userID, userDataType, defaultValue)
       .then((messages) => messages.forEach(handleRemoteMessageInForeground))
       .then(() => clearLocalUserData(userID, userDataType))
-      .catch(console.error)
+      .catch(setError)
   }
 
   async function startReceivingRemoteMessages() {

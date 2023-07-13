@@ -17,7 +17,7 @@ export default function ChatCard(props: ChatCardProps): JSX.Element {
   const userApi = useContext(UserApiContext)!
   const otherParticipants = props.chat.Gist.Participants.filter((user) => user.UserID !== userApi.uid)
   const avatarParticipant = pickParticipantForAvatarCard(otherParticipants, props.chat.Gist.Participants)
-  const message = props.chat.Messages[0]!
+  const message = props.chat.Messages[props.chat.Messages.length - 1]!
   const badgeCount = props.chat.Gist.LatestMessage.MessageID - (props.chat.Gist.LastSeenMessageID || 0)
 
   function select() {

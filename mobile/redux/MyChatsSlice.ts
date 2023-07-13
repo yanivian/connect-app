@@ -6,6 +6,7 @@ import { addOrReplaceChatIn, getChatIn } from '../utils/ChatUtils'
 import { compareChatGists, compareChatMessages } from '../utils/CompareUtils'
 
 const initialState: ChatsSnapshot = {
+  // TODO: Chats are not ordered deterministically.
   Chats: undefined,
 }
 
@@ -25,12 +26,20 @@ export const MyChatsSlice = createSlice({
       chat.Messages.forEach((message) => {
         const existingMessage = getChatMessageIn(message, messages)
         if (!existingMessage || compareChatMessages(existingMessage, message) <= 0) {
-          messages = addOrReplaceChatMessageIn(message, messages)
+          messages = addOrReplaceChatMessageIn(message, messages).sort(compareChatMessages)
+        } else {
+          console.warn(`Message deemed out-of-date: ${JSON.stringify(message)}`)
         }
       })
 
+      let gist = chat.Gist
+      if (existingChat && compareChatGists(existingChat.Gist, gist) > 0) {
+        console.warn(`Gist deemed out-of-date: ${JSON.stringify(gist)}`)
+        gist = existingChat.Gist
+      }
+
       const updatedChat: ChatModel = {
-        Gist: (!existingChat || compareChatGists(existingChat.Gist, chat.Gist) <= 0) ? chat.Gist : existingChat.Gist,
+        Gist: gist,
         Messages: messages,
       }
       state.Chats = addOrReplaceChatIn(updatedChat, list)

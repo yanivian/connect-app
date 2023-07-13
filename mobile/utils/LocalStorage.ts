@@ -12,12 +12,10 @@ export async function loadLocalUserData<T>(userID: string, type: string, default
       }
       return JSON.parse(payload)
     })
-    .catch(console.error)
 }
 
 export async function saveLocalUserData<T>(userID: string, type: string, data: T): Promise<void> {
   return AsyncStorage.setItem(getLocalUserDataKey(userID, type), JSON.stringify(data))
-    .catch(console.error)
 }
 
 export async function clearLocalUserData(userID: string, type: string): Promise<void> {
