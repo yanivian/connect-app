@@ -33,7 +33,7 @@ export const Section = (props: SectionProps) => {
   return (
     <Surface style={styles.section} elevation={4}>
       <View style={styles.sectionTitle}>
-        <Text numberOfLines={1} style={{ flexGrow: 1 }} variant="headlineSmall">
+        <Text numberOfLines={1} style={{ flex: 1, flexGrow: 1 }} variant="headlineSmall">
           {props.title}
         </Text>
         {props.actions &&
@@ -46,6 +46,7 @@ export const Section = (props: SectionProps) => {
                 mode='contained-tonal'
                 onPress={action.callback}
                 size={20}
+                style={{ marginLeft: 6 }}
               />
             )
           })
