@@ -76,7 +76,7 @@ export function ChatPage(props: ChatPageProps & {
       setLocked(false)
       scrollToEnd(true)
     })()
-  }, [])
+  }, [chatID])
 
   async function postChatMessage() {
     // TODO: Handle the case of more than one target user.

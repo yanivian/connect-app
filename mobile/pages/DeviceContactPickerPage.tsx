@@ -88,7 +88,12 @@ export function DeviceContactPickerPage(props: DeviceContactPickerPageProps): JS
         const phoneNumbers = new Set<string>()
         for (const contact of contacts) {
           for (const phoneNumberRecord of contact.phoneNumbers) {
-            const phoneNumber = parsePhoneNumber(phoneNumberRecord.number, 'US')
+            let phoneNumber
+            try {
+              phoneNumber = parsePhoneNumber(phoneNumberRecord.number, 'US')
+            } catch (e) {
+              console.debug(`Could not parse ${phoneNumberRecord.number} as a phone number: ${e}`)
+            }
             if (phoneNumber && phoneNumber.isValid()
               && phoneNumber.country === 'US'
               && ALLOWED_PHONE_NUMBER_TYPES.has(phoneNumber.getType())
