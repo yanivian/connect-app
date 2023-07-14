@@ -86,7 +86,7 @@ const Home = (): JSX.Element => {
   const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
   useEffect(() => setShowIncompleteProfileBanner(!profile.Name || !profile.Image), [profile])
 
-  const [tab, setTab] = React.useState('Chats')
+  const [tab, setTab] = React.useState('MyChats')
 
   return (
     <Portal.Host>
@@ -143,8 +143,8 @@ const Home = (): JSX.Element => {
                 value={tab}
                 onValueChange={setTab}
                 buttons={[
-                  { label: 'Chats', value: 'MyChats' },
-                  { label: 'Activities', value: 'MyActivities' },
+                  { value: 'MyChats', label: 'Conversations' },
+                  { value: 'MyActivities', label: 'Activities' },
                 ]}
                 style={{ marginBottom: 12 }}
               />
