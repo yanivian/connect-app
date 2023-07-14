@@ -26,7 +26,7 @@ async function checkMessagingEnabled(): Promise<boolean> {
 }
 
 async function checkMessagingEnabled_Android(): Promise<boolean> {
-  return PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then((status) => status === 'granted')
+  return PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then((status) => status !== 'denied')
 }
 
 async function checkMessagingEnabled_iOS(): Promise<boolean> {
