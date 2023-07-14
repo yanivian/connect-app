@@ -54,13 +54,7 @@ export default class FrontendService {
         targetUserID: targetUser.UserID,
       }
       return this.doPost_('/connection/add', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async inviteContact(contact: ContactModel): Promise<InviteModel> {
@@ -71,13 +65,7 @@ export default class FrontendService {
         phoneNumber: contact.PhoneNumber.number,
       }
       return this.doPost_('/contact/update', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async listChatMessages(chatID: string): Promise<ChatModel> {
@@ -87,13 +75,7 @@ export default class FrontendService {
         chatID,
       }
       return this.doPost_('/chat/listmessages', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async loginContext(req: LoginContextRequest): Promise<LoginContextModel> {
@@ -103,13 +85,7 @@ export default class FrontendService {
         ...req,
       }
       return this.doPost_('/user/login', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async postChatMessage(targetUserID: string, text: string | undefined): Promise<ChatModel> {
@@ -120,13 +96,7 @@ export default class FrontendService {
         text,
       }
       return this.doPost_('/chat/postmessage', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async refreshDeviceToken(deviceToken: string | undefined): Promise<{}> {
@@ -136,13 +106,7 @@ export default class FrontendService {
         deviceToken,
       }
       return this.doPost_('/profile/refreshdevicetoken', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async syncDeviceContacts(req: SyncDeviceContactsRequest): Promise<DeviceContactsModel> {
@@ -152,13 +116,19 @@ export default class FrontendService {
         request: JSON.stringify(req),
       }
       return this.doPost_('/contacts/sync', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+    }).then(this.parseAsJson_)
+  }
+
+  async updateChat(chatID: string, lastSeenMessageID: number | undefined, text: string | undefined): Promise<ChatModel> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        chatID,
+        lastSeenMessageID,
+        text,
       }
-    })
+      return this.doPost_('/chat/update', params)
+    }).then(this.parseAsJson_)
   }
 
   async updateProfile(req: UpdateProfileRequest): Promise<ProfileModel> {
@@ -168,25 +138,13 @@ export default class FrontendService {
         ...req,
       }
       return this.doPost_('/profile/update', params)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   async uploadImage(pickedImage: LocalFile): Promise<ImageModel> {
     return this.newAuthRequest_().then((authParams) => {
       return this.doPostWithFilePart_('/image/upload', authParams, pickedImage)
-    }).then(async resp => {
-      if (resp.ok) {
-        return resp.json()
-      } else {
-        return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
-      }
-    })
+    }).then(this.parseAsJson_)
   }
 
   private async newAuthRequest_(): Promise<AuthRequest> {
@@ -239,5 +197,13 @@ export default class FrontendService {
       }
       return `${key}=${encodeURIComponent('' + value)}`
     }).join("&")
+  }
+
+  private async parseAsJson_(resp: Response): Promise<any> {
+    if (resp.ok) {
+      return resp.json()
+    } else {
+      return resp.text().then((body) => Promise.reject(`Error (${resp.status}): ${body}`))
+    }
   }
 }

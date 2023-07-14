@@ -32,7 +32,7 @@ const Home = (): JSX.Element => {
   /** Handles incoming remote messages when app is in foreground. */
   function handleRemoteMessageInForeground(message: FirebaseMessagingTypes.RemoteMessage): void {
     conditionallyDispatch<ConnectionAddedModel>(message, 'ConnectionAdded', (payload) => dispatch(addIncomingConnection(payload)))
-    conditionallyDispatch<ChatModel>(message, 'ChatMessagePosted', (payload) => dispatch(incorporateChat(payload)))
+    conditionallyDispatch<ChatModel>(message, 'ChatUpdated', (payload) => dispatch(incorporateChat(payload)))
   }
 
   function conditionallyDispatch<T>(message: FirebaseMessagingTypes.RemoteMessage, key: string, dispatcher: (payload: T) => void) {

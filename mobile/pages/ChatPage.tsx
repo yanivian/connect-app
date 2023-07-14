@@ -10,7 +10,6 @@ import ChatMessageCard from '../components/ChatMessageCard'
 import { useAppDispatch, useAppSelector } from '../redux/Hooks'
 import { incorporateChat } from '../redux/MyChatsSlice'
 import { summarizeParticipants } from '../utils/ChatUtils'
-import { compareChatGists } from '../utils/CompareUtils'
 
 export interface ChatPageProps {
   chatID?: string
@@ -77,6 +76,19 @@ export function ChatPage(props: ChatPageProps & {
       scrollToEnd(true)
     })()
   }, [chatID])
+
+  // Signal the last seen message ID to server when needed.
+  useEffect(() => {
+    (async () => {
+      if (!chat) {
+        return
+      }
+      const lastSeenMessageID = Math.max(...chat.Messages.map(m => m.MessageID))
+      if (lastSeenMessageID > (chat.Gist.LastSeenMessageID || 0)) {
+        dispatch(incorporateChat(await frontendService.updateChat(chatID!, lastSeenMessageID, undefined)))
+      }
+    })()
+  }, [chat])
 
   async function postChatMessage() {
     // TODO: Handle the case of more than one target user.
