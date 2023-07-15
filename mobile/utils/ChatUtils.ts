@@ -39,6 +39,20 @@ export function summarizeParticipants(otherParticipants: Array<UserInfo>): strin
   }
 }
 
+export function summarizeTypingUsers(typingUsers: Array<UserInfo>): string {
+  const names = typingUsers.map((p) => p.Name || p.PhoneNumber || 'Anonymous')
+  switch (names.length) {
+    case 1:
+      return names[0]
+    case 2:
+      return `${names[0]} and ${names[1]}`
+    case 3:
+      return `${names[0]}, ${names[1]} and ${names[2]}`
+    default:
+      return `${names[0]} and ${names.length - 1} others`
+  }
+}
+
 export function pickParticipantForAvatarCard(otherParticipants: Array<UserInfo>, participants: Array<UserInfo>): UserInfo {
   const otherParticipantsWithAvatars = otherParticipants.filter((p) => !!p.Image)
   if (otherParticipantsWithAvatars) {

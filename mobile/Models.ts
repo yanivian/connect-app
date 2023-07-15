@@ -18,6 +18,7 @@ export interface ChatGistModel {
   Participants: Array<UserInfo>
   LatestMessage: ChatMessageModel
   LastSeenMessageID?: number
+  TypingUsers?: Array<UserInfo>
 }
 
 export interface ChatMessageModel {

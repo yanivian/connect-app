@@ -125,7 +125,8 @@ export default class FrontendService {
         ...authParams,
         chatID,
         lastSeenMessageID,
-        text,
+        clearDraftText: !text || undefined,
+        setDraftText: text || undefined,
       }
       return this.doPost_('/chat/update', params)
     }).then(this.parseAsJson_)

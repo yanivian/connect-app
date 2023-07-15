@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Dimensions, View } from 'react-native'
-import { ActivityIndicator, Card, Divider, IconButton, Portal, Snackbar, TextInput, useTheme } from 'react-native-paper'
+import { ActivityIndicator, Card, Divider, IconButton, Portal, Snackbar, Text, TextInput, useTheme } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
 import { FrontendServiceContext, UserApiContext } from "../Contexts"
 import { Page, Section } from '../Layouts'
@@ -9,7 +9,7 @@ import styles from '../Styles'
 import ChatMessageCard from '../components/ChatMessageCard'
 import { useAppDispatch, useAppSelector } from '../redux/Hooks'
 import { incorporateChat } from '../redux/MyChatsSlice'
-import { summarizeParticipants } from '../utils/ChatUtils'
+import { summarizeParticipants, summarizeTypingUsers } from '../utils/ChatUtils'
 
 export interface ChatPageProps {
   chatID?: string
@@ -63,6 +63,12 @@ export function ChatPage(props: ChatPageProps & {
 
   const [locked, setLocked] = useState(false)
   const [text, setText] = useState('')
+
+  async function setDraftText(value: string) {
+    setText(value)
+    const result = await frontendService.updateChat(chatID!, undefined, value)
+    dispatch(incorporateChat(result))
+  }
 
   // Fetch chat messages from server if needed.
   useEffect(() => {
@@ -166,6 +172,12 @@ export function ChatPage(props: ChatPageProps & {
                 ref={chatMessagesRecyclerListView}
                 rowRenderer={chatMessageCardRenderer}
               />
+              {chat && chat.Gist.TypingUsers &&
+                <Text numberOfLines={2} style={{ fontStyle: 'italic', marginVertical: 9, textAlign: 'center' }} variant='bodySmall'>
+                  {summarizeTypingUsers(chat.Gist.TypingUsers)}
+                  {chat.Gist.TypingUsers.length > 1 ? ' are typing.' : ' is typing.'}
+                </Text>
+              }
               <Divider />
               <View style={{
                 flexDirection: 'row',
@@ -178,7 +190,7 @@ export function ChatPage(props: ChatPageProps & {
                   value={text}
                   multiline={true}
                   numberOfLines={2}
-                  onChangeText={setText}
+                  onChangeText={setDraftText}
                   placeholder='Message'
                   inputMode='text'
                   disabled={locked}
