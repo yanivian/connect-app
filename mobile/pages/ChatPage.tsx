@@ -106,7 +106,7 @@ export function ChatPage(props: ChatPageProps & {
       setChatID(fresherChat.Gist.ChatID)
     }
     dispatch(incorporateChat(fresherChat))
-    setText('')
+    setDraftText('')
     setLocked(false)
   }
 
@@ -131,6 +131,7 @@ export function ChatPage(props: ChatPageProps & {
   useEffect(() => {
     const updatedChat = chatID && state.Chats && findChatByID(chatID, state.Chats) || undefined
     setChat(updatedChat)
+    !text && setText(updatedChat?.Gist.DraftText || '')
     setChatMessagesDataProvider(dataProvider.cloneWithRows(updatedChat?.Messages || []))
     if (!!chat) {
       scrollToEnd(true)
