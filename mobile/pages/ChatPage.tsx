@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import { debounce } from 'lodash'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Dimensions, View } from 'react-native'
 import { ActivityIndicator, Card, Divider, IconButton, Portal, Snackbar, Text, TextInput, useTheme } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
@@ -64,10 +65,14 @@ export function ChatPage(props: ChatPageProps & {
   const [locked, setLocked] = useState(false)
   const [text, setText] = useState('')
 
-  async function setDraftText(value: string) {
-    setText(value)
+  const setDraftTextCallback = useCallback(debounce(async (value: string) => {
     const result = await frontendService.updateChat(chatID!, undefined, value)
     dispatch(incorporateChat(result))
+  }, 1_500), [])
+
+  async function setDraftText(value: string) {
+    setText(value)
+    setDraftTextCallback(value)
   }
 
   // Fetch chat messages from server if needed.
