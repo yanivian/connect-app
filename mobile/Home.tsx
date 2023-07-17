@@ -159,7 +159,7 @@ const Home = (): JSX.Element => {
         </Section>
         <Portal>
           <Modal
-            contentContainerStyle={styles.fullscreen}
+            contentContainerStyle={styles.modal}
             onDismiss={() => setEditingProfile(false)}
             visible={isEditingProfile}
           >

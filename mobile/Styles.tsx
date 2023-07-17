@@ -10,9 +10,8 @@ const styles = StyleSheet.create({
     right: 20,
     borderRadius: 50,
   },
-  fullscreen: {
+  modal: {
     alignItems: undefined,
-    height: window.height,
     justifyContent: undefined,
     left: 0,
     margin: 0,
@@ -22,7 +21,6 @@ const styles = StyleSheet.create({
   },
   page: {
     flexDirection: 'column',
-    height: window.height,
   },
   section: {
     borderRadius: 12,
@@ -30,7 +28,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flexGrow: 1,
     margin: 8,
-    minHeight: window.height - 36,
   },
   sectionTitle: {
     alignItems: 'center',

@@ -231,7 +231,7 @@ export const MyConnections = (): JSX.Element => {
 
       <Portal>
         <Modal
-          contentContainerStyle={styles.fullscreen}
+          contentContainerStyle={styles.modal}
           dismissable
           onDismiss={clearContacts}
           visible={contacts.length > 0}

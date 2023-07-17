@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Dimensions } from 'react-native'
-import { Card, FAB, Modal, Portal, Snackbar } from 'react-native-paper'
+import { Dimensions, View } from 'react-native'
+import { FAB, Portal, Snackbar } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
 import { UserApiContext } from './Contexts'
+import { FullscreenModalPage } from './Layouts'
 import { ChatModel, UserInfo } from './Models'
 import styles from './Styles'
 import ChatCard from './components/ChatCard'
@@ -85,22 +86,19 @@ export const MyChats = (): JSX.Element => {
   }, [state.Chats])
 
   return (
-    <Card
-      mode='outlined'
+    <View
       style={{
-        backgroundColor: 'transparent',
         flex: 1,
         flexGrow: 1,
-        marginBottom: 70,
+        marginHorizontal: 20,
+        marginVertical: 12,
       }}
     >
-      <Card.Content style={{ width: '100%', height: '100%' }}>
-        <RecyclerListView
-          layoutProvider={chatCardLayoutProvider}
-          dataProvider={chatsDataProvider}
-          rowRenderer={chatCardRenderer}
-        />
-      </Card.Content>
+      <RecyclerListView
+        layoutProvider={chatCardLayoutProvider}
+        dataProvider={chatsDataProvider}
+        rowRenderer={chatCardRenderer}
+      />
       <Portal>
         <Snackbar style={styles.snackbar}
           onDismiss={() => setError(undefined)}
@@ -109,18 +107,14 @@ export const MyChats = (): JSX.Element => {
           {`Something went wrong: ${error}`}
         </Snackbar>
 
-        <Modal
-          contentContainerStyle={styles.fullscreen}
-          dismissable
+        <FullscreenModalPage
           onDismiss={() => pickParticipant(undefined)}
           visible={showDeviceContactPicker}
         >
           <DeviceContactPickerPage select={pickParticipant} />
-        </Modal>
+        </FullscreenModalPage>
 
-        <Modal
-          contentContainerStyle={styles.fullscreen}
-          dismissable
+        <FullscreenModalPage
           onDismiss={unselectChat}
           visible={!!selectedChat}
         >
@@ -128,7 +122,7 @@ export const MyChats = (): JSX.Element => {
             {...selectedChat!}
             close={unselectChat}
           />
-        </Modal>
+        </FullscreenModalPage>
 
         <FAB
           aria-label='Start a chat'
@@ -138,6 +132,6 @@ export const MyChats = (): JSX.Element => {
           visible={!selectedChat && !showDeviceContactPicker}
         />
       </Portal>
-    </Card>
+    </View >
   )
 }

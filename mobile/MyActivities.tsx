@@ -79,7 +79,7 @@ const MyActivities = (): JSX.Element => {
       }
       <Portal>
         <Modal
-          contentContainerStyle={styles.fullscreen}
+          contentContainerStyle={styles.modal}
           onDismiss={closeActivity}
           visible={!!selectedActivity}
         >

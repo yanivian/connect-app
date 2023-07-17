@@ -1,22 +1,49 @@
 import Lottie from 'lottie-react-native'
-import React from 'react'
-import { SafeAreaView, View } from 'react-native'
-import { IconButton, Surface, Text } from 'react-native-paper'
+import React, { useState } from 'react'
+import { Dimensions, SafeAreaView, View } from 'react-native'
+import { IconButton, Modal, Surface, Text } from 'react-native-paper'
 import { IconSource } from 'react-native-paper/src/components/Icon'
 import styles from './Styles'
 
 import type { PropsWithChildren } from 'react'
+import { KeyboardMetricsListener } from './components/KeyboardMetricsListener'
 
 type PageProps = PropsWithChildren<{
 }>
 
 export const Page = (props: PageProps) => {
+  const window = Dimensions.get('window')
+  const [height, setHeight] = useState(window.height)
+
   return (
     <SafeAreaView>
-      <View style={styles.page}>
+      <KeyboardMetricsListener
+        process={(metrics) => setHeight(window.height - (metrics?.height || 0))}
+      />
+      <View style={[styles.page, { height }]}>
         {props.children}
       </View>
     </SafeAreaView>
+  )
+}
+
+type FullscreenModalProps = PropsWithChildren<{
+  onDismiss: () => void
+  visible: boolean
+}>
+
+export const FullscreenModalPage = (props: FullscreenModalProps & PageProps) => {
+  return (
+    <Modal
+      contentContainerStyle={styles.modal}
+      dismissable
+      onDismiss={props.onDismiss}
+      visible={props.visible}
+    >
+      <Page {...props}>
+        {props.children}
+      </Page>
+    </Modal>
   )
 }
 

@@ -16,6 +16,13 @@ interface SyncDeviceContactsRequest {
   UserIDs?: Array<string>
 }
 
+interface UpdateChatRequest {
+  chatID: string
+  lastSeenMessageID?: number
+  clearDraftText?: boolean
+  setDraftText?: string
+}
+
 interface UpdateProfileRequest {
   name: string | null
   emailAddress: string | null
@@ -119,14 +126,11 @@ export default class FrontendService {
     }).then(this.parseAsJson_)
   }
 
-  async updateChat(chatID: string, lastSeenMessageID: number | undefined, text: string | undefined): Promise<ChatModel> {
+  async updateChat(req: UpdateChatRequest): Promise<ChatModel> {
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
-        chatID,
-        lastSeenMessageID,
-        clearDraftText: !text || undefined,
-        setDraftText: text || undefined,
+        ...req,
       }
       return this.doPost_('/chat/update', params)
     }).then(this.parseAsJson_)

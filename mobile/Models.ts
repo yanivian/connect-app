@@ -125,7 +125,7 @@ export interface UserApi {
 
 export interface UserInfo {
   UserID: string
-  Name: string | null
-  Image: ImageModel | null
-  PhoneNumber: string | null
+  Name?: string
+  Image?: ImageModel
+  PhoneNumber?: string
 }

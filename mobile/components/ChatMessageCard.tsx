@@ -13,6 +13,7 @@ interface ChatMessageCardProps {
 
 export default function ChatMessageCard(props: ChatMessageCardProps): JSX.Element {
   const theme = useTheme()
+  const bubbleBorderRadius = 15
   const userApi = useContext(UserApiContext)!
 
   const isMyMessage = props.message.Poster.UserID === userApi.uid
@@ -24,33 +25,63 @@ export default function ChatMessageCard(props: ChatMessageCardProps): JSX.Elemen
       alignItems: 'center',
       borderRadius: theme.roundness,
       flexDirection: 'row',
-      width: '80%',
     }}>
       {!isMyMessage &&
         <AvatarCard
           imageURL={props.message.Poster.Image?.URL}
-          style={{ marginRight: 9 }}
+          size={32}
+          style={{
+            alignSelf: 'flex-start',
+            marginRight: 5,
+          }}
         />
       }
       <View
         style={{
+          borderTopLeftRadius: isMyMessage && bubbleBorderRadius || undefined,
+          borderTopRightRadius: !isMyMessage && bubbleBorderRadius || undefined,
+          borderBottomLeftRadius: bubbleBorderRadius,
+          borderBottomRightRadius: bubbleBorderRadius,
+          backgroundColor: isMyMessage ? theme.colors.primaryContainer : theme.colors.secondaryContainer,
+          paddingHorizontal: 9,
+          paddingVertical: 5,
           flex: 1,
           flexDirection: 'column',
           flexGrow: 1,
         }}>
         {props.numOtherParticipants > 1 &&
-          <Text numberOfLines={1} style={{ flex: 1, fontStyle: 'italic', textAlign, color: theme.colors.primary }} variant="bodyMedium">
+          <Text
+            numberOfLines={1}
+            style={{
+              color: theme.colors.primary,
+              fontStyle: 'italic',
+              fontWeight: 'bold',
+              textAlign,
+            }}
+            variant="bodyMedium"
+          >
             {summarizePoster(props.message, userApi.uid, props.numOtherParticipants)}
           </Text>
         }
-        <Text style={{ flex: 1, flexGrow: 1, textAlign, verticalAlign: 'middle' }} variant="bodyLarge">
+        <Text
+          style={{
+            flexGrow: 1,
+            textAlign,
+            verticalAlign: 'middle',
+          }}
+          variant="bodyLarge"
+        >
           {props.message.Text || '(Nothing)'}
         </Text>
       </View>
       {isMyMessage &&
         <AvatarCard
           imageURL={props.message.Poster.Image?.URL}
-          style={{ marginLeft: 9 }}
+          size={32}
+          style={{
+            alignSelf: 'flex-start',
+            marginLeft: 5,
+          }}
         />
       }
     </View>
