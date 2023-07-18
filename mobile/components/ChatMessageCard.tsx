@@ -22,9 +22,9 @@ export default function ChatMessageCard(props: ChatMessageCardProps): JSX.Elemen
   return (
     <View style={{
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-      alignItems: 'center',
       borderRadius: theme.roundness,
       flexDirection: 'row',
+      transform: [{ scaleY: -1 }]
     }}>
       {!isMyMessage &&
         <AvatarCard
@@ -71,7 +71,7 @@ export default function ChatMessageCard(props: ChatMessageCardProps): JSX.Elemen
           }}
           variant="bodyLarge"
         >
-          {props.message.Text || '(Nothing)'}
+          {props.message.Text || ''}
         </Text>
       </View>
       {isMyMessage &&

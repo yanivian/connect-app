@@ -7,8 +7,6 @@ import { Page, Section } from './Layouts'
 import { ChatModel, ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
 import { MyChats } from './MyChats'
-import { MyConnections } from './MyConnections'
-import { DeviceContacts } from './MyDeviceContacts'
 import Profile from './Profile'
 import styles from './Styles'
 import AppStateListener from './components/AppStateListener'
@@ -18,6 +16,12 @@ import { addIncomingConnection } from './redux/MyConnectionsSlice'
 import { setProfile } from './redux/ProfileSlice'
 import { clearLocalUserData, loadLocalUserData, saveLocalUserData } from './utils/LocalStorage'
 import { getDeviceToken, subscribeBackgroundListener, subscribeForegroundListener } from './utils/MessagingUtils'
+
+const Tabs = {
+  None: 'None',
+  Conversations: 'MyChats',
+  Activities: 'MyActivities',
+}
 
 const Home = (): JSX.Element => {
   const dispatch = useAppDispatch()
@@ -75,18 +79,21 @@ const Home = (): JSX.Element => {
     }
   }
 
-  // Enable Messaging With APNS.
   const [showMessagingPermissionsBanner, setShowMessagingPermissionsBanner] = useState(false)
-  useEffect(() => {
-    startReceivingRemoteMessages()
-  }, [] /* Only on first render */)
 
   // Profile Management.
   const [isEditingProfile, setEditingProfile] = useState(loginContext.IsFirstLogin)
   const [showIncompleteProfileBanner, setShowIncompleteProfileBanner] = useState(false)
   useEffect(() => setShowIncompleteProfileBanner(!profile.Name || !profile.Image), [profile])
 
-  const [tab, setTab] = React.useState('MyChats')
+  const [tab, setTab] = React.useState<string>(Tabs.None)
+
+  useEffect(() => {
+    // Enable Messaging With APNS.
+    startReceivingRemoteMessages()
+    // Set initial tab.
+    setTab(Tabs.Conversations)
+  }, [] /* Only on first render */)
 
   return (
     <Portal.Host>
@@ -143,15 +150,15 @@ const Home = (): JSX.Element => {
                 value={tab}
                 onValueChange={setTab}
                 buttons={[
-                  { value: 'MyChats', label: 'Conversations' },
-                  { value: 'MyActivities', label: 'Activities' },
+                  { label: 'Conversations', value: Tabs.Conversations },
+                  { label: 'Activities', value: Tabs.Activities },
                 ]}
                 style={{ marginBottom: 12 }}
               />
-              {tab === 'MyChats' &&
+              {tab === Tabs.Conversations &&
                 <MyChats />
               }
-              {tab === 'MyActivities' &&
+              {tab === Tabs.Activities &&
                 <MyActivities />
               }
             </View>

@@ -8,7 +8,6 @@ import { Section } from '../Layouts'
 import { ChatMessageModel, ChatModel, UserInfo } from '../Models'
 import styles from '../Styles'
 import ChatMessageCard from '../components/ChatMessageCard'
-import { KeyboardMetricsListener } from '../components/KeyboardMetricsListener'
 import { useAppDispatch, useAppSelector } from '../redux/Hooks'
 import { incorporateChat } from '../redux/MyChatsSlice'
 import { summarizeParticipants, summarizeTypingUsers } from '../utils/ChatUtils'
@@ -63,8 +62,15 @@ export function ChatPage(props: ChatPageProps & {
         return
       }
       let numRows = (props.otherParticipants.length > 1) ? 1 : 0
-      numRows += Math.ceil((message.Text?.length || 1) / 18)
-      dim.height = Math.max(2, numRows) * 24
+      if (!message.Text) {
+        numRows += 1
+      } else {
+        // TODO: Use device pixel ratio, currently estimates 30 characters per line.
+        numRows += message.Text.split('\n')
+          .map(line => 1 + Math.floor(line.length / 30))
+          .reduce((prev, curr) => prev + curr)
+      }
+      dim.height = 15 + Math.max(1, numRows) * 24
       dim.width = width
     }
   )
@@ -72,14 +78,16 @@ export function ChatPage(props: ChatPageProps & {
   const [locked, setLocked] = useState(false)
   const [text, setText] = useState('')
 
-  const updateChatState = useCallback((chat: ChatModel) => {
-    console.log(chat)
+  const updateChatState = useCallback((update: ChatModel) => {
     if (!chatID) {
-      setChatID(chat.Gist.ChatID)
+      setChatID(update.Gist.ChatID)
     }
-    setChat(chat)
-    dispatch(incorporateChat(chat))
-  }, [])
+    if (chat && chat.Gist.TimestampMillis >= update.Gist.TimestampMillis) {
+      return
+    }
+    setChat(update)
+    dispatch(incorporateChat(update))
+  }, [chatID, chat])
 
   const setDraftTextCallback = useCallback(debounce(async (draft?: DraftMessage) => {
     if (!chatID) {
@@ -93,18 +101,18 @@ export function ChatPage(props: ChatPageProps & {
       clearDraftText: draft.clearText,
       setDraftText: draft.setText,
     }))
-  }, 750), [])
+  }, 750), [chatID])
 
-  async function setDraftText(value: string) {
-    setText(value)
+  const setDraftText = useCallback(async (draftText: string) => {
+    setText(draftText)
     if (locked) {
       return
     }
     await setDraftTextCallback({
-      clearText: !value || undefined,
-      setText: value || undefined,
+      clearText: !draftText || undefined,
+      setText: draftText || undefined,
     })
-  }
+  }, [locked])
 
   async function cancelDraftsInProgress() {
     await setDraftTextCallback(undefined)
@@ -119,11 +127,10 @@ export function ChatPage(props: ChatPageProps & {
       setLocked(true)
       updateChatState(await frontendService.listChatMessages(chatID))
       setLocked(false)
-      scrollToEnd(true)
     })()
   }, [chatID])
 
-  // Signal the last seen message ID to server when needed.
+  // Signal the last seen message ID to server when the chat changes.
   useEffect(() => {
     (async () => {
       if (!chatID || !chat) {
@@ -139,7 +146,8 @@ export function ChatPage(props: ChatPageProps & {
     })()
   }, [chat])
 
-  async function postChatMessage() {
+  // Post a text message.
+  const postChatMessage = useCallback(async () => {
     setLocked(true)
     await cancelDraftsInProgress()
     setText('')
@@ -147,10 +155,10 @@ export function ChatPage(props: ChatPageProps & {
     const targetUserID = otherParticipantUserIDs[0]
     updateChatState(await frontendService.postChatMessage(targetUserID, text))
     setLocked(false)
-  }
+  }, [text])
 
   const chatMessagesRecyclerListView = useRef<any>()
-  const [chatMessagesDataProvider, setChatMessagesDataProvider] = useState(dataProvider.cloneWithRows(chat?.Messages || []))
+  const [chatMessagesDataProvider, setChatMessagesDataProvider] = useState<DataProvider>()
   const chatMessageCardRenderer = (type: string | number, message: ChatMessageModel) => {
     if (type !== ChatMessageCardViewTypes.ROW) {
       return null
@@ -166,20 +174,14 @@ export function ChatPage(props: ChatPageProps & {
 
   // Refresh the data provider when the chat changes.
   useEffect(() => {
-    const updatedChat = chatID && state.Chats && findChatByID(chatID, state.Chats) || undefined
-    setChat(updatedChat)
-    !text && setText(updatedChat?.Gist.DraftText || '')
-    setChatMessagesDataProvider(dataProvider.cloneWithRows(updatedChat?.Messages || []))
-    scrollToEnd(true)
-  }, [chatID, state.Chats])
-
-  function scrollToEnd(animate?: boolean) {
-    if (!chat || chat.Messages.length < 2) {
+    const refresh = chatID && state.Chats && findChatByID(chatID, state.Chats) || undefined
+    if (!refresh) {
       return
     }
-    const view = (chatMessagesRecyclerListView.current! as RecyclerListView<any, any>)
-    view.scrollToEnd(animate)
-  }
+    setChat(refresh)
+    setText(refresh.Gist.DraftText || '')
+    setChatMessagesDataProvider(dataProvider.cloneWithRows(refresh.Messages || []))
+  }, [chatID, state.Chats])
 
   return (
     <Section
@@ -197,23 +199,19 @@ export function ChatPage(props: ChatPageProps & {
           backgroundColor: 'transparent',
         }}
       >
-        {chat &&
-          <>
-            <RecyclerListView
-              layoutProvider={chatMessageCardLayoutProvider}
-              dataProvider={chatMessagesDataProvider}
-              ref={chatMessagesRecyclerListView}
-              rowRenderer={chatMessageCardRenderer}
-            />
-            <KeyboardMetricsListener
-              process={() => scrollToEnd(true)}
-            />
-            {chat.Gist.TypingUsers &&
-              <Text numberOfLines={2} style={{ fontStyle: 'italic', marginVertical: 9, textAlign: 'center' }} variant='bodySmall'>
-                {summarizeTypingUsers(chat.Gist.TypingUsers, userApi.uid)}
-              </Text>
-            }
-          </>
+        {chat && chatMessagesDataProvider &&
+          <RecyclerListView
+            layoutProvider={chatMessageCardLayoutProvider}
+            dataProvider={chatMessagesDataProvider}
+            ref={chatMessagesRecyclerListView}
+            rowRenderer={chatMessageCardRenderer}
+            scrollViewProps={{ paddingTop: 5, transform: [{ scaleY: -1 }] }}
+          />
+        }
+        {chat?.Gist.TypingUsers &&
+          <Text numberOfLines={2} style={{ fontStyle: 'italic', marginVertical: 9, textAlign: 'center' }} variant='bodySmall'>
+            {summarizeTypingUsers(chat.Gist.TypingUsers, userApi.uid)}
+          </Text>
         }
         {!chat &&
           <View

@@ -25,7 +25,7 @@ export const MyChatsSlice = createSlice({
       let messages = existingChat?.Messages || []
       chat.Messages.forEach((message) => {
         const existingMessage = getChatMessageIn(message, messages)
-        if (!existingMessage || compareChatMessages(existingMessage, message) <= 0) {
+        if (!existingMessage || compareChatMessages(existingMessage, message) >= 0) {
           messages = addOrReplaceChatMessageIn(message, messages).sort(compareChatMessages)
         } else {
           console.debug(`Incoming message deemed out-of-date: ${JSON.stringify(message)}`)
