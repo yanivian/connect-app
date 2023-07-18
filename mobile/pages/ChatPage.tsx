@@ -1,5 +1,5 @@
 import { debounce } from 'lodash'
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Dimensions, View } from 'react-native'
 import { ActivityIndicator, Divider, IconButton, Portal, Snackbar, Text, TextInput, useTheme } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
@@ -151,13 +151,17 @@ export function ChatPage(props: ChatPageProps & {
     setLocked(true)
     await cancelDraftsInProgress()
     setText('')
-    // TODO: Handle the case of more than one target user.
-    const targetUserID = otherParticipantUserIDs[0]
-    updateChatState(await frontendService.postChatMessage(targetUserID, text))
+    let result: ChatModel
+    if (chatID) {
+      result = await frontendService.postChatMessage(chatID, text)
+    } else {
+      const targetUserIDs = props.otherParticipants.map((user) => user.UserID)
+      result = await frontendService.postChatMessageToTargetUsers(targetUserIDs, text)
+    }
+    updateChatState(result)
     setLocked(false)
   }, [text])
 
-  const chatMessagesRecyclerListView = useRef<any>()
   const [chatMessagesDataProvider, setChatMessagesDataProvider] = useState<DataProvider>()
   const chatMessageCardRenderer = (type: string | number, message: ChatMessageModel) => {
     if (type !== ChatMessageCardViewTypes.ROW) {
@@ -203,7 +207,6 @@ export function ChatPage(props: ChatPageProps & {
           <RecyclerListView
             layoutProvider={chatMessageCardLayoutProvider}
             dataProvider={chatMessagesDataProvider}
-            ref={chatMessagesRecyclerListView}
             rowRenderer={chatMessageCardRenderer}
             scrollViewProps={{ paddingTop: 5, transform: [{ scaleY: -1 }] }}
           />

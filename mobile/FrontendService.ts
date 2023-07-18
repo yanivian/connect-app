@@ -95,11 +95,22 @@ export default class FrontendService {
     }).then(this.parseAsJson_)
   }
 
-  async postChatMessage(targetUserID: string, text: string | undefined): Promise<ChatModel> {
+  async postChatMessage(chatID: string, text: string | undefined): Promise<ChatModel> {
     return this.newAuthRequest_().then((authParams) => {
       const params = {
         ...authParams,
-        targetUserID,
+        chatID,
+        text,
+      }
+      return this.doPost_('/chat/postmessage', params)
+    }).then(this.parseAsJson_)
+  }
+
+  async postChatMessageToTargetUsers(targetUserIDs: Array<string>, text: string | undefined): Promise<ChatModel> {
+    return this.newAuthRequest_().then((authParams) => {
+      const params = {
+        ...authParams,
+        targetUserIDs: targetUserIDs.join(','),
         text,
       }
       return this.doPost_('/chat/postmessage', params)

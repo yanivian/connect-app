@@ -5,33 +5,35 @@ import { Text, TouchableRipple, useTheme } from 'react-native-paper'
 import { UserInfo } from '../Models'
 import AvatarCard from './AvatarCard'
 
-interface DeviceContactCardProps {
+export interface DeviceContactCardProps {
   user: UserInfo
-  selectCallback: () => void
+  isSelected: boolean
 }
 
-export default function DeviceContactCard(props: DeviceContactCardProps): JSX.Element {
+export default function DeviceContactCard(props: DeviceContactCardProps & {
+  toggleSelect: () => void
+}): JSX.Element {
   const theme = useTheme()
 
-  function select() {
-    props.selectCallback()
-  }
-
   return (
-    <TouchableRipple onPress={select}>
+    <TouchableRipple onPress={props.toggleSelect}>
       <View style={{
         alignItems: 'center',
         borderRadius: theme.roundness,
         flexDirection: 'row',
         marginVertical: 6,
+        backgroundColor: props.isSelected ? theme.colors.primaryContainer : 'transparent',
       }}>
-        <AvatarCard imageURL={props.user.Image?.URL} />
+        <AvatarCard
+          imageURL={props.user.Image?.URL}
+          size={60}
+          style={{ marginRight: 9 }}
+        />
         <View
           style={{
             flex: 1,
             flexDirection: 'column',
             flexGrow: 1,
-            marginHorizontal: 9,
           }}>
           <Text numberOfLines={1} variant="bodyLarge">
             {props.user.Name || 'Anonymous'}

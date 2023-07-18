@@ -1,22 +1,23 @@
 import { NumberType, parsePhoneNumber } from 'libphonenumber-js'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Dimensions, View } from 'react-native'
-import { ActivityIndicator, Button, Card, Divider, Portal, Snackbar, useTheme } from 'react-native-paper'
+import { ActivityIndicator, Button, Divider, Portal, Snackbar, useTheme } from 'react-native-paper'
 import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview'
 import { FrontendServiceContext, UserApiContext } from "../Contexts"
 import { Page, Section } from '../Layouts'
 import { ChatModel, DeviceContactsModel, UserInfo } from '../Models'
 import styles from '../Styles'
-import DeviceContactCard from '../components/DeviceContactCard'
+import DeviceContactCard, { DeviceContactCardProps } from '../components/DeviceContactCard'
 import { refresh } from '../redux/DeviceContactsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/Hooks'
 import { ERROR_CONTACTS_PERMISSION_NOT_GRANTED, fetchContacts } from '../utils/ContactsUtils'
 import { loadLocalUserData, saveLocalUserData } from '../utils/LocalStorage'
+import { addOrReplaceUserIn, isUserIn, removeUserFrom } from '../utils/UserUtils'
 
 const ALLOWED_PHONE_NUMBER_TYPES = new Set<NumberType>(['FIXED_LINE_OR_MOBILE', 'MOBILE'])
 
 export interface DeviceContactPickerPageProps {
-  select: (user: UserInfo | undefined) => void
+  select: (user: Array<UserInfo> | undefined) => void
 }
 
 const { width } = Dimensions.get('window')
@@ -81,6 +82,11 @@ export function DeviceContactPickerPage(props: DeviceContactPickerPageProps): JS
     })()
   }, [deviceContacts])
 
+  function clearDeviceContacts() {
+    setSelectedUsers([])
+    dispatch(refresh({}))
+  }
+
   async function syncDeviceContacts(): Promise<any> {
     setRefreshing(true)
     return fetchContacts()
@@ -114,15 +120,37 @@ export function DeviceContactPickerPage(props: DeviceContactPickerPageProps): JS
       .finally(() => setRefreshing(false))
   }
 
-  const [deviceContactsDataProvider, setDeviceContactsDataProvider] = useState(dataProvider.cloneWithRows(deviceContacts.Users || []))
-  const deviceContactCardRenderer = (type: string | number, user: UserInfo, index: number) => {
+  const [selectedUsers, setSelectedUsers] = useState<Array<UserInfo>>([])
+
+  const toggleSelectUser = useCallback((user: UserInfo) => {
+    if (isUserIn(user, selectedUsers)) {
+      setSelectedUsers(removeUserFrom(user, selectedUsers))
+    } else {
+      setSelectedUsers(addOrReplaceUserIn(user, selectedUsers))
+    }
+  }, [selectedUsers])
+
+  const getDeviceContacts = useCallback(() => {
+    if (!deviceContacts.Users) {
+      return []
+    }
+    return deviceContacts.Users.map((user) => {
+      return {
+        user,
+        isSelected: isUserIn(user, selectedUsers),
+      } as DeviceContactCardProps
+    })
+  }, [deviceContacts, selectedUsers])
+
+  const [deviceContactsDataProvider, setDeviceContactsDataProvider] = useState(dataProvider.cloneWithRows(getDeviceContacts()))
+  const deviceContactCardRenderer = (type: string | number, props: DeviceContactCardProps, index: number) => {
     switch (type) {
       case DeviceContactCardViewTypes.ROW:
         return (
           <DeviceContactCard
-            key={user.UserID}
-            user={user}
-            selectCallback={() => props.select(user)}
+            key={props.user.UserID}
+            {...props}
+            toggleSelect={() => toggleSelectUser(props.user)}
           />
         )
       default:
@@ -132,8 +160,8 @@ export function DeviceContactPickerPage(props: DeviceContactPickerPageProps): JS
 
   // Refresh the data provider when device contacts change.
   useEffect(() => {
-    setDeviceContactsDataProvider(dataProvider.cloneWithRows(deviceContacts.Users || []))
-  }, [deviceContacts.Users])
+    setDeviceContactsDataProvider(dataProvider.cloneWithRows(getDeviceContacts()))
+  }, [deviceContacts, selectedUsers])
 
   return (
     <Page>
@@ -148,50 +176,50 @@ export function DeviceContactPickerPage(props: DeviceContactPickerPageProps): JS
         <View style={{
           flex: 1,
           flexGrow: 1,
-          flexDirection: 'column',
-          paddingBottom: 70,
+          backgroundColor: 'transparent',
         }}>
-          <Card
-            mode='outlined'
-            style={{
-              flex: 1,
-              flexGrow: 1,
-              backgroundColor: 'transparent',
-            }}
-          >
-            <Card.Content style={{ width: '100%', height: '100%' }}>
-              <RecyclerListView
-                layoutProvider={deviceContactCardLayoutProvider}
-                dataProvider={deviceContactsDataProvider}
-                rowRenderer={deviceContactCardRenderer}
-              />
-              {refreshing &&
-                <ActivityIndicator animating={true} size='small' />
-              }
-              <Divider />
-              <View style={{
-                paddingTop: 12,
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}>
-                <Button
-                  mode='contained-tonal'
-                  icon='delete'
-                  onPress={() => dispatch(refresh({}))}
-                >
-                  Clear
-                </Button>
-                <View style={{ width: 6 }} />
-                <Button
-                  mode='contained'
-                  icon='sync'
-                  onPress={syncDeviceContacts}
-                >
-                  Sync
-                </Button>
-              </View>
-            </Card.Content>
-          </Card>
+          <RecyclerListView
+            layoutProvider={deviceContactCardLayoutProvider}
+            dataProvider={deviceContactsDataProvider}
+            rowRenderer={deviceContactCardRenderer}
+          />
+          {refreshing &&
+            <ActivityIndicator
+              animating={true}
+              size='small'
+              style={{ paddingVertical: 12 }}
+            />
+          }
+          <Divider />
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginVertical: 12,
+          }}>
+            <Button
+              mode='contained-tonal'
+              icon='delete'
+              onPress={clearDeviceContacts}
+            >
+              Clear
+            </Button>
+            <View style={{ width: 6 }} />
+            <Button
+              mode='contained-tonal'
+              icon='sync'
+              onPress={syncDeviceContacts}
+            >
+              Sync
+            </Button>
+            <View style={{ width: 6 }} />
+            <Button
+              mode='contained'
+              onPress={() => props.select(selectedUsers)}
+              disabled={selectedUsers.length === 0}
+            >
+              Next
+            </Button>
+          </View>
         </View>
       </Section>
       <Portal>

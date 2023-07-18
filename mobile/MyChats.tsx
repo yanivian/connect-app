@@ -53,12 +53,12 @@ export const MyChats = (): JSX.Element => {
   }
 
   const [showDeviceContactPicker, setShowDeviceContactPicker] = useState(false)
-  function pickParticipant(user: UserInfo | undefined) {
-    if (!user) {
+  function pickParticipants(users: Array<UserInfo> | undefined) {
+    if (!users) {
       unselectChat()
     } else {
       setSelectedChat({
-        otherParticipants: [user]
+        otherParticipants: users,
       })
     }
     setShowDeviceContactPicker(false)
@@ -108,10 +108,10 @@ export const MyChats = (): JSX.Element => {
         </Snackbar>
 
         <FullscreenModalPage
-          onDismiss={() => pickParticipant(undefined)}
+          onDismiss={() => pickParticipants(undefined)}
           visible={showDeviceContactPicker}
         >
-          <DeviceContactPickerPage select={pickParticipant} />
+          <DeviceContactPickerPage select={pickParticipants} />
         </FullscreenModalPage>
 
         <FullscreenModalPage
