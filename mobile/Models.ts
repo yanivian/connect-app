@@ -4,17 +4,17 @@ import { PhoneNumber } from "libphonenumber-js"
 
 export interface ActivityModel {
   ID: string
-  CreatedTimestampMillis: number
+  TimestampMillis: number
   Name: string
   Location?: LocationModel
   Faq?: FaqModel
   StartTimestampMillis: number
   EndTimestampMillis: number
-  LastUpdatedTimestampMillis: number | null
 }
 
 export interface ChatGistModel {
   ChatID: string
+  TimestampMillis: number
   Participants: Array<UserInfo>
   LatestMessage: ChatMessageModel
   LastSeenMessageID?: number
@@ -24,8 +24,8 @@ export interface ChatGistModel {
 
 export interface ChatMessageModel {
   MessageID: number
+  TimestampMillis: number
   Poster: UserInfo
-  CreatedTimestampMillis: number
   Text?: string
 }
 
@@ -69,7 +69,6 @@ export interface FaqTopicModel {
 
 export interface ImageModel {
   ID: string
-  CreatedTimestampMillis: number
   URL: string
 }
 
@@ -77,8 +76,6 @@ export interface InviteModel {
   ID: string
   Name: string
   PhoneNumber: string
-  CreatedTimestampMillis: number
-  LastUpdatedTimestampMillis: number | null
 }
 
 export interface LocationModel {
@@ -104,11 +101,9 @@ export interface LoginContextModel {
 export interface ProfileModel {
   UserID: string
   PhoneNumber: string
-  CreatedTimestampMillis: number
   Name: string | null
   EmailAddress: string | null
   Image: ImageModel | null
-  LastUpdatedTimestampMillis: number | null
 }
 
 export interface DeviceContactsModel {

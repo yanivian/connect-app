@@ -38,7 +38,7 @@ export function compareChatGists(first: ChatGistModel, second: ChatGistModel): -
 export function compareChatMessages(first: ChatMessageModel, second: ChatMessageModel): -1 | 0 | 1 {
   return compare(first, second, [
     { value: (model) => Number(model.MessageID), order: 'ASC' },
-    { value: (model) => Number(model.CreatedTimestampMillis), order: 'ASC' },
+    { value: (model) => Number(model.TimestampMillis), order: 'ASC' },
   ] as Array<SortBy<ChatMessageModel>>)
 }
 

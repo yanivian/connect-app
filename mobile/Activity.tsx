@@ -370,12 +370,13 @@ export const Activity = (props: ActivityProps & {
                 const nowMillis = Date.now()
                 props.save({
                   ...model,
-                  Name: model.Name || namePlaceholder,
                   ID: !props.clone && props.activity?.ID || `item-${nowMillis}`,
-                  CreatedTimestampMillis: props.activity?.CreatedTimestampMillis || nowMillis,
+                  TimestampMillis: props.activity?.TimestampMillis || nowMillis,
+                  Name: model.Name || namePlaceholder,
                   StartTimestampMillis: startDate.getTime(),
                   EndTimestampMillis: endDate.getTime(),
-                  LastUpdatedTimestampMillis: props.activity ? nowMillis : null,
+                  Location: model.Location,
+                  Faq: model.Faq,
                 })
                 props.close()
                 setSaving(false)
