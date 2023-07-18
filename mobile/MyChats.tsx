@@ -119,7 +119,8 @@ export const MyChats = (): JSX.Element => {
           visible={!!selectedChat}
         >
           <ChatPage
-            {...selectedChat!}
+            chatID={selectedChat?.chatID}
+            otherParticipants={selectedChat?.otherParticipants || []}
             close={unselectChat}
           />
         </FullscreenModalPage>
