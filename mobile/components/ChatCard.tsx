@@ -18,7 +18,7 @@ export default function ChatCard(props: ChatCardProps): JSX.Element {
   const thisUser = props.chat.Gist.Participants.filter((user) => user.UserID === userApi.uid)[0]!
   const otherParticipants = props.chat.Gist.Participants.filter((user) => user.UserID !== userApi.uid)
   const avatarParticipant = pickParticipantForAvatarCard(otherParticipants, thisUser)
-  const message = props.chat.Messages[props.chat.Messages.length - 1]!
+  const message = props.chat.Messages[0]!
   const badgeCount = props.chat.Gist.LatestMessage.MessageID - (props.chat.Gist.LastSeenMessageID || 0)
 
   function select() {
@@ -76,7 +76,7 @@ export default function ChatCard(props: ChatCardProps): JSX.Element {
               }}
               variant="bodySmall"
             >
-              {message.Text || '(Nothing)'}
+              {message.Text || ''}
             </Text>
           </View>
           {props.chat.Gist.TypingUsers &&
