@@ -28,13 +28,13 @@ export const MyChatsSlice = createSlice({
         if (!existingMessage || compareChatMessages(existingMessage, message) >= 0) {
           messages = addOrReplaceChatMessageIn(message, messages).sort(compareChatMessages)
         } else {
-          console.debug(`Incoming message deemed out-of-date: ${JSON.stringify(message)}`)
+          // console.debug(`Incoming message deemed out-of-date: ${JSON.stringify(message)}`)
         }
       })
 
       let gist = chat.Gist
       if (existingChat && compareChatGists(existingChat.Gist, gist) > 0) {
-        console.debug(`Incoming gist deemed out-of-date: ${JSON.stringify(gist)}`)
+        // console.debug(`Incoming gist deemed out-of-date: ${JSON.stringify(gist)}`)
         gist = existingChat.Gist
       }
 

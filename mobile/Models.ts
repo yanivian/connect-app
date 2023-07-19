@@ -16,6 +16,7 @@ export interface ChatGistModel {
   ChatID: string
   TimestampMillis: number
   Participants: Array<UserInfo>
+  UniqueParticipantsSearchKey: string
   LatestMessage: ChatMessageModel
   LastSeenMessageID?: number
   TypingUsers?: Array<UserInfo>

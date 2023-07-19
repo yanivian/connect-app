@@ -10,7 +10,9 @@ import styles from '../Styles'
 import ChatMessageCard from '../components/ChatMessageCard'
 import { useAppDispatch, useAppSelector } from '../redux/Hooks'
 import { incorporateChat } from '../redux/MyChatsSlice'
-import { summarizeParticipants, summarizeTypingUsers } from '../utils/ChatUtils'
+import { findChatByID, findChatByParticipants, summarizeParticipants, summarizeTypingUsers } from '../utils/ChatUtils'
+import { compareChatMessages } from '../utils/CompareUtils'
+import { profileToUser } from '../utils/UserUtils'
 
 export interface ChatPageProps {
   chatID?: string
@@ -30,27 +32,26 @@ const { width } = Dimensions.get('window')
 
 const dataProvider = new DataProvider((r1, r2: any) => r1 !== r2)
 
-function findChatByID(chatID: string, list: Array<ChatModel>): ChatModel | undefined {
-  const matches = list.filter((c) => c.Gist.ChatID === chatID)
-  return matches && matches[0]
-}
-
 export function ChatPage(props: ChatPageProps & {
   close: () => void
 }): JSX.Element {
   const theme = useTheme()
-  const [error, setError] = useState<string | null>()
+  const dispatch = useAppDispatch()
 
   const userApi = useContext(UserApiContext)!
-  const otherParticipantUserIDs = props.otherParticipants.map((u) => u.UserID)
-
   const frontendService = useContext(FrontendServiceContext)!
 
-  const state = useAppSelector((state) => state.MyChatsSlice)
-  const dispatch = useAppDispatch()
+  const profile = useAppSelector((state) => state.ProfileSlice.profile!)
+  const [thisUser] = useState(profileToUser(profile))
+
+  const [error, setError] = useState<string | null>()
+
+  const myChatsSlice = useAppSelector((state) => state.MyChatsSlice)
 
   const [chatID, setChatID] = useState(props.chatID)
   const [chat, setChat] = useState<ChatModel>()
+
+  const [chatMessagesDataProvider, setChatMessagesDataProvider] = useState<DataProvider>()
 
   const chatMessageCardLayoutProvider = new LayoutProvider(
     (index) => ChatMessageCardViewTypes.ROW,
@@ -75,20 +76,69 @@ export function ChatPage(props: ChatPageProps & {
     }
   )
 
+  const chatMessageCardRenderer = (type: string | number, message: ChatMessageModel) => {
+    if (type !== ChatMessageCardViewTypes.ROW) {
+      return null
+    }
+    return (
+      <ChatMessageCard
+        key={message.MessageID}
+        message={message}
+        numOtherParticipants={props.otherParticipants.length}
+      />
+    )
+  }
+
+  // Refresh the data provider when the chat changes.
+  useEffect(() => {
+    (async () => {
+      if (!myChatsSlice.Chats) {
+        return
+      }
+      let localChat: ChatModel | undefined
+      if (chatID) {
+        localChat = findChatByID(chatID, myChatsSlice.Chats)
+      }
+      if (!localChat) {
+        localChat = findChatByParticipants([thisUser, ...props.otherParticipants], myChatsSlice.Chats)
+        if (localChat) {
+          setChatID(localChat.Gist.ChatID)
+        }
+      }
+      if (localChat) {
+        refreshChat(localChat)
+      }
+      setChatMessagesDataProvider(dataProvider.cloneWithRows(localChat.Messages || []))
+    })()
+  }, [chatID, myChatsSlice])
+
+  const updateChatState = useCallback((update: ChatModel) => {
+    if (chatID !== update.Gist.ChatID) {
+      setChatID(update.Gist.ChatID)
+    }
+    dispatch(incorporateChat(update))
+  }, [chat, chatID])
+
   const [locked, setLocked] = useState(false)
   const [text, setText] = useState('')
 
-  const updateChatState = useCallback((update: ChatModel) => {
-    if (!chatID) {
-      setChatID(update.Gist.ChatID)
+  const refreshChat = useCallback(async (refresh: ChatModel) => {
+    setChat(refresh)
+    if (!text) {
+      setText(refresh.Gist.DraftText || '')
     }
-    if (chat && chat.Gist.TimestampMillis >= update.Gist.TimestampMillis) {
-      return
+    if (compareChatMessages(refresh.Messages[0], refresh.Gist.LatestMessage) > 0
+      || refresh.Gist.LatestMessage.MessageID > refresh.Messages.length) {
+      // Fetch chat messages from server.
+      setLocked(true)
+      updateChatState(await frontendService.listChatMessages(refresh.Gist.ChatID))
+      setLocked(false)
+    } else {
+      // console.debug(`Chat deemed fresh: ${JSON.stringify(refresh)}`)
     }
-    setChat(update)
-    dispatch(incorporateChat(update))
-  }, [chatID, chat])
+  }, [text])
 
+  // Debounced callback to save draft text (and infer typing status) on server.
   const setDraftTextCallback = useCallback(debounce(async (draft?: DraftMessage) => {
     if (!chatID) {
       return
@@ -105,9 +155,6 @@ export function ChatPage(props: ChatPageProps & {
 
   const setDraftText = useCallback(async (draftText: string) => {
     setText(draftText)
-    if (locked) {
-      return
-    }
     await setDraftTextCallback({
       clearText: !draftText || undefined,
       setText: draftText || undefined,
@@ -117,18 +164,6 @@ export function ChatPage(props: ChatPageProps & {
   async function cancelDraftsInProgress() {
     await setDraftTextCallback(undefined)
   }
-
-  // Fetch chat messages from server if needed.
-  useEffect(() => {
-    (async () => {
-      if (!chatID) {
-        return
-      }
-      setLocked(true)
-      updateChatState(await frontendService.listChatMessages(chatID))
-      setLocked(false)
-    })()
-  }, [chatID])
 
   // Signal the last seen message ID to server when the chat changes.
   useEffect(() => {
@@ -161,31 +196,6 @@ export function ChatPage(props: ChatPageProps & {
     updateChatState(result)
     setLocked(false)
   }, [text])
-
-  const [chatMessagesDataProvider, setChatMessagesDataProvider] = useState<DataProvider>()
-  const chatMessageCardRenderer = (type: string | number, message: ChatMessageModel) => {
-    if (type !== ChatMessageCardViewTypes.ROW) {
-      return null
-    }
-    return (
-      <ChatMessageCard
-        key={message.MessageID}
-        message={message}
-        numOtherParticipants={props.otherParticipants.length}
-      />
-    )
-  }
-
-  // Refresh the data provider when the chat changes.
-  useEffect(() => {
-    const refresh = chatID && state.Chats && findChatByID(chatID, state.Chats) || undefined
-    if (!refresh) {
-      return
-    }
-    setChat(refresh)
-    setText(refresh.Gist.DraftText || '')
-    setChatMessagesDataProvider(dataProvider.cloneWithRows(refresh.Messages || []))
-  }, [chatID, state.Chats])
 
   return (
     <Section

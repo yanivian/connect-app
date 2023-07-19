@@ -1,4 +1,4 @@
-import { UserInfo } from "../Models"
+import { ProfileModel, UserInfo } from "../Models"
 import { IsEqual, arrayFind, arrayRemove, arrayUpsert } from "./ArrayUtils"
 
 const isSameUser: IsEqual<UserInfo> = (x: UserInfo, y: UserInfo) => {
@@ -15,4 +15,13 @@ export function removeUserFrom(user: UserInfo, list: Array<UserInfo>) {
 
 export function addOrReplaceUserIn(user: UserInfo, list: Array<UserInfo>) {
   return arrayUpsert(user, list, isSameUser)
+}
+
+export function profileToUser(profile: ProfileModel): UserInfo {
+  return {
+    UserID: profile.UserID,
+    PhoneNumber: profile.PhoneNumber,
+    Image: profile.Image || undefined,
+    Name: profile.Name || undefined,
+  }
 }

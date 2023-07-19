@@ -78,3 +78,14 @@ export function pickParticipantForAvatarCard(otherParticipants: Array<UserInfo>,
   }
   return thisUser
 }
+
+export function findChatByID(chatID: string, list: Array<ChatModel>): ChatModel | undefined {
+  const matches = list.filter((c) => c.Gist.ChatID === chatID)
+  return matches && matches[0]
+}
+
+export function findChatByParticipants(allParticipants: Array<UserInfo>, list: Array<ChatModel>) {
+  const uniqueParticipantsSearchKey = [...new Set(allParticipants.map((u) => u.UserID))].sort().join('#')
+  const matches = list.filter((c) => c.Gist.UniqueParticipantsSearchKey === uniqueParticipantsSearchKey)
+  return matches && matches[0]
+}
