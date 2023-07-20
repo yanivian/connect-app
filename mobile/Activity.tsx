@@ -316,9 +316,7 @@ export const Activity = (props: ActivityProps & {
                         minHeight: 40,
                         justifyContent: 'center',
                       },
-                      textInput: [styles.textInput, {
-                        multiline: true,
-                      }],
+                      textInput: styles.textInput,
                     }}
                     enablePoweredByContainer={false}
                     fetchDetails={true}
