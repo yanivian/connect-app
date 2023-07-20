@@ -1,7 +1,7 @@
 import Lottie from 'lottie-react-native'
 import React, { useState } from 'react'
-import { Dimensions, SafeAreaView, View } from 'react-native'
-import { IconButton, Modal, Surface, Text } from 'react-native-paper'
+import { Dimensions, Platform, SafeAreaView, View } from 'react-native'
+import { IconButton, Modal, Surface, Text, useTheme } from 'react-native-paper'
 import { IconSource } from 'react-native-paper/src/components/Icon'
 import styles from './Styles'
 
@@ -12,6 +12,7 @@ type PageProps = PropsWithChildren<{
 }>
 
 export const Page = (props: PageProps) => {
+  const theme = useTheme()
   const window = Dimensions.get('window')
   const [height, setHeight] = useState(window.height)
 
@@ -20,7 +21,10 @@ export const Page = (props: PageProps) => {
       <KeyboardMetricsListener
         process={(metrics) => setHeight(window.height - (metrics?.height || 0))}
       />
-      <View style={[styles.page, { height }]}>
+      <View style={[styles.page, {
+        backgroundColor: theme.colors.inverseOnSurface,
+        height,
+        }]}>
         {props.children}
       </View>
     </SafeAreaView>
@@ -58,7 +62,7 @@ type SectionProps = PropsWithChildren<{
 
 export const Section = (props: SectionProps) => {
   return (
-    <Surface style={styles.section} elevation={4}>
+    <View style={styles.section}>
       <View style={styles.sectionTitle}>
         <Text numberOfLines={1} style={{ flex: 1, flexGrow: 1 }} variant="headlineSmall">
           {props.title}
@@ -82,7 +86,7 @@ export const Section = (props: SectionProps) => {
       <View style={styles.sectionContent}>
         {props.children}
       </View>
-    </Surface>
+    </View>
   )
 }
 

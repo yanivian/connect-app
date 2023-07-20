@@ -2,12 +2,12 @@ import React, { useContext, useState } from 'react'
 import { Image, View } from 'react-native'
 import * as ImagePicker from 'react-native-image-picker'
 import { Button, HelperText, Menu, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper'
-import { FrontendServiceContext } from './Contexts'
-import { LoadingAnimation, Page, Section } from './Layouts'
-import { ImageModel, ProfileModel } from './Models'
-import styles from './Styles'
-import ProfilePlaceholder from './images/ProfilePlaceholder.svg'
-import { useAppSelector } from './redux/Hooks'
+import { FrontendServiceContext } from '../Contexts'
+import { LoadingAnimation, Page, Section } from '../Layouts'
+import { ImageModel, ProfileModel } from '../Models'
+import styles from '../Styles'
+import ProfilePlaceholder from '../images/ProfilePlaceholder.svg'
+import { useAppSelector } from '../redux/Hooks'
 
 async function pickFromImageLibrary(): Promise<ImagePicker.ImagePickerResponse> {
   const options: ImagePicker.ImageLibraryOptions = {
@@ -35,7 +35,7 @@ interface ProfileProps {
   close: () => void
 }
 
-const Profile = (props: ProfileProps): JSX.Element => {
+const ProfilePage = (props: ProfileProps): JSX.Element => {
   const frontendService = useContext(FrontendServiceContext)!
   const profile = useAppSelector((state) => state.ProfileSlice.profile!)
   const theme = useTheme()
@@ -130,27 +130,31 @@ const Profile = (props: ProfileProps): JSX.Element => {
             </View>
             <View style={{ flex: 1, flexDirection: 'column' }}>
               <TextInput
+                autoCapitalize="words"
+                autoComplete="name"
+                disabled={saving}
+                inputMode="text"
+                label="Name"
+                mode="outlined"
+                multiline={true}
+                onChangeText={setName}
                 style={[styles.textInput, {
                   marginBottom: 12,
                 }]}
-                mode="outlined"
-                label="Name"
                 value={name || ''}
-                onChangeText={setName}
-                autoCapitalize="words"
-                autoComplete="name"
-                inputMode="text"
-                disabled={saving} />
+              />
               <TextInput
-                style={styles.textInput}
-                mode="outlined"
-                label="Email address"
-                value={emailAddress || ''}
-                onChangeText={setEmailAddress}
                 autoCapitalize="none"
                 autoComplete="email"
+                disabled={saving}
                 inputMode="email"
-                disabled={saving} />
+                label="Email address"
+                mode="outlined"
+                multiline={true}
+                onChangeText={setEmailAddress}
+                style={styles.textInput}
+                value={emailAddress || ''}
+              />
             </View>
           </View>
           <HelperText
@@ -184,4 +188,4 @@ const Profile = (props: ProfileProps): JSX.Element => {
   )
 }
 
-export default Profile
+export default ProfilePage

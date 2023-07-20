@@ -176,7 +176,6 @@ export function DeviceContactPickerPage(props: DeviceContactPickerPageProps): JS
         <View style={{
           flex: 1,
           flexGrow: 1,
-          backgroundColor: 'transparent',
         }}>
           <RecyclerListView
             layoutProvider={deviceContactCardLayoutProvider}

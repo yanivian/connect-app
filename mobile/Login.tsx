@@ -118,16 +118,17 @@ const Login = (props: LoginProps): JSX.Element => {
           <View style={{ height: 12 }}></View>
           <TextInput
             autoFocus
-            style={styles.textInput}
-            mode="outlined"
+            disabled={loading}
+            error={!!error}
+            inputMode="numeric"
             label="Phone number"
             left={<TextInput.Affix text="+1" />}
-            value={phoneNumber}
+            mode="outlined"
             onChangeText={setPhoneNumber}
             onSubmitEditing={async (e) => signInWithPhoneNumber()}
-            inputMode="numeric"
-            disabled={loading}
-            error={!!error} />
+            style={styles.textInput}
+            value={phoneNumber}
+          />
           <HelperText
             type="error"
             visible={!!error}
@@ -165,17 +166,18 @@ const Login = (props: LoginProps): JSX.Element => {
           </Text>
           <View style={{ height: 12 }}></View>
           <TextInput
+            autoComplete="off"
             autoFocus
-            style={styles.textInput}
-            mode="outlined"
+            disabled={loading}
+            error={!!error}
+            inputMode="numeric"
             label="Code"
-            value={code}
+            mode="outlined"
             onChangeText={setCode}
             onSubmitEditing={async (e) => verifyCode()}
-            autoComplete="off"
-            inputMode="numeric"
-            disabled={loading}
-            error={!!error} />
+            style={styles.textInput}
+            value={code}
+          />
           <HelperText
             type="error"
             visible={!!error}

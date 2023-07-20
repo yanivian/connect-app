@@ -159,6 +159,7 @@ export const Activity = (props: ActivityProps & {
                 disabled={saving}
                 inputMode='text'
                 mode='flat'
+                multiline={true}
                 onChangeText={(text) => setModel({ ...model, Name: text })}
                 placeholder='Play Date'
                 style={{ backgroundColor: 'transparent' }}
@@ -312,9 +313,12 @@ export const Activity = (props: ActivityProps & {
                         paddingHorizontal: 12,
                         borderBottomWidth: .5,
                         borderColor: theme.colors.onBackground,
-                        backgroundColor: 'transparent',
+                        minHeight: 40,
+                        justifyContent: 'center',
                       },
-                      textInput: styles.textInput,
+                      textInput: [styles.textInput, {
+                        multiline: true,
+                      }],
                     }}
                     enablePoweredByContainer={false}
                     fetchDetails={true}

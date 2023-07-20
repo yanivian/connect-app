@@ -7,9 +7,9 @@ import { Page, Section } from './Layouts'
 import { ChatModel, ConnectionAddedModel } from './Models'
 import MyActivities from './MyActivities'
 import { MyChats } from './MyChats'
-import Profile from './Profile'
 import styles from './Styles'
 import AppStateListener from './components/AppStateListener'
+import ProfilePage from './pages/ProfilePage'
 import { useAppDispatch, useAppSelector } from './redux/Hooks'
 import { incorporateChat } from './redux/MyChatsSlice'
 import { addIncomingConnection } from './redux/MyConnectionsSlice'
@@ -170,7 +170,7 @@ const Home = (): JSX.Element => {
             onDismiss={() => setEditingProfile(false)}
             visible={isEditingProfile}
           >
-            <Profile
+            <ProfilePage
               save={(profile) => dispatch(setProfile(profile))}
               close={() => setEditingProfile(false)}
             />
